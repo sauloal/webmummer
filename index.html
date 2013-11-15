@@ -6,42 +6,68 @@
     <style type="text/css">
       body { font: 13px sans-serif; }
       body, html{
-        width  : 98%;
-        height : 98%;
+        width  : 100%;
+        height : 95%;
         padding: 0;
-     }
+        margin: 0;
+      }
+
       rect { fill: #fff; }
+
       ul {
         list-style-type: none;
-        margin: 0.5em 0em 0.5em 0em;
+        margin: 0.3em 0em 0.3em 0em;
         width: 100%; }
-        ul li {
+
+      ul li {
           display: table-cell;
           vertical-align: middle;
           margin: 0em;
-          padding: 0em 1em; }
-      .axis { font-size: 1.5em; }
+          padding: 0em .5em; }
+
+      .axis { font-size: 1.0em; }
+
+      .x-num {
+
+      }
+
+      .y-num {
+
+      }
+
+      .title {
+
+      }
+
+      .xlabel{
+
+      }
+
+      .ylabel{
+
+      }
+
       .chart {
-        background-color: #F7F2C5;
+        background-color: #fff;
         width: 100%;
         height: 100%; }
-      circle, .line {
-        fill: none;
-        stroke: steelblue;
+
+      .line {
+        fill: #666;
         stroke-width: 5px; }
-      circle {
-        fill: white;
-        fill-opacity: 0.2;
-        cursor: move; }
-        circle.selected {
-          fill: #ff7f0e;
-          stroke: #ff7f0e; }
-        circle:hover {
-          fill: #ff7f0e;
-          stroke: #707f0e; }
-        circle.selected:hover {
-          fill: #ff7f0e;
-          stroke: #ff7f0e; }
+
+        .points {
+        fill: none;
+        stroke-width: 5px; }
+
+      .matrix {
+        fill: #EEE;
+        }
+
+        .grid {
+            stroke: #ccc;
+        }
+
         [sense="0"] {
             fill: blue;
             stroke: blue;
@@ -50,17 +76,40 @@
             fill: red;
             stroke: red;
         }
+
+
+      /*circle {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 5px; }
+
+      circle {
+        fill: white;
+        fill-opacity: 0.2;
+        cursor: move; }
+
+      circle.selected {
+          fill: #ff7f0e;
+          stroke: #ff7f0e; }
+
+      circle:hover {
+          fill: #ff7f0e;
+          stroke: #707f0e; }
+
+      circle.selected:hover {
+          fill: #ff7f0e;
+          stroke: #ff7f0e; }*/
     </style>
-    <link rel="stylesheet" type="text/css" href="tipsy.css" />
+    <link rel="stylesheet" type="text/css" href="css/tipsy.css" />
   </head>
   <body>
     <div id="chart1" class="chart"></div>
     <div id="scriptholder"></div>
-    <script type="text/javascript" src="d3.v2.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="jquery.tipsy.js"></script>
-    <script type="text/javascript" src="simple-graph.js"></script>
-    <script type="text/javascript" src="list.js"></script>
-    <script type="text/javascript" src="setup.js"></script>
+    <script type="text/javascript" src="js/d3.v3.3.9.js"></script>
+    <script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="js/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="js/simple-graph.js"></script>
+    <script type="text/javascript" src="data/list.js"></script>
+    <script type="text/javascript" src="js/setup.js"></script>
   </body>
 </html>

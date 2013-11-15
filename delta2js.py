@@ -2,7 +2,11 @@
 import sys, os
 import subprocess
 import re
+from pprint import pprint as pp
 
+
+compulsory = ['.delta']
+forbidden  = ['.invertions.delta.q.delta', '.fasta.delta']
 
 labelFields = {
     'refName'    : ['(\S+?)_SL2.40ch\d+'                       , os.path.basename],
@@ -236,7 +240,6 @@ def parseDelta(delta):
 
 
 
-
 def genCoords(exporter, scafOrder, scafLens):
     targetPos = 1
     for tgtName in scafOrder:
@@ -335,33 +338,134 @@ def parseFN(infile):
 
     return res
 
+
+
 def main():
+    outfiles = {}
+
+    refs     = {}
+    chroms   = {}
+    spps     = {}
+    statuses = {}
+
+
     for infile in sys.argv[1:]:
-        if not infile.endswith( '.delta' ):
+        print "INFILE : %s" % infile
+
+        hasC = False
+        for compul in compulsory:
+            if infile.endswith( compul ):
+                hasC = True
+
+        if not hasC:
+            print "  does not have compulsory extension. skipping", compulsory
             continue
 
-        if     infile.endswith( '.invertions.delta.q.delta' ):
+        hasF = False
+        for forb in forbidden:
+            if infile.endswith( forb ):
+                hasF = True
+
+        if hasF:
+            print "  has compulsory extension", forbidden
             continue
 
 
         outfile  = infile + '.js'
-        print "INFILE : %s" % infile
         print "OUTFILE: %s" % outfile
 
         labels = parseFN( infile )
+
+
+        #'.delta'               : 'Raw Dot Plot',
+        #'.delta.q.delta'       : 'Clean Dot Plot',
+        #'.delta.q.delta.filter': 'Clean & Filtered Dot Plot',
+        #'.delta.q.delta.filter.invertions.delta': 'Clean & Filtered Dot Plot. Only Inversions',
+
+
+        #'refName'    : ['(\S+?)_SL2.40ch\d+'                       , os.path.basename],
+        #'chromNumber': ['SL2.40ch(\d+)'                            , None],
+        #'spp'        : ['_\._(\S+)_scaffold_final\.assembly\.fasta', None],
+        #'status'     : ['\.fasta(\S+)'                             , None]
+
+        status      = labels['status'     ]
+        spp         = labels['spp'        ]
+        chromNumber = labels['chromNumber']
+        refName     = labels['refName'    ]
+
+        statuses[ status      ] = 1
+        spps    [ spp         ] = 1
+        chroms  [ chromNumber ] = 1
+        refs    [ refName     ] = 1
 
         title  = titleFmt  % labels
         xlabel = xlabelFmt % labels
         ylabel = ylabelFmt % labels
 
-        print "parsing delta"
-        scafOrder, scafLens = parseDelta(infile)
+        if not os.path.exists( outfile ):
+            print "parsing delta"
+            scafOrder, scafLens = parseDelta(infile)
 
 
-        print "parsing coords"
-        exporter = exp(outfile, title=title, xlabel=xlabel, ylabel=ylabel)
-        genCoords(exporter, scafOrder, scafLens)
-        exporter.close()
+            print "parsing coords"
+            exporter = exp(outfile, title=title, xlabel=xlabel, ylabel=ylabel)
+            genCoords(exporter, scafOrder, scafLens)
+            exporter.close()
+
+        if refName not in outfiles:
+            outfiles[ refName ] = {}
+
+        if chromNumber not in outfiles[ refName ]:
+            outfiles[ refName ][ chromNumber ] = {}
+
+        if spp not in outfiles[ refName ][ chromNumber ]:
+            outfiles[ refName ][ chromNumber ][ spp ] = {}
+
+        if status not in outfiles[ refName ][ chromNumber ][ spp ]:
+            outfiles[ refName ][ chromNumber ][ spp ][ status ] = [
+                [os.path.abspath(infile ), os.path.basename(infile )],
+                [os.path.abspath(outfile), os.path.basename(outfile)],
+            ]
+        else:
+            print "data read twice"
+            print "ref %s chrom %s spp %s status %s" % ( refName, chromNumber, spp, status )
+            sys.exit( 1 )
+
+
+    with open( 'list.js', 'w' ) as fhd:
+        statusStr = ', '.join( [ "'%s'" % x for x in sorted(statuses) ] )
+        fhd.write( 'var statuses = [%s];\n' % statusStr);
+
+        sppStr    = ', '.join( [ "'%s'" % x for x in sorted(spps    ) ] )
+        fhd.write( 'var spps     = [%s];\n' % sppStr);
+
+        chromStr  = ', '.join( [ "'%s'" % x for x in sorted(chroms  ) ] )
+        fhd.write( 'var chroms   = [%s];\n' % chromStr);
+
+        refStr    = ', '.join( [ "'%s'" % x for x in sorted(refs    ) ] )
+        fhd.write( 'var refs     = [%s];\n' % refStr);
+
+        fhd.write( 'var filelist = {\n');
+
+
+        for refName in sorted(outfiles):
+            fhd.write("  '%s': {\n" % refName )
+
+            for chromNumber in sorted(outfiles[ refName ]):
+                fhd.write("    '%s': {\n" % chromNumber )
+
+                for spp in sorted(outfiles[ refName ][ chromNumber ]):
+                    fhd.write("      '%s': {\n" % spp )
+
+                    for status in sorted(outfiles[ refName ][ chromNumber ][ spp ]):
+                        filedata = outfiles[ refName ][ chromNumber ][ spp ][ status ]
+                        fhd.write('        "%s": "%s",\n' % (status, filedata[1][1]) )
+
+                    fhd.write('      },\n')
+                fhd.write('    },\n')
+            fhd.write('  },\n')
+
+        fhd.write('};\n')
 
     print "done"
 
