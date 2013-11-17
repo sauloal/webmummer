@@ -61,7 +61,7 @@ deltajs.py MUST be modified to your own project file naming.
 data/list.js can also be created manually.
 
 #### Run
-```
+``` bash
 cd data
 rm ../../../out/*.js
 ../delta2js.py ../../../out/*.delta
@@ -71,7 +71,7 @@ rm webmummer.tar.xz; tar --exclude .git -ahcvf webmummer.tar.xz .
 
 #### Output
 ##### data/list.js
-```
+``` javascript
 var statuses = ['Clean & Filtered Dot Plot. Only Inversions', 'Clean Dot Plot'];
 var spps     = ['solanum arcanum', 'solanum habrochaites', 'solanum lycopersicum heinz denovo', 'solanum pennellii'];
 var chroms   = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
@@ -89,7 +89,7 @@ var filelist = {
 ```
 
 ##### data/file.js
-```
+``` javascript
 var title  = 'solanum lycopersicum heinz vs solanum arcanum - Chromosome 00 - Clean Dot Plot';
 var xlabel = 'solanum lycopersicum heinz Chromosome 00';
 var ylabel = 'solanum arcanum';
