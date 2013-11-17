@@ -5,6 +5,11 @@ import re
 from pprint import pprint as pp
 
 
+#./delta2js.py ../../out/*.delta
+#cp -l ../../out/*.js data
+#mv list.js data/list.js
+#rm webmummer.tar.xz; tar --exclude .git -ahcvf webmummer.tar.xz .
+
 compulsory = ['.delta']
 forbidden  = ['.invertions.delta.q.delta', '.fasta.delta']
 

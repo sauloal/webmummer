@@ -68,13 +68,17 @@
             stroke: #ccc;
         }
 
-        [sense="0"] {
+        .points-f {
             fill: blue;
             stroke: blue;
         }
-        [sense="1"] {
+        .points-r {
             fill: red;
             stroke: red;
+        }
+
+        .compass-opaque {
+            opacity: .2;
         }
 
 
@@ -99,7 +103,38 @@
       circle.selected:hover {
           fill: #ff7f0e;
           stroke: #ff7f0e; }*/
+
+    .download {
+      background: #333;
+      color: #FFF;
+      font-weight: 900;
+      border: 2px solid #B10000;
+      padding: 4px;
+      margin:4px;
+    }
     </style>
+
+    <style>
+        .compass{
+          fill: #fff;
+          stroke: #000;
+          stroke-width: 1.5;
+        }
+        .compass-button{
+          fill: #225EA8;
+          stroke: #0C2C84;
+          stroke-miterlimit:	6;
+          stroke-linecap: round;
+        }
+        .compass-button:hover{
+          stroke-width: 2;
+        }
+        .compass-plus-minus{
+          fill: #fff;
+          pointer-events: none;
+        }
+    </style>
+
     <link rel="stylesheet" type="text/css" href="css/tipsy.css" />
   </head>
   <body>
@@ -109,6 +144,7 @@
     <script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
     <script type="text/javascript" src="js/jquery.tipsy.js"></script>
     <script type="text/javascript" src="js/simple-graph.js"></script>
+
     <script type="text/javascript" src="data/list.js"></script>
     <script type="text/javascript" src="js/setup.js"></script>
   </body>

@@ -13,6 +13,8 @@ function toFixed(value, precision) {
     return precision ? integral + '.' +  padding + fraction : integral;
 }
 
+
+
 function parsepoint(point) {
     var res   = {
         x1      :       point[0],
@@ -30,6 +32,8 @@ function parsepoint(point) {
     return res;
 }
 
+
+
 function genTip(point) {
     var vars  = parsepoint( point );
     var res   = 'Scaf: ' + vars.name + ' Sense: ' + vars.senseStr + ' Ref Pos: ' + vars.x1 + '-' + vars.x2 + ' Scaf Pos: ' + vars.y1 + '-' + vars.y2 + ' Qual: ' + vars.qual;
@@ -37,17 +41,30 @@ function genTip(point) {
 }
 
 
+
+
+
 registerKeyboardHandler = function(callback) {
   var callback = callback;
   d3.select(window).on("keydown", callback);
 };
+
+
+
 
 SimpleGraph = function(elemid, options) {
   var self                    = this;
   this.chart                  = document.getElementById(elemid);
   this.cx                     = this.chart.clientWidth;
   this.cy                     = this.chart.clientHeight;
+  this.elemid                 = elemid;
   this.options                = options                || {};
+  this.options.labelId        = options.labelId        || null;
+
+  this.options.xlabel         = options.xlabel         || 'x';
+  this.options.ylabel         = options.ylabel         || 'y';
+  this.options.title          = options.title          || 'no title';
+
   this.options.xmax           = options.xmax           || 30;
   this.options.xmin           = options.xmin           ||  0;
   this.options.ymax           = options.ymax           || 10;
@@ -77,10 +94,10 @@ SimpleGraph = function(elemid, options) {
 
 
   this.padding = {
-     "top":    this.options.title  ? this.options.padding.top   [0] : this.options.padding.top   [1],
-     "right":                        this.options.padding.right [0],
+     "top"   : this.options.title  ? this.options.padding.top   [0] : this.options.padding.top   [1],
+     "right" :                       this.options.padding.right [0],
      "bottom": this.options.xlabel ? this.options.padding.bottom[0] : this.options.padding.bottom[1],
-     "left":   this.options.ylabel ? this.options.padding.left  [0] : this.options.padding.left  [1],
+     "left"  : this.options.ylabel ? this.options.padding.left  [0] : this.options.padding.left  [1],
   };
 
 
@@ -129,11 +146,13 @@ SimpleGraph = function(elemid, options) {
       datacount = this.size.width / this.options.split;
 
 
-  this.vis = d3.select(this.chart).append("svg")
+  this.svg = d3.select(this.chart).append("svg")
       .attr("width"    , this.cx)
-      .attr("height"   , this.cy)
-      .append("g"               )
-      .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
+      .attr("height"   , this.cy);
+
+
+  this.vis = this.svg.append("g"               )
+        .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
 
 
   this.plot = this.vis.append("rect")
@@ -203,28 +222,11 @@ SimpleGraph = function(elemid, options) {
       .on("touchend.drag",  self.mouseup()  )
 
   d3.select('body')
-    .on("keydown"      ,  self.keymove()  );
+    .on("keydown"        ,  self.keymove()  );
 
+  this.addCompass();
 
-  this.reset = function (){
-    var self = this;
-    console.log("reseting");
-
-    self.x = d3.scale.linear()
-      .domain([this.options.xmin, this.options.xmax])
-      .range( [0                , this.size.width  ]);
-
-
-  // y-scale (inverted domain)
-    self.y     = d3.scale.linear()
-      .domain([this.options.ymax, this.options.ymin])
-      .nice()
-      .range([0, this.size.height])
-      .nice();
-
-    self.redraw()();
-    self.update();
-  }
+  this.addDownload();
 
   this.redraw()();
 };
@@ -240,7 +242,7 @@ SimpleGraph = function(elemid, options) {
 SimpleGraph.prototype.update = function() {
   var self   = this;
   var coords = [];
-  this.vis.selectAll("path"  ).remove();
+  this.vis.selectAll(".points").remove();
   //this.vis.selectAll("circle").remove();
 
   for (var j = 0; j < this.points.length; j++) {
@@ -253,13 +255,13 @@ SimpleGraph.prototype.update = function() {
 
     var line  = this.line( [ stVal, ndVal ] );
 
+    var senseclass = sense ? 'points-r' : 'points-f';
+
     this.vis
         .append("path")
-        .attr("class"  , "points"  )
+        .attr("class"  , "points " + senseclass )
         .attr("d"      , line    )
-        .attr("j"      , j       )
-        .attr("sense"  , sense   )
-        ;
+        .attr("j"      , j       );
     //coords[ coords.length ] = stVal;
     //coords[ coords.length ] = ndVal;
   }
@@ -305,7 +307,7 @@ SimpleGraph.prototype.update = function() {
     //});
 
 
-    $('svg path').tipsy({
+    $('svg path.points').tipsy({
         gravity: 'w',
         html   : true,
         title  : function() {
@@ -322,6 +324,28 @@ SimpleGraph.prototype.update = function() {
   }
 }
 
+
+
+
+SimpleGraph.prototype.reset = function() {
+    var self = this;
+    console.log("reseting");
+
+    self.x = d3.scale.linear()
+      .domain([self.options.xmin, self.options.xmax])
+      .range( [0                , self.size.width  ]);
+
+
+    // y-scale (inverted domain)
+    self.y     = d3.scale.linear()
+      .domain([self.options.ymax, self.options.ymin])
+      .nice()
+      .range( [0, self.size.height])
+      .nice();
+
+    self.redraw()();
+    self.update();
+}
 
 
 
@@ -415,59 +439,71 @@ SimpleGraph.prototype.keymove = function() {
     }
 
     //console.log('val pressed ',valPressed);
-    console.log('key ' + valPressed+ ' val ',valPressed);
+    //console.log('key ' + valPressed+ ' val ',valPressed);
+
+    self.mover( valPressed );
+  }
+}
+
+
+
+
+SimpleGraph.prototype.mover = function(valPressed) {
+    var self = this;
 
     var blockY = Math.floor(self.size.height / 5);
     var blockX = Math.floor(self.size.width  / 5);
 
     switch(valPressed) {
       case  'l': {  // left
-        pan(self,   blockX,   0); break;
+        self.panIt( blockX,   0); break;
       };
       case  'r': {  // right
-        pan(self,  -blockX,   0); break;
+        self.panIt(-blockX,   0); break;
       };
       case  't': {  // top
-        pan(self,   0,  blockY); break;
+        self.panIt(0,  blockY); break;
       };
       case  'b': {  // bottom
-        pan(self,   0, -blockY); break;
+        self.panIt(0, -blockY); break;
       };
       case  '+': {  // plus
-        zoom(self, 1.25); break;
+        self.zoomIt(1.25); break;
       };
       case  '-': {  // -
-        zoom(self, 0.75); break;
+        self.zoomIt(0.75); break;
       };
       case  '0': {  // zero
         self.reset(); break;
       };
     }
-  }
 };
 
 
 
 
-function updatePos( self, zoom ) {
-    var cTrans = zoom.translate();
-    var cScale = zoom.scale();
+SimpleGraph.prototype.updatePos = function(){
+    if (this.options.labelId){
+        var cTrans = this.zoom.translate();
+        var cScale = this.zoom.scale();
 
-    console.log(cScale);
+        //console.log(cScale);
 
-    var rx     = cTrans[0];
-    var ry     = cTrans[1];
+        var rx     = cTrans[0];
+        var ry     = cTrans[1];
 
-    //var text  = '<b>Zoom:</b> ' + toFixed(cScale,1) + 'X - ';
-    var text = '<b>Pos:</b> '  + Math.floor(self.x.invert(rx)) + ' x ' + Math.floor(self.y.invert(ry));
+        //var text  = '<b>Zoom:</b> ' + toFixed(cScale,1) + 'X - ';
+        var text = '<b>Pos:</b> '  + Math.floor(this.x.invert(rx)) + ' x ' + Math.floor(this.y.invert(ry));
 
-    $('#pos' ).html( text );
+        //d3.select('#'+this.options.labelId).html( text );
+    }
 }
 
 
 
 
-function pan(self, dx, dy) {
+SimpleGraph.prototype.panIt = function(dx, dy){
+    var self = this;
     //console.log('pan. self ' + self + ' dx ' + dx + ' dy ' + dy);
     var cTrans = self.zoom.translate();
     //console.log( 'cTrans B ' + cTrans );
@@ -492,7 +528,7 @@ function pan(self, dx, dy) {
     //console.log( 'rx ' + rx );
     //console.log( 'ry ' + ry );
 
-    self.plot.call(self.zoom.translate([ rx, ry ]));
+    self.plot.call( self.zoom.translate([ rx, ry ]) );
     self.redraw()();
     self.update();
 
@@ -503,17 +539,18 @@ function pan(self, dx, dy) {
 
 
 
-function zoom(self, z) {
-    console.log( 'zoom. z ' + z )
-    var cScale   = self.zoom.scale();
-    var dstScale = cScale * z;
+SimpleGraph.prototype.zoomIt = function(z){
+    var self = this;
+        console.log( 'zoom. z ' + z )
+        var cScale   = self.zoom.scale();
+        var dstScale = cScale * z;
 
-    console.log( 'c scale ' + cScale + ' dst scale ' + dstScale );
+        //console.log( 'c scale ' + cScale + ' dst scale ' + dstScale );
 
-    self.plot.call( self.zoom.scale( dstScale ) );
+        self.plot.call( self.zoom.scale( dstScale ) );
 
-    self.redraw()();
-    self.update();
+        self.redraw()();
+        self.update();
 }
 
 
@@ -718,7 +755,7 @@ SimpleGraph.prototype.redraw = function() {
 
     gy.exit().remove();
 
-    updatePos( self, self.zoom );
+    self.updatePos( );
 
     self.plot.call( self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
     self.update();
@@ -748,3 +785,312 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
     self.downy = self.y.invert(p[1]);
   }
 };
+
+
+
+
+SimpleGraph.prototype.download = function() {
+    var self = this;
+    var doctype = '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
+    var svg     = self.svg;
+
+    svg.selectAll(".download-icon").remove();
+    svg.selectAll(".compass-g"    ).remove();
+
+    var styles  = self.getStyles();
+    styles      = (styles === undefined) ? "" : styles;
+
+    svg
+        .attr("version", "1.1")
+        .attr('id', this.options.title)
+        .insert("defs", ":first-child")
+            .attr("class", "svg-crowbar")
+            .append("style")
+                .attr("type", "text/css");
+
+    // removing attributes so they aren't doubled up
+    svg.node().removeAttribute("xmlns");
+    svg.node().removeAttribute("xlink");
+
+    // These are needed for the svg
+    if (!svg.node().hasAttributeNS(d3.ns.prefix.xmlns, "xmlns")) {
+         svg.node().setAttributeNS(d3.ns.prefix.xmlns, "xmlns", d3.ns.prefix.svg);
+    }
+
+    if (!svg.node().hasAttributeNS(d3.ns.prefix.xmlns, "xmlns:xlink")) {
+         svg.node().setAttributeNS(d3.ns.prefix.xmlns, "xmlns:xlink", d3.ns.prefix.xlink);
+    }
+
+    var source  = (new XMLSerializer()).serializeToString(svg.node()).replace('</style>', '<![CDATA[' + styles + ']]></style>\n');
+    var rect    = svg.node().getBoundingClientRect();
+    var svgInfo = {
+        top              : rect.top,
+        left             : rect.left,
+        width            : rect.width,
+        height           : rect.height,
+        class            : svg.attr("class"),
+        id               : svg.attr("id"),
+        childElementCount: svg.node().childElementCount,
+        source           : [doctype + source]
+    };
+
+    var filename = 'image.csv';
+
+    if (svgInfo.id) {
+        filename = svgInfo.id;
+    } else if (svgInfo.class) {
+        filename = svgInfo.class;
+    } else if (window.document.title) {
+        filename = window.document.title.toLowerCase();
+    }
+
+    filename = filename.replace(/[^a-z0-9]/gi, '-');
+
+    var url = window.URL.createObjectURL(new Blob(svgInfo.source, { "type" : "text\/xml" }));
+
+    var a   = d3.select("body")
+        .append('a')
+            .attr( "class"   , "svg-crowbar")
+            .attr( "download", filename + ".svg")
+            .attr( "href"    , url)
+            .style("display" , "none");
+
+    a.node().click();
+
+    setTimeout(function() {
+        window.URL.revokeObjectURL(url);
+    }, 10);
+
+    a.remove();
+
+    this.addCompass();
+
+    this.addDownload();
+};
+
+
+
+
+SimpleGraph.prototype.getStyles = function() {
+    var self        = this;
+    var doc         = window.document;
+    var styles      = "";
+    var styleSheets = doc.styleSheets;
+
+    if (styleSheets) {
+      for (var i = 0; i < styleSheets.length; i++) {
+        processStyleSheet(styleSheets[i]);
+      }
+    }
+
+    function processStyleSheet(ss) {
+      if (ss.cssRules) {
+        for (var i = 0; i < ss.cssRules.length; i++) {
+          var rule = ss.cssRules[i];
+          if (rule.type === 3) {
+            // Import Rule
+            processStyleSheet(rule.styleSheet);
+          } else {
+            // hack for illustrator crashing on descendent selectors
+            if (rule.selectorText) {
+              if (rule.selectorText.indexOf(">") === -1) {
+                styles += "\n" + rule.cssText;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return styles;
+}
+
+
+
+
+SimpleGraph.prototype.addDownload = function() {
+    //.attr("transform", "matrix(1,0,0,-1,113.89831,1293.0169)")
+    //.attr("transform", "scale(0.05)")
+
+    var self = this;
+
+    var gW   = 512;
+    var sW   = this.size.width > this.size.height ? this.size.height : this.size.width;
+    var sW10 = sW * .025;
+    var wP   = sW10 / gW;
+        sW10 = gW * wP;
+    var xPos = this.size.width - sW10 + this.padding.right;
+    var yPos = 0;
+
+    //console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
+
+    var g  = this.vis
+        .append("g"                            )
+            .attr("class"    , 'download-icon')
+            .attr("transform", "translate("+xPos+","+yPos+") rotate(180) scale("+wP+")")
+            .on(  'click'    , function() { self.download() } )
+        .append("path")
+            .attr("d", "m 1120,608 q 0,-12 -10,-24 L 791,265 q -9,-9 -23,-9 -14,0 -23,9 L 425,585 q -9,9 -9,23 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 v 352 q 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 q 13,0 22.5,-9.5 Q 896,1005 896,992 V 640 h 192 q 14,0 23,-9 9,-9 9,-23 z m 160,32 q 0,104 -40.5,198.5 Q 1199,933 1130,1002 1061,1071 966.5,1111.5 872,1152 768,1152 664,1152 569.5,1111.5 475,1071 406,1002 337,933 296.5,838.5 256,744 256,640 256,536 296.5,441.5 337,347 406,278 475,209 569.5,168.5 664,128 768,128 872,128 966.5,168.5 1061,209 1130,278 1199,347 1239.5,441.5 1280,536 1280,640 z m 256,0 Q 1536,431 1433,254.5 1330,78 1153.5,-25 977,-128 768,-128 559,-128 382.5,-25 206,78 103,254.5 0,431 0,640 0,849 103,1025.5 206,1202 382.5,1305 559,1408 768,1408 977,1408 1153.5,1305 1330,1202 1433,1025.5 1536,849 1536,640 z")
+    ;
+
+}
+
+
+
+
+SimpleGraph.prototype.addCompass = function() {
+        //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")")
+    var gW     = 42;
+    var startX = 50;
+    var startY = 50;
+
+    var r      = 20;
+    var rb     = 8;
+
+    var mX     = startX   -  8.5;  // 41.5
+    var mY     = startY   -  5.0;  // 45
+    var msX    = mX       -  4.5;  // 37
+    var msY    = mY       -  2.0;  // 43
+
+    var pX     = startX   +  9.5;  // 59.5
+    var pY     = mY;               // 45
+    var ps1X   = pX       -  4;    // 55.5
+    var ps1Y   = pY       -  2;    // 43
+    var ps2X   = ps1X     +  2.5;  // 58
+    var ps2Y   = ps1Y     -  2.5;  // 40.5
+
+    var zX     = startX   -  0.5;  // 49.5
+    var zY     = startY   + 11.0;  // 61
+
+    var sW     = this.cx > this.cy ? this.cy : this.cx;
+    var sW10   = sW * .1;
+    var wP     = sW10 / gW;
+
+    var self   = this;
+
+    //console.log("gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP);
+
+
+
+    var g = this.vis
+        .append("g"                            )
+            .attr("class"    , 'compass-g compass-opaque')
+            .attr("transform", "translate(0,0) scale("+wP+")")
+            .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ) })
+            .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ) });
+
+    g.append("circle")
+        .attr("class"  , 'compass-bg')
+        .attr("cx"     , startX      )
+        .attr("cy"     , startY      )
+        .attr("r"      , gW          )
+        .attr("fill"   , "white"     )
+        .attr("opacity", 0.75        );
+
+    g.append('path')
+        .attr('class', 'compass-button'                   )
+        .attr('d'    , "M50 10 l12 20 a40,70 0 0,0 -24,0z")
+        .on('click'  ,  function() { console.log('1'); self.mover('t') }    ); //t
+
+    g.append('path')
+        .attr('class', 'compass-button'                    )
+        .attr('d'    , "M90 50 l-20 -12 a70,40 0 0,1 0,24z")
+        .on('click'  ,  function() { console.log('4'); self.mover('r') }     ); // r
+
+    g.append('path')
+        .attr('class', 'compass-button'                    )
+        .attr('d'    , "M50 90 l12 -20 a40,70 0 0,1 -24,0z")
+        .on('click'  ,  function() { console.log('3'); self.mover('b') }     ); // b
+
+    g.append('path')
+        .attr('class', 'compass-button'                   )
+        .attr('d'    , "M10 50 l20 -12 a70,40 0 0,0 0,24z")
+        .on('click'  ,  function() { console.log('2'); self.mover('l') }    ); // l
+
+
+
+    g.append('circle')
+        .attr('class', 'compass')
+        .attr("cx"   , startX   )
+        .attr("cy"   , startY   )
+        .attr("r"    , r        );
+
+
+
+    g.append('circle')
+        .attr('class', 'compass-button')
+        .attr("cx"   , mX              )
+        .attr("cy"   , mY              )
+        .attr("r"    , rb              )
+        .on('click'  , function() { self.mover('-') } );
+
+    g.append('circle')
+        .attr('class', 'compass-button')
+        .attr("cx"   , pX              )
+        .attr("cy"   , pY              )
+        .attr("r"    , rb              )
+        .on('click'  ,  function() { self.mover('+') } );
+
+
+    g.append('circle')
+        .attr('class', 'compass-button')
+        .attr("cx"   , zX              )
+        .attr("cy"   , zY              )
+        .attr("r"    , rb              )
+        .on('click'  ,  function() { self.mover('0') } );
+
+
+    g.append('circle')
+        .attr('class', 'compass-plus-minus')
+        .attr("cx"   , zX                  )
+        .attr("cy"   , zY                  )
+        .attr("r"    , rb/3*2              );
+
+
+    g.append('circle')
+        .attr('class', 'compass-button')
+        .attr("cx"   , zX              )
+        .attr("cy"   , zY              )
+        .attr("r"    , rb/3            );
+
+
+
+    // minus signal
+    g.append('rect')
+        .attr('class' , 'compass-plus-minus')
+        .attr('x'     , msX                 )
+        .attr('y'     , msY                 )
+        .attr('width' , rb                  )
+        .attr('height', rb/3                );
+
+
+
+    // plus signal
+    g.append('rect')
+        .attr('class' , 'compass-plus-minus')
+        .attr('x'     , ps1X                )
+        .attr('y'     , ps1Y                )
+        .attr('width' , rb                  )
+        .attr('height', rb/3                );
+
+    g.append('rect')
+        .attr('class' , 'compass-plus-minus')
+        .attr('x'     , ps2X                )
+        .attr('y'     , ps2Y                )
+        .attr('width' , rb/3                )
+        .attr('height', rb                  );
+
+    //<svg>
+    //    <circle cx="50" cy="50" r="42" fill="white" opacity="0.75"/>
+    //    <path class="compass-button" onclick="pan(0,50)"  d="M50 10 l12 20 a40,70 0 0,0 -24,0z"  />
+    //    <path class="compass-button" onclick="pan(50,0)"  d="M10 50 l20 -12 a70,40 0 0,0 0,24z"  />
+    //    <path class="compass-button" onclick="pan(0,-50)" d="M50 90 l12 -20 a40,70 0 0,1 -24,0z" />
+    //    <path class="compass-button" onclick="pan(-50,0)" d="M90 50 l-20 -12 a70,40 0 0,1 0,24z" />
+    //    <circle class="compass"         cx="50" cy="50" r="20"/>
+    //    <circle class="compass-button"  cx="50" cy="41" r="8" onclick="zoom(0.8)"/>
+    //    <circle class="compass-button"  cx="50" cy="59" r="8" onclick="zoom(1.25)"/>
+    //    <rect class="compass-plus-minus" x="46"   y="39.5" width="8" height="3"/>
+    //    <rect class="compass-plus-minus" x="46"   y="57.5" width="8" height="3"/>
+    //    <rect class="compass-plus-minus" x="48.5" y="55"   width="3" height="8"/>
+    //</svg>
+}

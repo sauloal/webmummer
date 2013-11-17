@@ -1,4 +1,6 @@
 var datafolder = 'data/';
+var chartName  = 'chart1';
+
 
 $( document ).ready(function() {
     $('#chart1').html( 'please select' );
@@ -7,7 +9,6 @@ $( document ).ready(function() {
     var okb = $('<button>')
                 .click( selclick )
                 .html( 'view' );
-
 
     var pos = $('<label>').attr('id', 'pos');
     var hlp = $('<label>').html( '<b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset - ');
@@ -21,6 +22,8 @@ $( document ).ready(function() {
         var opt = opts[o];
         var val = $('#'+opt[1]).children().last().attr('selected', 'selected');
     }
+
+    okb.trigger('click');
 });
 
 
@@ -107,11 +110,11 @@ function loadGraph() {
         holder.removeChild(holder.firstChild);
     }
 
-    $('#chart1').html('loaded');
+    $('#'+chartName).html('loaded');
 
-    $('#chart1').html('');
+    $('#'+chartName).html('');
 
-    graph  = new SimpleGraph("chart1", {
+    graph  = new SimpleGraph(chartName, {
         "xmin"    : xmin,
         "xmax"    : xmax,
         "ymin"    : ymin,
@@ -121,8 +124,10 @@ function loadGraph() {
         "title"   : title,
         "points"  : points,
         "xTicks"  : 5,
+        "yTicks"  : 5,
         "padding" : { 'left': [120, 45] },
-        "ylabelDy": "-3.3em"
+        "ylabelDy": "-3.3em",
+        "labelId" : "pos"
     });
 }
 
@@ -179,9 +184,8 @@ function selclick(){
 
     var filename = datafolder + file;
 
-    //loadScript("data2.js");
-    $('#chart1').html('loading ' + obj2str(vals) );
-    $('#chart1').attr("tabindex", -1).focus();
+    $('#'+chartName).html('loading ' + obj2str(vals) );
+    $('#'+chartName).attr("tabindex", -1).focus();
 
     loadScript( filename );
 }
@@ -194,6 +198,7 @@ function basename(path) {
 
 /*
   options                || {};
+  options.labelId        || null;
   options.xmax           || 30;
   options.xmin           ||  0;
   options.ymax           || 10;
