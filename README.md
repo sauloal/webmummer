@@ -107,4 +107,8 @@ TODO
 --------
 - [ ] allow for multiple plots
 - [ ] better keyboard zoom
+- [ ] highlight same scaffold
+- [ ] clean out-of-graph lines
+- [ ] disable auto load
+- [ ] use jquery-ui to drop-down lists
 
