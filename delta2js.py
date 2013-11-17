@@ -4,10 +4,10 @@ import subprocess
 import re
 from pprint import pprint as pp
 
-
-#./delta2js.py ../../out/*.delta
-#cp -l ../../out/*.js data
-#mv list.js data/list.js
+#cd data
+#rm ../../../out/*.js
+#../delta2js.py ../../../out/*.delta
+#cp -l ../../../out/*.js .
 #rm webmummer.tar.xz; tar --exclude .git -ahcvf webmummer.tar.xz .
 
 compulsory = ['.delta']
@@ -47,6 +47,7 @@ labelFields['status'][1]= statusMatcher
 
 pointFmt = "[{x:%d,y:%d},{x:%d,y:%d},{n:%d,s:%d,q:%.2f}],"
 pointFmt = "[%d,%d,%d,%d,%d,%d,%.2f],"
+pointFmt = "%d,%d,%d,%d,%d,%d,%.2f,"
 
 
 #solanum_lycopersicum_heinz_SL2.40ch12.fa_._solanum_pennellii_scaffold_final.assembly.fasta.delta.q.delta.fplot
@@ -63,20 +64,20 @@ pointFmt = "[%d,%d,%d,%d,%d,%d,%.2f],"
 
 class exp(object):
     def __init__(self, outfile, title="title", xlabel="xlabel", ylabel="ylabel"):
-        self.title  = title
-        self.xlabel = xlabel
-        self.ylabel = ylabel
-        self.outf   = outfile
+        self.title   = title
+        self.xlabel  = xlabel
+        self.ylabel  = ylabel
+        self.outf    = outfile
 
-        self.minX   = sys.maxint
-        self.maxX   = 0
+        self.minX    = sys.maxint
+        self.maxX    = 0
 
-        self.minY   = sys.maxint
-        self.maxY   = 0
+        self.minY    = sys.maxint
+        self.maxY    = 0
 
-        self.spps   = {}
+        self.spps    = {}
 
-        self.fhd    = open(outfile, 'w')
+        self.fhd     = open(outfile, 'w')
 
         self.fhd.write("""\
 var title  = '%s';
@@ -132,12 +133,12 @@ var points = [
         line = """\
 ];
 
-var xmin   = %12d;
-var xmax   = %12d;
+var xmin    = %12d;
+var xmax    = %12d;
 
-var ymin   = %12d;
-var ymax   = %12d;
-var spps   = [\
+var ymin    = %12d;
+var ymax    = %12d;
+var spps    = [\
 """ % ( self.minX, self.maxX, self.minY, self.maxY )
 
         for spp in sorted(self.spps, key=lambda p: self.spps[p]):
@@ -174,7 +175,7 @@ var spps   = [\
 
 
 def parseDelta(delta):
-    show_coords = "../show-coords -l -r -T %s" % (delta)
+    show_coords = "show-coords -l -r -T %s" % (delta)
     print show_coords
     coords      = subprocess.Popen(show_coords, stdout=subprocess.PIPE, shell=True).communicate()[0]
     scafOrder   = []

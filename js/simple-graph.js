@@ -1,5 +1,4 @@
 //http://bl.ocks.org/stepheneb/1182434
-
 function toFixed(value, precision) {
     //http://stackoverflow.com/questions/2221167/javascript-formatting-a-rounded-number-to-n-decimals/2909252#2909252
     var precision = precision || 0,
@@ -15,34 +14,6 @@ function toFixed(value, precision) {
 
 
 
-function parsepoint(point) {
-    var res   = {
-        x1      :       point[0],
-        y1      :       point[1],
-        x2      :       point[2],
-        y2      :       point[3],
-        name    : spps[ point[4] ],
-        sense   :       point[5],
-        senseStr:       point[5] == 0 ? 'fwd' : 'rev',
-        qual    :       point[6],
-    }
-
-    //console.log( res );
-
-    return res;
-}
-
-
-
-function genTip(point) {
-    var vars  = parsepoint( point );
-    var res   = 'Scaf: ' + vars.name + ' Sense: ' + vars.senseStr + ' Ref Pos: ' + vars.x1 + '-' + vars.x2 + ' Scaf Pos: ' + vars.y1 + '-' + vars.y2 + ' Qual: ' + vars.qual;
-    return res;
-}
-
-
-
-
 
 registerKeyboardHandler = function(callback) {
   var callback = callback;
@@ -54,7 +25,7 @@ registerKeyboardHandler = function(callback) {
 
 SimpleGraph = function(elemid, options) {
   var self                    = this;
-  this.chart                  = document.getElementById(elemid);
+  this.chart                  = document.getElementById( elemid);
   this.cx                     = this.chart.clientWidth;
   this.cy                     = this.chart.clientHeight;
   this.elemid                 = elemid;
@@ -69,10 +40,10 @@ SimpleGraph = function(elemid, options) {
   this.options.xmin           = options.xmin           ||  0;
   this.options.ymax           = options.ymax           || 10;
   this.options.ymin           = options.ymin           ||  0;
-                                                            //            from spps
-                                                            //                f/r
-                                                            //x1 y1 x2 y2 spp 0/1 q
-  this.points                 = options.points         ||  [ [0 ,0, 0, 0, 0,  0,  0.0] ];
+                                                        //              from spps
+                                                        //                  f/r
+                                                        //  x1 y1 x2 y2 spp 0/1 q
+  this.points                 = options.points         ||  [0 ,0, 0, 0, 0,  0,  0.0];
   this.options.xTicks         = options.xTicks         || 10;
   this.options.yTicks         = options.yTicks         || 10;
   this.options.split          = options.split          || 30;
@@ -91,6 +62,11 @@ SimpleGraph = function(elemid, options) {
   this.options.ylabelDx       = options.ylabelDx       || "0em";
   this.options.ylabelDy       = options.ylabelDy       || "-2.3em";
   //this.options.radius         = options.radius         || 5.0;
+
+  this.regSize = 7;
+  this.numRegs = (this.points.length / this.regSize);
+  console.log("num vals "+this.points.length);
+  console.log("num regs "+self.numRegs);
 
 
   this.padding = {
@@ -173,7 +149,7 @@ SimpleGraph = function(elemid, options) {
       .attr("width"  , this.size.width )
       .attr("height" , this.size.height)
       .attr("viewBox", "0 0 "+this.size.width+" "+this.size.height)
-      .attr("class"  , "line");
+      .attr("class"  , "line"          );
 
 
 
@@ -181,10 +157,10 @@ SimpleGraph = function(elemid, options) {
   if (this.options.title) {
     this.vis.append("text")
         .attr("class", "axis title"        )
-        .text(this.options.title           )
         .attr("x"    , this.size.width/2   )
         .attr("dy"   , this.options.titleDx)
-        .style("text-anchor","middle"      );
+        .style("text-anchor","middle"      )
+        .text(this.options.title           );
   }
 
 
@@ -192,26 +168,26 @@ SimpleGraph = function(elemid, options) {
   if (this.options.xlabel) {
     this.vis.append("text")
         .attr("class", "axis xlabel"     )
-        .text(this.options.xlabel        )
         .attr("x" , this.size.width/2    )
         .attr("y" , this.size.height     )
         .attr("dx", this.options.xlabelDx)
         .attr("dy", this.options.xlabelDy)
-        .style("text-anchor","middle"    );
+        .style("text-anchor","middle"    )
+        .text(this.options.xlabel        );
   }
 
 
   // add y-axis label
   if (this.options.ylabel) {
     this.vis.append("g").append("text")
-        .attr("class"       , "axis ylabel"  )
-        .text(this.options.ylabel     )
+        .attr("class"       , "axis ylabel"         )
         .attr("x"           , this.options.ylabelX  )
         .attr("y"           , this.options.ylabelY  )
         .attr("dy"          , this.options.ylabelDy )
         .attr("dx"          , this.options.ylabelDx )
-        .style("text-anchor","middle" )
-        .attr("transform"   ,"translate(" + -40 + " " + this.size.height/2+") rotate(-90)");
+        .style("text-anchor","middle"               )
+        .attr("transform"   ,"translate(" + -40 + " " + this.size.height/2+") rotate(-90)")
+        .text(this.options.ylabel                   );
   }
 
 
@@ -245,9 +221,8 @@ SimpleGraph.prototype.update = function() {
   this.vis.selectAll(".points").remove();
   //this.vis.selectAll("circle").remove();
 
-  for (var j = 0; j < this.points.length; j++) {
-    var point = this.points[j];
-    var vars  = parsepoint( point );
+  for (var j = 0; j < this.numRegs; j++) {
+    var vars  = this.parsepoint( j );
 
     var sense =      vars.sense;
     var stVal = { x: vars.x1, y: vars.y1, j: j, s: sense};
@@ -312,8 +287,7 @@ SimpleGraph.prototype.update = function() {
         html   : true,
         title  : function() {
             var j   = this.getAttribute('j');
-            var res = genTip(self.points[j]);
-            return res;
+            return self.genTip( j );
         }
     });
 
@@ -322,6 +296,36 @@ SimpleGraph.prototype.update = function() {
     d3.event.preventDefault();
     d3.event.stopPropagation();
   }
+}
+
+
+
+
+SimpleGraph.prototype.parsepoint = function(j) {
+    var startPos = j * this.regSize;
+    var point    = this.points.slice( startPos, startPos+this.regSize );
+
+    var res     = {
+        x1      :       point[0],
+        y1      :       point[1],
+        x2      :       point[2],
+        y2      :       point[3],
+        name    : spps[ point[4] ],
+        sense   :       point[5],
+        senseStr:       point[5] == 0 ? 'fwd' : 'rev',
+        qual    :       point[6],
+    }
+
+    return res;
+}
+
+
+
+
+SimpleGraph.prototype.genTip = function (j) {
+    var vars  = this.parsepoint( j );
+    var res   = 'Scaf: ' + vars.name + ' Sense: ' + vars.senseStr + ' Ref Pos: ' + vars.x1 + '-' + vars.x2 + ' Scaf Pos: ' + vars.y1 + '-' + vars.y2 + ' Qual: ' + vars.qual;
+    return res;
 }
 
 
