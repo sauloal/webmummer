@@ -35,6 +35,9 @@ var opts   = [
 ];
 
 
+
+
+
 function genOpts(obj){
     var opts = [];
     for ( var o = 0; o < obj.length; o++ ){
@@ -78,13 +81,16 @@ function genSelectors(){
 }
 
 
-function loadScript(url){
+function loadScript( reg ){
+    var file     = reg[ 'filename' ];
+    var filename = datafolder + file;
+
     // Adding the script tag to the head as suggested before
-    var callback = loadGraph;
+    var callback = function() { loadGraph(reg) };
     //var head     = document.getElementsByTagName('head')[0];
     var script   = document.createElement('script');
     script.type  = 'text/javascript';
-    script.src   = url;
+    script.src   = filename;
 
     // Then bind the event to the callback function.
     // There are several events for cross browser compatibility.
@@ -97,38 +103,37 @@ function loadScript(url){
         holder.removeChild(holder.firstChild);
     }
 
-    delete points;
-    delete spps;
-
     holder.appendChild( script );
 }
 
 
-function loadGraph() {
+function loadGraph( reg ) {
     var holder = document.getElementById('scriptholder');
+
     while (holder.firstChild) {
         holder.removeChild(holder.firstChild);
     }
 
-    $('#'+chartName).html('loaded');
-
-    $('#'+chartName).html('');
+    document.getElementById(chartName).innerHTML = '';
 
     graph  = new SimpleGraph(chartName, {
-        "xmin"    : xmin,
-        "xmax"    : xmax,
-        "ymin"    : ymin,
-        "ymax"    : ymax,
-        "xlabel"  : xlabel,
-        "ylabel"  : ylabel,
-        "title"   : title,
-        "points"  : points,
+        "xmin"    : reg.xmin,
+        "xmax"    : reg.xmax,
+        "ymin"    : reg.ymin,
+        "ymax"    : reg.ymax,
+        "xlabel"  : reg.xlabel,
+        "ylabel"  : reg.ylabel,
+        "title"   : reg.title,
+        "points"  : reg.points,
         "xTicks"  : 5,
         "yTicks"  : 5,
         "padding" : { 'left': [120, 45] },
         "ylabelDy": "-3.3em",
         "labelId" : "pos"
     });
+
+    delete reg.points;
+    delete reg.spps;
 }
 
 
@@ -148,11 +153,12 @@ function getVals(){
     return vals;
 }
 
+
 function getRegister( vals ){
     try {
-        var file = filelist[ vals['ref'] ][ vals['chrom'] ][ vals['spp'] ][ vals['status'] ];
-        console.log( file );
-        return file;
+        var reg = filelist[ vals['ref'] ][ vals['chrom'] ][ vals['spp'] ][ vals['status'] ];
+        console.log( reg );
+        return reg;
     }
     catch(err) {
         console.error('combination does not exists for:')
@@ -160,6 +166,7 @@ function getRegister( vals ){
         return;
     }
 }
+
 
 function obj2str(obj) {
     var res = "";
@@ -169,6 +176,7 @@ function obj2str(obj) {
     return res;
 }
 
+
 function selclick(){
     var vals = getVals();
     if (!vals) {
@@ -177,18 +185,21 @@ function selclick(){
 
     console.log( vals );
 
-    var file = getRegister( vals );
+    var reg  = getRegister( vals );
+    if (!reg) {
+        return;
+    }
+    var file = reg[ 'filename' ];
     if (!file) {
         return;
     }
 
-    var filename = datafolder + file;
-
     $('#'+chartName).html('loading ' + obj2str(vals) );
     $('#'+chartName).attr("tabindex", -1).focus();
 
-    loadScript( filename );
+    loadScript( reg );
 }
+
 
 function basename(path) {
     return path.replace(/\\/g,'/').replace( /.*\//, '' );

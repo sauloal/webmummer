@@ -1,0 +1,142 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module delta2js</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>delta2js</strong></big></big> (version 201311181249, Nov 2013)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/assembly/nobackup/mummer/MUMmer3.23/1502/viewer/line/delta2js.py">/home/assembly/nobackup/mummer/MUMmer3.23/1502/viewer/line/delta2js.py</a></font></td></tr></table>
+    <p><tt>delta2js.py<br>
+&nbsp;<br>
+Converts&nbsp;mummer&nbsp;.delta&nbsp;files&nbsp;to&nbsp;javascript&nbsp;database&nbsp;for&nbsp;webmummer.<br>
+https://github.com/sauloal/webmummer<br>
+&nbsp;<br>
+Saulo&nbsp;Aflitos<br>
+Plant&nbsp;Research&nbsp;International&nbsp;-&nbsp;PRI<br>
+Cluster&nbsp;Bioinformatics<br>
+Wageningen&nbsp;University&nbsp;and&nbsp;Research&nbsp;Centre&nbsp;-&nbsp;WUR<br>
+Centre&nbsp;for&nbsp;BioSystems&nbsp;Genomics&nbsp;-&nbsp;CBSG<br>
+&nbsp;<br>
+To&nbsp;Run:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cd&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rm&nbsp;&lt;delta&nbsp;folder&gt;/*.js<br>
+&nbsp;&nbsp;&nbsp;&nbsp;delta2js.py&nbsp;&lt;delta&nbsp;folder&gt;/*.delta<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cp&nbsp;&lt;delta&nbsp;folder&gt;/*.js&nbsp;.<br>
+&nbsp;<br>
+License:&nbsp;GPL&nbsp;2.0</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="subprocess.html">subprocess</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="delta2js.html#exp">exp</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="exp">class <strong>exp</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Exporter&nbsp;Class:&nbsp;exports&nbsp;database&nbsp;headers&nbsp;(title,&nbsp;axis&nbsp;labels&nbsp;and&nbsp;limits)&nbsp;and,&nbsp;uppon<br>
+receiving&nbsp;each&nbsp;coordinates,&nbsp;append&nbsp;it&nbsp;to&nbsp;the&nbsp;array.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="exp-__init__"><strong>__init__</strong></a>(self, outfile, refName, chromNumber, spp, status, title<font color="#909090">='title'</font>, xlabel<font color="#909090">='xlabel'</font>, ylabel<font color="#909090">='ylabel'</font>)</dt><dd><tt>Accepts&nbsp;output&nbsp;file,&nbsp;title&nbsp;and&nbsp;axis&nbsp;labels.<br>
+Initialize&nbsp;limits.</tt></dd></dl>
+
+<dl><dt><a name="exp-add"><strong>add</strong></a>(self, sense, reg)</dt><dd><tt>Filters&nbsp;from&nbsp;register&nbsp;only&nbsp;the&nbsp;necessary&nbsp;information.<br>
+Calls&nbsp;self.<strong>append</strong>;</tt></dd></dl>
+
+<dl><dt><a name="exp-addOld"><strong>addOld</strong></a>(self, sense, reg)</dt></dl>
+
+<dl><dt><a name="exp-append"><strong>append</strong></a>(self, x1, y1, x2, y2, name, sense, q)</dt><dd><tt>Adds&nbsp;query&nbsp;name&nbsp;to&nbsp;database&nbsp;of&nbsp;names&nbsp;(a&nbsp;list&nbsp;of&nbsp;all&nbsp;names).<br>
+Exports&nbsp;only&nbsp;species&nbsp;ID&nbsp;(index&nbsp;of&nbsp;the&nbsp;species&nbsp;name&nbsp;in&nbsp;the&nbsp;database&nbsp;of&nbsp;names);<br>
+&nbsp;<br>
+Replaces&nbsp;sense&nbsp;for&nbsp;0/1;<br>
+&nbsp;<br>
+Updates&nbsp;min&nbsp;and&nbsp;max&nbsp;positions;</tt></dd></dl>
+
+<dl><dt><a name="exp-close"><strong>close</strong></a>(self)</dt><dd><tt>Exports&nbsp;min/max;<br>
+Exports&nbsp;query&nbsp;species&nbsp;list;<br>
+Closes&nbsp;filehandle;</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-genCoords"><strong>genCoords</strong></a>(exporter, scafOrder, scafLens)</dt><dd><tt>Check&nbsp;sanity&nbsp;of&nbsp;data&nbsp;and&nbsp;adds&nbsp;data&nbsp;to&nbsp;exporter.<br>
+Converts&nbsp;query&nbsp;coordnates&nbsp;to&nbsp;Y&nbsp;coordinates&nbsp;where&nbsp;scaffolds&nbsp;are&nbsp;ordered&nbsp;and&nbsp;their&nbsp;lengths&nbsp;sum<br>
+to&nbsp;create&nbsp;a&nbsp;single&nbsp;Y&nbsp;axis.</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>Parse&nbsp;all&nbsp;input&nbsp;files&nbsp;names,&nbsp;exports&nbsp;them&nbsp;to&nbsp;databases&nbsp;and&nbsp;creates&nbsp;index&nbsp;of&nbsp;all&nbsp;files.</tt></dd></dl>
+ <dl><dt><a name="-parseDelta"><strong>parseDelta</strong></a>(delta)</dt><dd><tt>Converts&nbsp;.delta&nbsp;to&nbsp;.coords&nbsp;(if&nbsp;needed)&nbsp;and&nbsp;parses&nbsp;.coords&nbsp;file.</tt></dd></dl>
+ <dl><dt><a name="-parseFN"><strong>parseFN</strong></a>(infile)</dt><dd><tt>Parses&nbsp;file&nbsp;name&nbsp;to&nbsp;extract&nbsp;species&nbsp;information</tt></dd></dl>
+ <dl><dt><a name="-statusMatcher"><strong>statusMatcher</strong></a>(status)</dt><dd><tt>Given&nbsp;the&nbsp;extension&nbsp;of&nbsp;the&nbsp;file,&nbsp;return&nbsp;a&nbsp;verbose&nbsp;string&nbsp;describing&nbsp;it&nbsp;to&nbsp;be&nbsp;used&nbsp;in&nbsp;title.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__author__</strong> = 'Saulo Aflitos'<br>
+<strong>__credits__</strong> = 'mummer, WUR, PRI, CBSG'<br>
+<strong>__date__</strong> = 'Nov 2013'<br>
+<strong>__version__</strong> = '201311181249'<br>
+<strong>compulsory</strong> = ['.delta', '.delta.coords']<br>
+<strong>forbidden</strong> = ['.invertions.delta.q.delta', '.invertions.delta.q.delta.coords', '.fasta.delta', '.fasta.delta.coords']<br>
+<strong>k</strong> = 'chromNumber'<br>
+<strong>labelFields</strong> = {'chromNumber': [&lt;_sre.SRE_Pattern object&gt;, None], 'refName': [&lt;_sre.SRE_Pattern object&gt;, &lt;function basename&gt;], 'spp': [&lt;_sre.SRE_Pattern object&gt;, None], 'status': [&lt;_sre.SRE_Pattern object&gt;, &lt;function statusMatcher&gt;]}<br>
+<strong>pointFmt</strong> = '%d,%d,%d,%d,%d,%d,%.2f,'<br>
+<strong>statusMatch</strong> = {'.delta': 'Raw Dot Plot', '.delta.coords': 'Raw Dot Plot', '.delta.q.delta': 'Clean Dot Plot', '.delta.q.delta.coords': 'Clean Dot Plot', '.delta.q.delta.filter': 'Clean &amp; Filtered Dot Plot', '.delta.q.delta.filter.coords': 'Clean &amp; Filtered Dot Plot', '.delta.q.delta.filter.invertions.delta': 'Clean &amp; Filtered Dot Plot. Only Inversions', '.delta.q.delta.filter.invertions.delta.coords': 'Clean &amp; Filtered Dot Plot. Only Inversions'}<br>
+<strong>titleFmt</strong> = '%(refName)s vs %(spp)s - Chromosome %(chromNumber)s - %(status)s'<br>
+<strong>xlabelFmt</strong> = '%(refName)s Chromosome %(chromNumber)s'<br>
+<strong>ylabelFmt</strong> = '%(spp)s'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Saulo&nbsp;Aflitos</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Credits</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">mummer,&nbsp;WUR,&nbsp;PRI,&nbsp;CBSG</td></tr></table>
+</body></html>

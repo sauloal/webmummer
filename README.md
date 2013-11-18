@@ -13,7 +13,7 @@ By opening index.html in a browser (preferably not IE), choose reference, chromo
 
 Navigation
 -----------
-The dot plot will be shown and can be browsed with either the keyboard or mouse. 
+The dot plot will be shown and can be browsed with either the keyboard or mouse.
 
 Use arrow keys, +/-/0, drag with mouse, [shift] double-click, scroll-wheel or use the compass.
 
@@ -48,7 +48,7 @@ contains the relevant css for coloring the graph.
 ### delta2js.py
 Delta files are parsed and converted to cartesian coordinates by delta2js.py.
 
-It exports all values to java script files because that's the only type of file that can be loaded in a browser without a web server. 
+It exports all values to java script files because that's the only type of file that can be loaded in a browser without a web server.
 
 data/*.js contains minimum and maximum values, as well as an array with all coordinates.
 
@@ -111,4 +111,5 @@ TODO
 - [ ] clean out-of-graph lines
 - [ ] disable auto load
 - [ ] use jquery-ui to drop-down lists
-
+- [ ] allow enablig circles
+- [ ] replace all jquery selector for d3 selector in simple-graph.js

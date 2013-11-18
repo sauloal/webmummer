@@ -234,11 +234,14 @@ SimpleGraph.prototype.update = function() {
 
     this.vis
         .append("path")
-        .attr("class"  , "points " + senseclass )
-        .attr("d"      , line    )
-        .attr("j"      , j       );
-    //coords[ coords.length ] = stVal;
-    //coords[ coords.length ] = ndVal;
+            .attr("class"    , "points " + senseclass )
+            .attr("d"        , line                   )
+            .attr("j"        , j                      )
+            .attr("scaf"     , vars.nameNum           )
+            .on(  "mouseover", function(d) { self.highlight( vars.nameNum );        })
+            .on(  "mouseout" , function(d) { d3.selectAll('.scaf-highlight').remove(); });
+        //coords[ coords.length ] = stVal;
+        //coords[ coords.length ] = ndVal;
   }
 
     //return;
@@ -282,6 +285,7 @@ SimpleGraph.prototype.update = function() {
     //});
 
 
+    // TODO: REPLACE BY D3 SELECTOR
     $('svg path.points').tipsy({
         gravity: 'w',
         html   : true,
@@ -301,6 +305,66 @@ SimpleGraph.prototype.update = function() {
 
 
 
+SimpleGraph.prototype.highlight = function( nameNum ) {
+    //.scaf-highlight
+    var scafLines = d3.selectAll(".points[scaf='"+nameNum+"']");
+
+    var minX = Number.MAX_VALUE;
+    var maxX = 0;
+    var minY = Number.MAX_VALUE;
+    var maxY = 0;
+
+    for ( var s = 0; s < scafLines[0].length; s++ ) {
+        var scaf = scafLines[0][s];
+        var j    = scaf.getAttribute('j');
+        var vars = this.parsepoint( j );
+
+        minX = vars.x1 < minX ? vars.x1 : minX;
+        minX = vars.x2 < minX ? vars.x2 : minX;
+        minY = vars.y1 < minY ? vars.y1 : minY;
+        minY = vars.y2 < minY ? vars.y2 : minY;
+
+        maxX = vars.x1 > maxX ? vars.x1 : maxX;
+        maxX = vars.x2 > maxX ? vars.x2 : maxX;
+        maxY = vars.y1 > maxY ? vars.y1 : maxY;
+        maxY = vars.y2 > maxY ? vars.y2 : maxY;
+    };
+
+    console.log("X min " + minX + ' max ' + maxX);
+    console.log("Y min " + minY + ' max ' + maxY);
+
+    minX = this.x(minX);
+    maxX = this.x(maxX);
+    minY = this.y(minY);
+    maxY = this.y(maxY);
+
+    console.log("X min " + minX + ' max ' + maxX);
+    console.log("Y min " + minY + ' max ' + maxY);
+
+    var lenX = maxX - minX;
+    var lenY = minY - maxY;
+
+    console.log("len X " + lenX + ' Y ' + lenY);
+
+
+    this.vis.append("rect")
+      .attr( "class"  , 'scaf-highlight')
+      .attr( "cx"     , this.x(minX)    )
+      .attr( "cy"     , this.y(minY)    )
+      .attr( "width"  , lenX            )
+      .attr( "height" , lenY            );
+}
+
+
+
+
+SimpleGraph.prototype.getSppName = function(k){
+    return spps[ k ];
+}
+
+
+
+
 SimpleGraph.prototype.parsepoint = function(j) {
     var startPos = j * this.regSize;
     var point    = this.points.slice( startPos, startPos+this.regSize );
@@ -310,7 +374,8 @@ SimpleGraph.prototype.parsepoint = function(j) {
         y1      :       point[1],
         x2      :       point[2],
         y2      :       point[3],
-        name    : spps[ point[4] ],
+        nameNum :       point[4],
+        name    : this.getSppName( point[4] ),
         sense   :       point[5],
         senseStr:       point[5] == 0 ? 'fwd' : 'rev',
         qual    :       point[6],
