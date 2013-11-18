@@ -146,7 +146,7 @@ class exp(object):
         self.minY    = sys.maxint
         self.maxY    = 0
 
-        self.spps    = {}
+        self.scaffs  = {}
 
         self.fhd     = open(outfile, 'w')
 
@@ -165,16 +165,16 @@ class exp(object):
     def append(self, x1, y1, x2, y2, name, sense, q):
         """
         Adds query name to database of names (a list of all names).
-        Exports only species ID (index of the species name in the database of names);
+        Exports only species ID (index of the scaffold name in the database of names);
 
         Replaces sense for 0/1;
 
         Updates min and max positions;
         """
-        if name not in self.spps:
-            self.spps[name] = len(self.spps)
+        if name not in self.scaffs:
+            self.scaffs[name] = len(self.scaffs)
 
-        name  = self.spps[name]
+        name  = self.scaffs[name]
 
         sense = 0 if sense == 'fwd' else 1
 
@@ -223,17 +223,17 @@ class exp(object):
         line = """\
 ];
 
-%(dbreg)s[ 'xmin' ]  = %(minX)12d;
-%(dbreg)s[ 'xmax' ]  = %(maxX)12d;
+%(dbreg)s[ 'xmin'   ]  = %(minX)12d;
+%(dbreg)s[ 'xmax'   ]  = %(maxX)12d;
 
-%(dbreg)s[ 'ymin' ]  = %(minY)12d;
-%(dbreg)s[ 'ymax' ]  = %(maxY)12d;
-%(dbreg)s[ 'spps' ]  = [\
+%(dbreg)s[ 'ymin'   ]  = %(minY)12d;
+%(dbreg)s[ 'ymax'   ]  = %(maxY)12d;
+%(dbreg)s[ 'scaffs' ]  = [\
 """ % { 'dbreg': self.dbreg, 'minX': self.minX, 'maxX': self.maxX, 'minY': self.minY, 'maxY': self.maxY }
 
-        for spp in sorted(self.spps, key=lambda p: self.spps[p]):
+        for scaf in sorted(self.scaffs, key=lambda p: self.scaffs[p]):
             #print "spp %s p %d" % (spp, self.spps[spp])
-            line += "'%s'," % spp
+            line += "'%s'," % scaf
 
         line += '];'
 

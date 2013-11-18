@@ -81,12 +81,12 @@ function genSelectors(){
 }
 
 
-function loadScript( reg ){
+function loadScript( uid, reg ){
     var file     = reg[ 'filename' ];
     var filename = datafolder + file;
 
     // Adding the script tag to the head as suggested before
-    var callback = function() { loadGraph(reg) };
+    var callback = function() { loadGraph(uid, reg) };
     //var head     = document.getElementsByTagName('head')[0];
     var script   = document.createElement('script');
     script.type  = 'text/javascript';
@@ -107,7 +107,7 @@ function loadScript( reg ){
 }
 
 
-function loadGraph( reg ) {
+function loadGraph( uid, reg ) {
     var holder = document.getElementById('scriptholder');
 
     while (holder.firstChild) {
@@ -116,7 +116,10 @@ function loadGraph( reg ) {
 
     document.getElementById(chartName).innerHTML = '';
 
-    graph  = new SimpleGraph(chartName, {
+    document.body.addEventListener('d3createdPath', addTipsy, false);
+
+    var graph  = new SimpleGraph(chartName, {
+        "uid"     : uid,
         "xmin"    : reg.xmin,
         "xmax"    : reg.xmax,
         "ymin"    : reg.ymin,
@@ -125,6 +128,7 @@ function loadGraph( reg ) {
         "ylabel"  : reg.ylabel,
         "title"   : reg.title,
         "points"  : reg.points,
+        "scaffs"  : reg.scaffs,
         "xTicks"  : 5,
         "yTicks"  : 5,
         "padding" : { 'left': [120, 45] },
@@ -132,14 +136,40 @@ function loadGraph( reg ) {
         "labelId" : "pos"
     });
 
+    reg['graph'] = graph;
+
     delete reg.points;
-    delete reg.spps;
+    delete reg.scaffs;
 }
 
+
+function addTipsy( e ) {
+    $(e.detail.el).tipsy({
+            gravity: 'w',
+            html   : true,
+            title  : function() {
+                var j   = this.getAttribute('j');
+                var tip = e.detail.self.genTip( j );
+                //console.log("tip "+tip);
+                return tip;
+            }
+        });
+
+    //$('svg circle').tipsy({
+    //    gravity: 'w',
+    //    html   : true,
+    //    title  : function() {
+    //        var j   = this.getAttribute('j');
+    //        var res = genTip(self.points[j]);
+    //        return res;
+    //    }
+    //});
+}
 
 function getVals(){
     var vals = {};
 
+    var uid = '';
     for ( var o = 0; o < opts.length; o++ ) {
         var opt = opts[o];
         var val = $('#'+opt[1]+' option:selected').first().attr( 'value' );
@@ -148,7 +178,11 @@ function getVals(){
             return;
         }
         vals[opt[1]] = val;
+        uid += val;
     }
+
+    uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+    vals['uid'] = uid;
 
     return vals;
 }
@@ -157,7 +191,7 @@ function getVals(){
 function getRegister( vals ){
     try {
         var reg = filelist[ vals['ref'] ][ vals['chrom'] ][ vals['spp'] ][ vals['status'] ];
-        console.log( reg );
+        //console.log( reg );
         return reg;
     }
     catch(err) {
@@ -183,21 +217,23 @@ function selclick(){
         return;
     }
 
-    console.log( vals );
+    //console.log( vals );
 
     var reg  = getRegister( vals );
     if (!reg) {
         return;
     }
+
     var file = reg[ 'filename' ];
     if (!file) {
         return;
     }
 
+    var uid = vals.uid;
     $('#'+chartName).html('loading ' + obj2str(vals) );
     $('#'+chartName).attr("tabindex", -1).focus();
 
-    loadScript( reg );
+    loadScript( uid, reg );
 }
 
 
@@ -209,15 +245,22 @@ function basename(path) {
 
 /*
   options                || {};
+  options.scaffs         || null;
   options.labelId        || null;
+  options.uid            || 'uid'
+
+  options.xlabel         || 'x';
+  options.ylabel         || 'y';
+  options.title          || 'no title';
+
   options.xmax           || 30;
   options.xmin           ||  0;
   options.ymax           || 10;
   options.ymin           ||  0;
-                            //              from spps
-                            //                  f/r
-                            //  x1 y1 x2 y2 spp 0/1 q
-  options.points         ||  [ [0 ,0, 0, 0, 0,  0,  0.0] ];
+                            //              from scaffs
+                            //                   f/r
+                            //  x1 y1 x2 y2 scaf 0/1 q
+  options.points         ||  [ [0 ,0, 0, 0, 0,   0,  0.0] ];
   options.xTicks         || 10;
   options.yTicks         || 10;
   options.split          || 30;

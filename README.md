@@ -80,8 +80,12 @@ var filelist = {
   'solanum lycopersicum heinz': {
     '00': {
       'solanum arcanum': {
-        "Clean & Filtered Dot Plot. Only Inversions": "solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.filter.invertions.delta.js",
-        "Clean Dot Plot": "solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.js",
+        "Clean & Filtered Dot Plot. Only Inversions": {
+          "filename": "solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.filter.invertions.delta.js"
+        },
+        "Clean Dot Plot": {
+          "filename": "solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.js"
+        },
       }
     }
   }
@@ -90,26 +94,29 @@ var filelist = {
 
 ##### data/file.js
 ``` javascript
-var title  = 'solanum lycopersicum heinz vs solanum arcanum - Chromosome 00 - Clean Dot Plot';
-var xlabel = 'solanum lycopersicum heinz Chromosome 00';
-var ylabel = 'solanum arcanum';
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'title'  ] = 'solanum lycopersicum heinz vs solanum pennellii - Chromosome 12 - Clean Dot Plot';
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'xlabel' ] = 'solanum lycopersicum heinz Chromosome 12';
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'ylabel' ] = 'solanum pennellii';
 
-var points = [9068,9205,18172,98,0,1,98.29];
-var xmin    =         9068;
-var xmax    =     13232799;
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'points' ] = [3159,3057,8585,8485,0,0,96.19];
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'xmin' ]  =         3159;
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'xmax' ]  =     65485119;
 
-var ymin    =           98;
-var ymax    =      9570245;
-var spps    = ['scaffold_10719'];
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'ymin' ]  =         3057;
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'ymax' ]  =     60818323;
+filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean Dot Plot' ][ 'scafs']  = ['scaffold_2657'];
 ```
 
 TODO
 --------
+### Priority
 - [ ] allow for multiple plots
 - [ ] better keyboard zoom
-- [ ] highlight same scaffold
+- [x] highlight same scaffold
 - [ ] clean out-of-graph lines
-- [ ] disable auto load
+
+### Optional
 - [ ] use jquery-ui to drop-down lists
 - [ ] allow enablig circles
-- [ ] replace all jquery selector for d3 selector in simple-graph.js
+- [x] replace all jquery selector for d3 selector in simple-graph.js
+- [ ] disable auto load

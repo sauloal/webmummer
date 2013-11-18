@@ -25,12 +25,14 @@ registerKeyboardHandler = function(callback) {
 
 SimpleGraph = function(elemid, options) {
   var self                    = this;
-  this.chart                  = document.getElementById( elemid);
+  this.chart                  = document.getElementById( elemid );
   this.cx                     = this.chart.clientWidth;
   this.cy                     = this.chart.clientHeight;
   this.elemid                 = elemid;
   this.options                = options                || {};
+  this.scaffs                 = options.scaffs         || null;
   this.options.labelId        = options.labelId        || null;
+  this.options.uid            = options.uid            || 'uid';
 
   this.options.xlabel         = options.xlabel         || 'x';
   this.options.ylabel         = options.ylabel         || 'y';
@@ -40,10 +42,10 @@ SimpleGraph = function(elemid, options) {
   this.options.xmin           = options.xmin           ||  0;
   this.options.ymax           = options.ymax           || 10;
   this.options.ymin           = options.ymin           ||  0;
-                                                        //              from spps
-                                                        //                  f/r
-                                                        //  x1 y1 x2 y2 spp 0/1 q
-  this.points                 = options.points         ||  [0 ,0, 0, 0, 0,  0,  0.0];
+                                                        //              from scaffs
+                                                        //                   f/r
+                                                        //  x1 y1 x2 y2 scaf 0/1 q
+  this.points                 = options.points         ||  [0 ,0, 0, 0, 0,   0,  0.0];
   this.options.xTicks         = options.xTicks         || 10;
   this.options.yTicks         = options.yTicks         || 10;
   this.options.split          = options.split          || 30;
@@ -65,8 +67,8 @@ SimpleGraph = function(elemid, options) {
 
   this.regSize = 7;
   this.numRegs = (this.points.length / this.regSize);
-  console.log("num vals "+this.points.length);
-  console.log("num regs "+self.numRegs);
+  console.log("num vals " + this.points.length);
+  console.log("num regs " + this.numRegs);
 
 
   this.padding = {
@@ -124,10 +126,11 @@ SimpleGraph = function(elemid, options) {
 
   this.svg = d3.select(this.chart).append("svg")
       .attr("width"    , this.cx)
-      .attr("height"   , this.cy);
+      .attr("height"   , this.cy)
+      .attr("uid"      , this.options.uid);
 
 
-  this.vis = this.svg.append("g"               )
+  this.vis = this.svg.append("g")
         .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
 
 
@@ -218,7 +221,7 @@ SimpleGraph = function(elemid, options) {
 SimpleGraph.prototype.update = function() {
   var self   = this;
   var coords = [];
-  this.vis.selectAll(".points").remove();
+  this.vis.selectAll("svg[uid="+self.options.uid+"] .points").remove();
   //this.vis.selectAll("circle").remove();
 
   for (var j = 0; j < this.numRegs; j++) {
@@ -232,17 +235,37 @@ SimpleGraph.prototype.update = function() {
 
     var senseclass = sense ? 'points-r' : 'points-f';
 
-    this.vis
-        .append("path")
+    var p = this.vis.append( "path" )
             .attr("class"    , "points " + senseclass )
             .attr("d"        , line                   )
             .attr("j"        , j                      )
             .attr("scaf"     , vars.nameNum           )
-            .on(  "mouseover", function(d) { self.highlight( vars.nameNum );        })
-            .on(  "mouseout" , function(d) { d3.selectAll('.scaf-highlight').remove(); });
-        //coords[ coords.length ] = stVal;
-        //coords[ coords.length ] = ndVal;
+            .on(  "mouseover", function(d) { self.highlight( this          ); })
+            .on(  "mouseout" , function(d) { self.downlight( this          ); })
+            ;
+
+    //coords[ coords.length ] = stVal;
+    //coords[ coords.length ] = ndVal;
   }
+
+    this.vis.selectAll("svg[uid="+self.options.uid+"] .points").each( function(d, i){
+        //var j    = this.getAttribute('j');
+        var d3eventPath = new CustomEvent(
+            "d3createdPath",
+            {
+                detail: {
+                    message: 'd3 has created an path element',
+                    self   : self,
+                    el     : this,
+                    time   : new Date()
+                },
+                bubbles   : true,
+                cancelable: true
+            }
+        );
+        this.dispatchEvent( d3eventPath );
+    });
+
 
     //return;
 
@@ -274,27 +297,6 @@ SimpleGraph.prototype.update = function() {
     //circle.exit().remove();
     //
     //
-    //$('svg circle').tipsy({
-    //    gravity: 'w',
-    //    html   : true,
-    //    title  : function() {
-    //        var j   = this.getAttribute('j');
-    //        var res = genTip(self.points[j]);
-    //        return res;
-    //    }
-    //});
-
-
-    // TODO: REPLACE BY D3 SELECTOR
-    $('svg path.points').tipsy({
-        gravity: 'w',
-        html   : true,
-        title  : function() {
-            var j   = this.getAttribute('j');
-            return self.genTip( j );
-        }
-    });
-
 
   if (d3.event && d3.event.keyCode) {
     d3.event.preventDefault();
@@ -305,61 +307,79 @@ SimpleGraph.prototype.update = function() {
 
 
 
-SimpleGraph.prototype.highlight = function( nameNum ) {
-    //.scaf-highlight
-    var scafLines = d3.selectAll(".points[scaf='"+nameNum+"']");
+SimpleGraph.prototype.downlight = function( el ) {
+    var self = this;
+    d3.select(el).classed( "scaf-highlight", false );
+    self.vis.selectAll('.scaf-square').remove();
+}
 
-    var minX = Number.MAX_VALUE;
-    var maxX = 0;
-    var minY = Number.MAX_VALUE;
-    var maxY = 0;
 
-    for ( var s = 0; s < scafLines[0].length; s++ ) {
-        var scaf = scafLines[0][s];
-        var j    = scaf.getAttribute('j');
-        var vars = this.parsepoint( j );
 
-        minX = vars.x1 < minX ? vars.x1 : minX;
-        minX = vars.x2 < minX ? vars.x2 : minX;
-        minY = vars.y1 < minY ? vars.y1 : minY;
-        minY = vars.y2 < minY ? vars.y2 : minY;
 
-        maxX = vars.x1 > maxX ? vars.x1 : maxX;
-        maxX = vars.x2 > maxX ? vars.x2 : maxX;
-        maxY = vars.y1 > maxY ? vars.y1 : maxY;
-        maxY = vars.y2 > maxY ? vars.y2 : maxY;
-    };
+SimpleGraph.prototype.highlight = function( el ) {
+    var del = d3.select(el);
+    del.classed( "scaf-highlight", true );
 
-    console.log("X min " + minX + ' max ' + maxX);
-    console.log("Y min " + minY + ' max ' + maxY);
+    var self      = this;
+    var nameNum   = del.attr('scaf');
+    var minX      = Number.MAX_VALUE;
+    var maxX      = 0;
+    var minY      = Number.MAX_VALUE;
+    var maxY      = 0;
+    var scafLines = self.vis.selectAll(".points[scaf='"+nameNum+"']");
 
-    minX = this.x(minX);
-    maxX = this.x(maxX);
-    minY = this.y(minY);
-    maxY = this.y(maxY);
+    scafLines.each( function(d, i){
+        var j    = this.getAttribute('j');
+        var vars = self.parsepoint( j );
+        var x1   = self.x( vars.x1 );
+        var x2   = self.x( vars.x2 );
+        var y1   = self.y( vars.y1 );
+        var y2   = self.y( vars.y2 );
 
-    console.log("X min " + minX + ' max ' + maxX);
-    console.log("Y min " + minY + ' max ' + maxY);
+        minX = x1 < minX ? x1 : minX;
+        minX = x2 < minX ? x2 : minX;
+        minY = y1 < minY ? y1 : minY;
+        minY = y2 < minY ? y2 : minY;
+
+        maxX = x1 > maxX ? x1 : maxX;
+        maxX = x2 > maxX ? x2 : maxX;
+        maxY = y1 > maxY ? y1 : maxY;
+        maxY = y2 > maxY ? y2 : maxY;
+    });
 
     var lenX = maxX - minX;
-    var lenY = minY - maxY;
+    var lenY = maxY - minY;
 
-    console.log("len X " + lenX + ' Y ' + lenY);
+    //var lenX = Math.round( ( maxX - minX )*1.1 );
+    //var lenY = Math.round( ( maxY - minY )*1.1 );
+    //minY = Math.round(minY * 0.95);
+    //minX = Math.round(minX * 0.95);
 
+
+    //console.log("");
+    //console.log("X min " + minX + ' max ' + maxX);
+    //console.log("Y min " + minY + ' max ' + maxY);
+    //console.log("len X " + lenX + ' Y ' + lenY);
+    //console.log("cx " + minX + " cy " + minY + ' width ' + lenX + ' heigth ' + lenY);
 
     this.vis.append("rect")
-      .attr( "class"  , 'scaf-highlight')
-      .attr( "cx"     , this.x(minX)    )
-      .attr( "cy"     , this.y(minY)    )
-      .attr( "width"  , lenX            )
-      .attr( "height" , lenY            );
+      .attr( "class"  , 'scaf-square')
+      .attr( "x"      , minX         )
+      .attr( "y"      , minY         )
+      .attr( "width"  , lenX         )
+      .attr( "height" , lenY         );
 }
 
 
 
 
 SimpleGraph.prototype.getSppName = function(k){
-    return spps[ k ];
+    if (this.scaffs) {
+        return this.scaffs[ k ];
+    }
+    else {
+        return 'NaN';
+    }
 }
 
 
@@ -389,7 +409,11 @@ SimpleGraph.prototype.parsepoint = function(j) {
 
 SimpleGraph.prototype.genTip = function (j) {
     var vars  = this.parsepoint( j );
-    var res   = 'Scaf: ' + vars.name + ' Sense: ' + vars.senseStr + ' Ref Pos: ' + vars.x1 + '-' + vars.x2 + ' Scaf Pos: ' + vars.y1 + '-' + vars.y2 + ' Qual: ' + vars.qual;
+    var res   = '<b>Scaf:</b> '         + vars.name     +
+                '<br><b>Sense:</b> '    + vars.senseStr +
+                '<br><b>Ref Pos:</b> '  + vars.x1       + '-' + vars.x2 +
+                '<br><b>Scaf Pos:</b> ' + vars.y1       + '-' + vars.y2 +
+                '<br><b>Qual:</b> '     + vars.qual;
     return res;
 }
 
@@ -863,8 +887,8 @@ SimpleGraph.prototype.download = function() {
     var doctype = '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
     var svg     = self.svg;
 
-    svg.selectAll(".download-icon").remove();
-    svg.selectAll(".compass-g"    ).remove();
+    svg.selectAll("svg[uid="+self.options.uid+"] .download-icon").remove();
+    svg.selectAll("svg[uid="+self.options.uid+"] .compass-g"    ).remove();
 
     var styles  = self.getStyles();
     styles      = (styles === undefined) ? "" : styles;
