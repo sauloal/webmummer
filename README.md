@@ -21,6 +21,7 @@ Screenshot
 -------------
 <img src="https://raw.github.com/sauloal/webmummer/master/Screenshot.png"/>
 
+
 Saving
 -------
 On the top right corther there's a button to save the current view to a svg file.
