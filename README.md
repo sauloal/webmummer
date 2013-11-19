@@ -20,6 +20,8 @@ Use arrow keys, +/-/0, drag with mouse, [shift] double-click, scroll-wheel or us
 Screenshot
 -------------
 <img src="https://raw.github.com/sauloal/webmummer/master/Screenshot.png"/>
+<img src="http://sauloal.github.io/webmummer/solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean-Dot-Plot.svg"/>
+<img src="http://sauloal.github.io/webmummer/solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean---Filtered-Dot-Plot--Only-Inversions.svg"/>
 
 
 Saving
