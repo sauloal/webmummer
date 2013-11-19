@@ -24,46 +24,52 @@ registerKeyboardHandler = function(callback) {
 
 
 SimpleGraph = function(elemid, options) {
-  var self                    = this;
-  this.chart                  = document.getElementById( elemid );
-  this.cx                     = this.chart.clientWidth;
-  this.cy                     = this.chart.clientHeight;
-  this.elemid                 = elemid;
-  this.options                = options                || {};
-  this.scaffs                 = options.scaffs         || null;
-  this.options.labelId        = options.labelId        || null;
-  this.options.uid            = options.uid            || 'uid';
+  var self                         = this;
+  this.chart                       = document.getElementById( elemid );
+  this.cx                          = this.chart.clientWidth;
+  this.cy                          = this.chart.clientHeight;
+  this.elemid                      = elemid;
+  this.options                     = options                     || {};
+  this.scaffs                      = options.scaffs              || null;
+  this.options.labelId             = options.labelId             || null;
+  this.options.uid                 = options.uid                 || 'uid';
 
-  this.options.xlabel         = options.xlabel         || 'x';
-  this.options.ylabel         = options.ylabel         || 'y';
-  this.options.title          = options.title          || 'no title';
+  this.options.xlabel              = options.xlabel              || 'x';
+  this.options.ylabel              = options.ylabel              || 'y';
+  this.options.title               = options.title               || 'no title';
 
-  this.options.xmax           = options.xmax           || 30;
-  this.options.xmin           = options.xmin           ||  0;
-  this.options.ymax           = options.ymax           || 10;
-  this.options.ymin           = options.ymin           ||  0;
-                                                        //              from scaffs
-                                                        //                   f/r
-                                                        //  x1 y1 x2 y2 scaf 0/1 q
-  this.points                 = options.points         ||  [0 ,0, 0, 0, 0,   0,  0.0];
-  this.options.xTicks         = options.xTicks         || 10;
-  this.options.yTicks         = options.yTicks         || 10;
-  this.options.split          = options.split          || 30;
-  this.options.padding        = options.padding        || {};
-  this.options.padding.top    = options.padding.top    || [40, 20];
-  this.options.padding.right  = options.padding.right  || [30, 30];
-  this.options.padding.bottom = options.padding.bottom || [60, 10];
-  this.options.padding.left   = options.padding.left   || [70, 45];
-  this.options.titleDx        = options.titleDx        || "-0.8em";
-  this.options.xNumbersDy     = options.xNumbersDy     || "1em";
-  this.options.yNumbersDy     = options.yNumbersDy     || "0.35em";
-  this.options.xlabelDx       = options.xlabelDx       || "0em";
-  this.options.xlabelDy       = options.xlabelDy       || "+2.3em";
-  this.options.ylabelX        = options.ylabelX        || 0;
-  this.options.ylabelY        = options.ylabelY        || 0;
-  this.options.ylabelDx       = options.ylabelDx       || "0em";
-  this.options.ylabelDy       = options.ylabelDy       || "-2.3em";
+  this.options.xmax                = options.xmax                || 30;
+  this.options.xmin                = options.xmin                ||  0;
+  this.options.ymax                = options.ymax                || 10;
+  this.options.ymin                = options.ymin                ||  0;
+                                                                 //              from scaffs
+                                                                 //                   f/r
+                                                                 //  x1 y1 x2 y2 scaf 0/1 q
+  this.points                      = options.points              ||  [0 ,0, 0, 0, 0,   0,  0.0];
+  this.options.xTicks              = options.xTicks              || 10;
+  this.options.yTicks              = options.yTicks              || 10;
+  this.options.split               = options.split               || 30;
+  this.options.padding             = options.padding             || {};
+  this.options.padding.top         = options.padding.top         || [40, 20];
+  this.options.padding.right       = options.padding.right       || [30, 30];
+  this.options.padding.bottom      = options.padding.bottom      || [60, 10];
+  this.options.padding.left        = options.padding.left        || [70, 45];
+  this.options.titleDx             = options.titleDx             || "-0.8em";
+  this.options.xNumbersDy          = options.xNumbersDy          || "1em";
+  this.options.yNumbersDy          = options.yNumbersDy          || "0.35em";
+  this.options.xlabelDx            = options.xlabelDx            || "0em";
+  this.options.xlabelDy            = options.xlabelDy            || "+2.3em";
+  this.options.ylabelX             = options.ylabelX             || 0;
+  this.options.ylabelY             = options.ylabelY             || 0;
+  this.options.ylabelDx            = options.ylabelDx            || "0em";
+  this.options.ylabelDy            = options.ylabelDy            || "-2.3em";
+  this.options.downloadIconMaxSize = options.downloadIconMaxSize ||  30;
+  this.options.closeIconMaxSize    = options.closeIconMaxSize    ||  30;
+  this.options.compassMaxSize      = options.compassMaxSize      ||  75;
+  this.options.compassMinSize      = options.compassMinSize      ||  20;
   //this.options.radius         = options.radius         || 5.0;
+
+
 
   this.regSize = 7;
   this.numRegs = (this.points.length / this.regSize);
@@ -143,6 +149,8 @@ SimpleGraph = function(elemid, options) {
       .on(   "touchstart.drag", self.plot_drag());
 
   this.zoom  = d3.behavior.zoom();
+
+
   this.plot.call(this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
 
 
@@ -193,6 +201,10 @@ SimpleGraph = function(elemid, options) {
         .text(this.options.ylabel                   );
   }
 
+  this.btns = this.svg.append("g")
+        //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
+  ;
+
 
   d3.select(this.chart)
       .on("mousemove.drag", self.mousemove())
@@ -206,6 +218,8 @@ SimpleGraph = function(elemid, options) {
   this.addCompass();
 
   this.addDownload();
+
+  this.addClose();
 
   this.redraw()();
 };
@@ -889,6 +903,7 @@ SimpleGraph.prototype.download = function() {
 
     svg.selectAll("svg[uid="+self.options.uid+"] .download-icon").remove();
     svg.selectAll("svg[uid="+self.options.uid+"] .compass-g"    ).remove();
+    svg.selectAll("svg[uid="+self.options.uid+"] .close-icon"   ).remove();
 
     var styles  = self.getStyles();
     styles      = (styles === undefined) ? "" : styles;
@@ -959,6 +974,8 @@ SimpleGraph.prototype.download = function() {
     this.addCompass();
 
     this.addDownload();
+
+    this.addClose();
 };
 
 
@@ -1001,30 +1018,102 @@ SimpleGraph.prototype.getStyles = function() {
 
 
 
+SimpleGraph.prototype.close = function() {
+    var el = document.getElementById( this.elemid );
+    el.parentElement.removeChild( el );
+}
+
+
+
+
 SimpleGraph.prototype.addDownload = function() {
     //.attr("transform", "matrix(1,0,0,-1,113.89831,1293.0169)")
     //.attr("transform", "scale(0.05)")
 
     var self = this;
 
-    var gW   = 512;
+    var gW   = 300;
     var sW   = this.size.width > this.size.height ? this.size.height : this.size.width;
     var sW10 = sW * .025;
+    if ( sW10 < this.options.downloadIconMaxSize ) {
+        sW10 = this.options.downloadIconMaxSize;
+    }
+
     var wP   = sW10 / gW;
         sW10 = gW * wP;
-    var xPos = this.size.width - sW10 + this.padding.right;
+    var xPos = this.size.width - (3*sW10) + this.padding.right;
     var yPos = 0;
 
-    //console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
+    console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
+    console.log(this.options.downloadIconMaxSize);
 
-    var g  = this.vis
-        .append("g"                            )
-            .attr("class"    , 'download-icon')
-            .attr("transform", "translate("+xPos+","+yPos+") rotate(180) scale("+wP+")")
-            .on(  'click'    , function() { self.download() } )
-        .append("path")
-            .attr("d", "m 1120,608 q 0,-12 -10,-24 L 791,265 q -9,-9 -23,-9 -14,0 -23,9 L 425,585 q -9,9 -9,23 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 v 352 q 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 q 13,0 22.5,-9.5 Q 896,1005 896,992 V 640 h 192 q 14,0 23,-9 9,-9 9,-23 z m 160,32 q 0,104 -40.5,198.5 Q 1199,933 1130,1002 1061,1071 966.5,1111.5 872,1152 768,1152 664,1152 569.5,1111.5 475,1071 406,1002 337,933 296.5,838.5 256,744 256,640 256,536 296.5,441.5 337,347 406,278 475,209 569.5,168.5 664,128 768,128 872,128 966.5,168.5 1061,209 1130,278 1199,347 1239.5,441.5 1280,536 1280,640 z m 256,0 Q 1536,431 1433,254.5 1330,78 1153.5,-25 977,-128 768,-128 559,-128 382.5,-25 206,78 103,254.5 0,431 0,640 0,849 103,1025.5 206,1202 382.5,1305 559,1408 768,1408 977,1408 1153.5,1305 1330,1202 1433,1025.5 1536,849 1536,640 z")
-    ;
+    //var g  = this.btns
+    //    .append("g"                            )
+    //        .attr("class"    , 'download-icon compass-opaque')
+    //        .attr("transform", "rotate(180) scale("+wP+")")
+    //        //.attr("transform", "translate("+xPos+","+yPos+") rotate(180) scale("+wP+")")
+    //        .on(  'click'    , function()  { self.download() } )
+    //        .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ) })
+    //        .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ) })
+    //    .append("path")
+    //        .attr("d", "m 1120,608 q 0,-12 -10,-24 L 791,265 q -9,-9 -23,-9 -14,0 -23,9 L 425,585 q -9,9 -9,23 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 v 352 q 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 q 13,0 22.5,-9.5 Q 896,1005 896,992 V 640 h 192 q 14,0 23,-9 9,-9 9,-23 z m 160,32 q 0,104 -40.5,198.5 Q 1199,933 1130,1002 1061,1071 966.5,1111.5 872,1152 768,1152 664,1152 569.5,1111.5 475,1071 406,1002 337,933 296.5,838.5 256,744 256,640 256,536 296.5,441.5 337,347 406,278 475,209 569.5,168.5 664,128 768,128 872,128 966.5,168.5 1061,209 1130,278 1199,347 1239.5,441.5 1280,536 1280,640 z m 256,0 Q 1536,431 1433,254.5 1330,78 1153.5,-25 977,-128 768,-128 559,-128 382.5,-25 206,78 103,254.5 0,431 0,640 0,849 103,1025.5 206,1202 382.5,1305 559,1408 768,1408 977,1408 1153.5,1305 1330,1202 1433,1025.5 1536,849 1536,640 z")
+    //;
+
+
+
+    var g1  = this.btns
+            .append("g"                            )
+                .attr("class"    , 'download-icon compass-opaque')
+                .attr("transform", "translate("+sW10+","+(sW10/10)+") scale("+wP+")")
+                .on(  'click'    , function()  { self.download() } )
+                .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ) })
+                .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ) });
+
+    g1.append('path')
+        .attr("style"       , "fill:#000000;fill-opacity:1;stroke:none")
+        .attr("transform"   , "matrix(1.5535248,0,0,1.5535248,83.172743,0)")
+        .attr("d"           , "m 139.90613,72.463142 a 96.722107,96.722107 0 1 1 -193.444216,0 96.722107,96.722107 0 1 1 193.444216,0 z");
+
+    var g2 = g1.append('g');
+
+    g2.append('path')
+        .attr("style"       , "fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        .attr("transform"   , "matrix(0.92827428,0.00326311,-0.00213854,0.60836285,113.39003,55.97555)")
+        .attr("d"           , "m -55.558393,104.53548 95.913655,-1.83769 95.913648,-1.83769 -46.365336,83.98251 -46.365337,83.9825 -49.5483166,-82.14482 z");
+
+    g2.append('rect')
+        .attr("style"       , "fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        .attr("width"       , "41.921329")
+        .attr("height"      , "138.89598")
+        .attr("x"           , "129.29953")
+        .attr("y"           , "10.319729")
+        .attr("d"           , "");
+
+//<g
+//     transform="translate(0,-752.36218)"
+//     id="layer1">
+//    <path
+//       d="m 139.90613,72.463142 a 96.722107,96.722107 0 1 1 -193.444216,0 96.722107,96.722107 0 1 1 193.444216,0 z"
+//       transform="matrix(1.5535248,0,0,1.5535248,83.172743,790.03378)"
+//       id="path2985"
+//       style="fill:#000000;fill-opacity:1;stroke:none" />
+//  </g>
+//  <g
+//     id="layer2">
+//    <path
+//       d="m -55.558393,104.53548 95.913655,-1.83769 95.913648,-1.83769 -46.365336,83.98251 -46.365337,83.9825 -49.5483166,-82.14482 z"
+//       transform="matrix(0.92827428,0.00326311,-0.00213854,0.60836285,113.39003,118.97555)"
+//       id="path2990"
+//       style="fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//    <rect
+//       width="41.921329"
+//       height="138.89598"
+//       x="129.29953"
+//       y="29.319729"
+//       id="rect3762"
+//       style="fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//  </g>
+//
 
 }
 
@@ -1057,13 +1146,19 @@ SimpleGraph.prototype.addCompass = function() {
 
     var sW     = this.cx > this.cy ? this.cy : this.cx;
     var sW10   = sW * .1;
+    if (sW10 > this.options.compassMaxSize){
+        sW10 = this.options.compassMaxSize;
+    }
+    if (sW10 < this.options.compassMinSize) {
+        sW10 = this.options.compassMinSize;
+    }
+
+
     var wP     = sW10 / gW;
 
     var self   = this;
 
     //console.log("gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP);
-
-
 
     var g = this.vis
         .append("g"                            )
@@ -1186,4 +1281,110 @@ SimpleGraph.prototype.addCompass = function() {
     //    <rect class="compass-plus-minus" x="46"   y="57.5" width="8" height="3"/>
     //    <rect class="compass-plus-minus" x="48.5" y="55"   width="3" height="8"/>
     //</svg>
+}
+
+
+
+
+SimpleGraph.prototype.addClose = function() {
+    var self   = this;
+
+    var gW     = 300;
+    var sW     = this.size.width > this.size.height ? this.size.height : this.size.width;
+    var sW10   = sW * .025;
+    if ( sW10 < this.options.closeIconMaxSize ) {
+        sW10   = this.options.closeIconMaxSize;
+    }
+
+    var wP   = sW10 / gW;
+        sW10 = gW * wP;
+    var xPos = this.size.width - (2*sW10) + this.padding.right;
+    var yPos = 0 - 35;
+
+    //console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
+
+
+    var g1 = this.btns
+        .append("g"                                       )
+            .attr("class"    , 'close-icon compass-opaque')
+            //.attr("transform", "translate("+(-32 + (3*sW10))+","+-35+") scale("+wP+")")
+            .attr("transform", "translate(0,0) scale("+wP+")")
+            .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ) })
+            .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ) })
+            .on(  "click"    , function(d) { self.close() }                                      );
+
+    var g2 = g1.append('g')
+        .attr('id', 'layer1');
+
+    g2.append('path')
+        .attr("style"       , "fill:#000000;fill-opacity:1;stroke:none")
+        .attr("transform"   , "matrix(1.9082106,0,0,1.9082106,-22.026324,-128.37065)")
+        .attr("d"           , "m 168.26579,145.95174 a 77.85714,78.571426 0 1 1 -155.714276,0 77.85714,78.571426 0 1 1 155.714276,0 z");
+
+    var g3 = g1.append('g')
+        .attr('id'       , 'layer2'                 )
+        .attr('transform', "translate(0,-752.36218)")
+        .attr('style'    , 'display:inline'         );
+
+    g3.append('path')
+        .attr("style"       , "fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        .attr("d"           , "M 79.946368,993.62902 220.57402,811.08004");
+
+    g3.append('path')
+        .attr("style"       , "fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        .attr("d"           , "M 220.57402,993.62902 79.946368,811.08004");
+
+  //<g>
+  //  <path
+  //     d="m 168.26579,145.95174 a 77.85714,78.571426 0 1 1 -155.714276,0 77.85714,78.571426 0 1 1 155.714276,0 z"
+  //     transform="matrix(1.9082106,0,0,1.9082106,-22.026324,-128.37065)"
+  //     id="path3790"
+  //     style="fill:#000000;fill-opacity:1;stroke:none" />
+  //</g>
+  //<g
+  //   transform="translate(0,-752.36218)"
+  //   id="layer1"
+  //   style="display:inline">
+  //  <path
+  //     d="M 79.946368,993.62902 220.57402,811.08004"
+  //     id="path3763"
+  //     style="fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+  //  <path
+  //     d="M 220.57402,993.62902 79.946368,811.08004"
+  //     id="path3765"
+  //     style="fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+
+
+
+
+
+
+//<svg viewBox="0 0 744.09 1052.4" version="1.1">
+// <g id="layer1">
+//  <path id="path2989" stroke-width="5" stroke="#000" transform="matrix(1.1048 0 0 1.1048 -179.21 -162.53)" d="m814.29 606.65a314.29 314.29 0 1 1 -628.57 0 314.29 314.29 0 1 1 628.57 0z"/>
+//  <g id="g3763" transform="matrix(.91837 0 0 .91837 47.587 10.944)" stroke="#fff" stroke-linecap="round" stroke-width="133.87" fill="none">
+//   <path id="path2991" d="m176.51 362.87 356.13 356.13"/>
+//   <path id="path2993" d="m532.64 362.87-356.13 356.13"/>
+//  </g>
+// </g>
+//</svg>
+
+        //.attr("stroke-width", 5     )
+        //.attr("stroke"      , "#000")
+        //.attr("transform"   , "matrix(1.1048 0 0 1.1048 -179.21 -162.53)")
+        //.attr("d"           , "m814.29 606.65a314.29 314.29 0 1 1 -628.57 0 314.29 314.29 0 1 1 628.57 0z");
+
+    //var g2 = g1.append('g')
+    //    .attr("transform"      , "matrix(.91837 0 0 .91837 47.587 10.944)")
+    //    .attr("stroke"         , "#fff"  )
+    //    .attr("stroke-linecap" , "round" )
+    //    .attr("stroke-width"   , "133.87")
+    //    .attr("fill"           , "none"  )
+    //
+    //g2.append('path')
+    //    .attr('d', "m176.51 362.87 356.13 356.13");
+    //
+    //g2.append('path')
+    //    .attr('d', "m532.64 362.87-356.13 356.13");
+
 }

@@ -123,3 +123,16 @@ TODO
 - [ ] allow enablig circles
 - [x] replace all jquery selector for d3 selector in simple-graph.js
 - [ ] disable auto load
+
+
+IMAGES
+--------------
+git checkout --orphan gh-pages
+rm -rf css/ data/ js/ delta2js.* index.html LICENSE.md
+rm .gitignore
+echo "My GitHub Page" > index.html
+git add index.html
+git add solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean-*
+git commit -am 'my first page'
+push origin gh-pages
+git checkout master

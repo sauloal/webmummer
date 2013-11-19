@@ -1,32 +1,68 @@
 var datafolder = 'data/';
+/*
+ * Folder where the databases resides
+ */
 var chartName  = 'chart1';
+/*
+ * Div where to draw graphs
+ */
+var scriptHolder = 'scriptholder';
+
+//http://stackoverflow.com/questions/799981/document-ready-equivalent-without-jquery
+document.addEventListener('DOMContentLoaded', start )
 
 
-$( document ).ready(function() {
-    $('#chart1').html( 'please select' );
 
-    var sel = genSelectors();
-    var okb = $('<button>')
-                .click( selclick )
-                .html( 'view' );
 
-    var pos = $('<label>').attr('id', 'pos');
-    var hlp = $('<label>').html( '<b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset - ');
 
-    $('body').prepend( pos );
-    $('body').prepend( hlp );
-    $('body').prepend( okb );
-    $('body').prepend( sel );
+function start() {
+    /*
+     * Creates page elements
+     */
+    //$('#chart1').html( 'please select' );
 
+    var pos = document.createElement('label');
+        pos.id = 'pos'; // creates position label
+
+    var hlp = document.createElement('label');
+        hlp.innerHTML = '<b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
+
+    var okb = document.createElement('button');   // add button and it's click action
+        okb.onclick   = selclick;
+        okb.innerHTML = 'view';
+
+    var sel = genSelectors(); // generate selectors based on "opts" variable
+
+    // append elements
+    var bdy = document.getElementsByTagName('body')[0];
+    var bfc = bdy.firstChild;
+
+    bdy.insertBefore( pos, bfc );
+    bfc = bdy.firstChild;
+    bdy.insertBefore( hlp, bfc );
+    bfc = bdy.firstChild;
+    bdy.insertBefore( okb, bfc );
+    bfc = bdy.firstChild;
+    bdy.insertBefore( sel, bfc );
+
+    // automatically select the last option in all fields
     for ( var o = 0; o < opts.length; o++ ) {
-        var opt = opts[o];
-        var val = $('#'+opt[1]).children().last().attr('selected', 'selected');
+        var opt   = opts[o];
+        var field = document.getElementById( opt[1] );
+        if ( field.localName == 'select' ) {
+            field.lastChild.selected = true;
+        } else {
+            //console.log('not select');
+        }
     }
 
-    okb.trigger('click');
-});
+    okb.onclick();
+};
 
-
+/*
+ * Available fields to be queried in the database
+ * Used to create drop-down boxes
+ */
 var opts   = [
     [ refs    , 'ref'   , 'Select Reference'  ],
     [ chroms  , 'chrom' , 'Select Chromosome' ],
@@ -38,87 +74,132 @@ var opts   = [
 
 
 
-function genOpts(obj){
-    var opts = [];
+function genOpts(obj, refSel){
+    /*
+     * Generate drop-down lists options base on "opts"
+     */
     for ( var o = 0; o < obj.length; o++ ){
         var opt = obj[ o ];
 
-        var op  = $('<option>')
-            .attr('value', opt)
-            .html( opt );
+        var op           = document.createElement('option');
+            op.value     = opt;
+            op.innerHTML = opt;
 
-        opts[ opts.length ] = op;
+        refSel.appendChild( op );
     }
-
-    return opts;
 }
 
 
 function genSelectors(){
+    /*
+     * Generate "select" elements. Calls genOpts to read options
+     * If only one option available, adds a label field, otherwise, adds a drop-down menu.
+     */
     //var statuses = ['Clean & Filtered Dot Plot. Only Inversions', 'Clean Dot Plot'];
     //var spps     = ['solanum arcanum', 'solanum habrochaites', 'solanum lycopersicum heinz denovo', 'solanum pennellii'];
     //var chroms   = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
     //var refs     = ['solanum lycopersicum heinz'];
     //var filelist = {
 
-    var sels   = [];
+    var sels    = document.createElement('span');
+        sels.id = 'selectors';
 
     for ( var o = 0; o < opts.length; o++ ) {
         var opt = opts[o];
-        var $refOp = $('<option>')
-            .attr('value', null)
-            .html( opt[2] );
+        var optVar   = opt[0];
+        var optName  = opt[1];
+        var optLabel = opt[2];
 
-        var $refSel = $("<select>")
-            .attr('id', opt[1] )
-            .append( $refOp )
-            .append( genOpts(opt[0]) );
+        if ( optVar.length == 1 ) {
+            var refSel           = document.createElement("label");
+                refSel.id        = optName;
+                refSel.alt       = optLabel;
+                refSel.value     = optVar[0];
+                refSel.innerHTML = optVar[0];
 
-        sels[ sels.length ] = $refSel;
+            sels.appendChild(refSel);
+
+        } else {
+            var refOp           = document.createElement('option');
+                refOp.value     = null;
+                refOp.innerHTML = optLabel;
+
+            var refSel     = document.createElement("select");
+                refSel.id  = optName;
+                refSel.alt = optLabel;
+                refSel.appendChild( refOp )
+                genOpts( optVar, refSel );
+
+            sels.appendChild(refSel);
+        }
     }
 
     return sels;
 }
 
 
-function loadScript( uid, reg ){
-    var file     = reg[ 'filename' ];
-    var filename = datafolder + file;
+function loadScript( reg ){
+    /*
+     * Adds a <script> tag to load the database
+     * This is needed to circunvent the security measures which forbids
+     * the browser to load any file other than images and javascript.
+     *
+     * Given the UID of the graph and the database register to be plotted
+     * (both to be forwarded to "loadGraph"), creates the script and add
+     * loadgraph as callback to its "onload".
+     */
+
+    var filename = reg[ 'filepath' ];
+    var scriptId = reg[ 'scriptid' ];
+    var holder   = document.getElementById( scriptHolder );
+
 
     // Adding the script tag to the head as suggested before
-    var callback = function() { loadGraph(uid, reg) };
+    var callback  = function() { loadGraph(reg) };
+
     //var head     = document.getElementsByTagName('head')[0];
-    var script   = document.createElement('script');
-    script.type  = 'text/javascript';
-    script.src   = filename;
+    var script    = document.createElement('script');
+    script.type   = 'text/javascript';
+    script.src    = filename;
+    script.id     = scriptId;
 
     // Then bind the event to the callback function.
     // There are several events for cross browser compatibility.
-    script.onreadystatechange = callback;
-    script.onload             = callback;
+    //script.onreadystatechange = callback;
+    script.onload = callback;
 
     // Fire the loading
-    var holder = document.getElementById('scriptholder');
-    while (holder.firstChild) {
-        holder.removeChild(holder.firstChild);
-    }
+    //var holder = document.getElementById('scriptholder');
+    //while (holder.firstChild) {
+    //    holder.removeChild(holder.firstChild);
+    //}
 
     holder.appendChild( script );
 }
 
 
-function loadGraph( uid, reg ) {
-    var holder = document.getElementById('scriptholder');
+function loadGraph( reg ) {
+    /*
+     * Deletes the <script> tag to release the memory in the DOM.
+     * Clears chart
+     * Create event listener to add tipsy (tip creator)
+     * Initialize SimpleGraph
+     * Deletes from register
+     */
+    var uid    = reg[ 'uid'   ];
+    var divid  = reg[ 'divid' ];
 
-    while (holder.firstChild) {
-        holder.removeChild(holder.firstChild);
-    }
+    var holder = document.getElementById( scriptHolder );
+    var script = document.getElementById( reg.scriptid );
+    var chr    = document.getElementById( divid        );
 
-    document.getElementById(chartName).innerHTML = '';
+    holder.removeChild( script );
 
-    document.body.addEventListener('d3createdPath', addTipsy, false);
+    chr.innerHTML = '';
 
-    var graph  = new SimpleGraph(chartName, {
+    //document.body.addEventListener('d3createdPath', addTipsy, false);
+
+    var graph  = new SimpleGraph(divid, {
         "uid"     : uid,
         "xmin"    : reg.xmin,
         "xmax"    : reg.xmax,
@@ -136,7 +217,7 @@ function loadGraph( uid, reg ) {
         "labelId" : "pos"
     });
 
-    reg['graph'] = graph;
+    //reg['graph'] = graph;
 
     delete reg.points;
     delete reg.scaffs;
@@ -169,17 +250,29 @@ function addTipsy( e ) {
 function getVals(){
     var vals = {};
 
-    var uid = '';
+    var uid  = '';
+
     for ( var o = 0; o < opts.length; o++ ) {
-        var opt = opts[o];
-        var val = $('#'+opt[1]+' option:selected').first().attr( 'value' );
+        var opt   = opts[o];
+        var field = document.getElementById(opt[1]);
+        var val   = null;
+
+        if ( field.localName == 'select' ) {
+            val = field.options[field.selectedIndex].value;
+        } else {
+            val = field.value;
+        }
+
         if (!val) {
             console.log( 'no ' + opt[1] + ' selected' );
             return;
         }
+
+        //console.log( 'appending '+opt[1]+' = '+val );
         vals[opt[1]] = val;
         uid += val;
     }
+
 
     uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
     vals['uid'] = uid;
@@ -192,6 +285,10 @@ function getRegister( vals ){
     try {
         var reg = filelist[ vals['ref'] ][ vals['chrom'] ][ vals['spp'] ][ vals['status'] ];
         //console.log( reg );
+        reg['uid'     ] = vals.uid;
+        reg['filepath'] = datafolder + reg.filename;
+        reg['scriptid'] = 'script_'  + reg.uid;
+        reg['divid'   ] = 'div_'     + reg.uid;
         return reg;
     }
     catch(err) {
@@ -214,6 +311,7 @@ function obj2str(obj) {
 function selclick(){
     var vals = getVals();
     if (!vals) {
+        console.log('no vals');
         return;
     }
 
@@ -221,19 +319,34 @@ function selclick(){
 
     var reg  = getRegister( vals );
     if (!reg) {
+        console.log('no reg');
         return;
     }
 
     var file = reg[ 'filename' ];
     if (!file) {
+        console.log('no filename');
         return;
     }
 
-    var uid = vals.uid;
-    $('#'+chartName).html('loading ' + obj2str(vals) );
-    $('#'+chartName).attr("tabindex", -1).focus();
+    var chr = document.getElementById(reg.divid);
 
-    loadScript( uid, reg );
+    if ( ! chr ) {
+        var chr           = document.createElement('div');
+            chr.id        = reg.divid;
+            chr.className = 'chart chartpart';
+            chr.tabindex  = -1;
+    }
+
+    chr.innerHTML = 'loading ' + obj2str(vals);
+
+    var chart         = document.getElementById( chartName );
+    chart.appendChild( chr );
+
+    var div = document.getElementById(reg.divid);
+    div.focus();
+
+    loadScript( reg );
 }
 
 
@@ -278,4 +391,8 @@ function basename(path) {
   options.ylabelY        || 0;
   options.ylabelDx       || "0em";
   options.ylabelDy       || "-2.3em";
+  options.downloadIconMaxSize ||  10;
+  options.compassMaxSize      || 300;
+  options.compassMinSize      || 100;
+
 */
