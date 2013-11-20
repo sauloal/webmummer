@@ -15,6 +15,41 @@ function toFixed(value, precision) {
 
 
 
+
+//http://stackoverflow.com/questions/446892/how-to-find-event-listeners-on-a-dom-node/447106#447106
+// keeps all event listeners attached to element
+//function reportIn(e){
+//    var a = this.lastListenerInfo[this.lastListenerInfo.length-1];
+//    console.log(a)
+//}
+//
+//
+//  plot.realAddEventListener = plot.addEventListener;
+//
+//  plot.addEventListener = function(a,b,c){
+//      //plot.realAddEventListener(a,reportIn,c);
+//      plot.realAddEventListener(a,b,c);
+//      if(!this.lastListenerInfo){  this.lastListenerInfo = {}};
+//      this.lastListenerInfo[a] = [b,c];
+//  };
+
+//document.realAddEventListener = document.addEventListener;
+//
+//document.addEventListener = function(a,b,c){
+//    document.realAddEventListener(a,reportIn,c);
+//    document.realAddEventListener(a,b,c);
+//    if(!this.lastListenerInfo){  this.lastListenerInfo = new Array()};
+//    this.lastListenerInfo.push({a : a, b : b , c : c});
+//};
+
+
+
+
+
+
+
+
+// register keyboard events
 registerKeyboardHandler = function(callback) {
   var callback = callback;
   d3.select(window).on("keydown", callback);
@@ -131,37 +166,30 @@ SimpleGraph = function(elemid, options) {
 
 
   this.svg = d3.select(this.chart).append("svg")
-      .attr("width"    , this.cx)
-      .attr("height"   , this.cy)
+      .attr("width"    , this.cx         )
+      .attr("height"   , this.cy         )
+      .attr("class"    , "svgmain"       )
       .attr("uid"      , this.options.uid);
 
 
   this.vis = this.svg.append("g")
-        .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
+        .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")")
+        .attr("class"    , "gvis");
 
 
   this.plot = this.vis.append("rect")
-      .attr( "class"          , 'matrix'        )
-      .attr( "width"          , this.size.width )
-      .attr( "height"         , this.size.height)
-      .attr( "pointer-events" , "all"           )
-      .on(   "mousedown.drag" , self.plot_drag())
-      .on(   "touchstart.drag", self.plot_drag());
+      .attr( "class"          , 'matrix'          )
+      .attr( 'id'             , 'rect_'+this.options.uid )
+      .attr( "width"          , this.size.width   )
+      .attr( "height"         , this.size.height  )
+      .attr( "pointer-events" , "all"             )
+      .on(   "mousedown.drag" , self.plot_drag()  )
+      .on(   "touchstart.drag", self.plot_drag()  );
 
   this.zoom  = d3.behavior.zoom();
 
 
   this.plot.call(this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
-
-
-  this.vis.append("svg")
-      .attr("top"    , 0               )
-      .attr("left"   , 0               )
-      .attr("width"  , this.size.width )
-      .attr("height" , this.size.height)
-      .attr("viewBox", "0 0 "+this.size.width+" "+this.size.height)
-      .attr("class"  , "line"          );
-
 
 
   // add Chart Title
@@ -190,7 +218,7 @@ SimpleGraph = function(elemid, options) {
 
   // add y-axis label
   if (this.options.ylabel) {
-    this.vis.append("g").append("text")
+    this.vis.append("text")
         .attr("class"       , "axis ylabel"         )
         .attr("x"           , this.options.ylabelX  )
         .attr("y"           , this.options.ylabelY  )
@@ -202,18 +230,18 @@ SimpleGraph = function(elemid, options) {
   }
 
   this.btns = this.svg.append("g")
+    .attr('class', 'gbtns')
         //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
   ;
 
+  this.lines = this.vis.append("g")
+    .attr("class", 'glines');
 
   d3.select(this.chart)
       .on("mousemove.drag", self.mousemove())
       .on("touchmove.drag", self.mousemove())
       .on("mouseup.drag",   self.mouseup()  )
       .on("touchend.drag",  self.mouseup()  )
-
-  d3.select('body')
-    .on("keydown"        ,  self.keymove()  );
 
   this.addCompass();
 
@@ -227,6 +255,13 @@ SimpleGraph = function(elemid, options) {
 
 
 
+d3.selection.prototype.size = function(){
+  var n = 0;
+  this.each( function() { ++n } );
+  return n;
+};
+
+
 
 
 //
@@ -234,35 +269,36 @@ SimpleGraph = function(elemid, options) {
 //
 SimpleGraph.prototype.update = function() {
   var self   = this;
-  var coords = [];
-  this.vis.selectAll("svg[uid="+self.options.uid+"] .points").remove();
-  //this.vis.selectAll("circle").remove();
+  //var coords = [];
 
-  for (var j = 0; j < this.numRegs; j++) {
-    var vars  = this.parsepoint( j );
+  var lines = this.vis.selectAll("svg[uid="+self.options.uid+"] .points");
 
-    var sense =      vars.sense;
-    var stVal = { x: vars.x1, y: vars.y1, j: j, s: sense};
-    var ndVal = { x: vars.x2, y: vars.y2, j: j, s: sense};
+  if ( lines.size() == 0 ) {
+    for (var j = 0; j < self.numRegs; j++) {
+      var vars       = self.parsepoint( j );
 
-    var line  = this.line( [ stVal, ndVal ] );
+      var sense      =      vars.sense;
+      var stVal      = { x: vars.x1, y: vars.y1, j: j, s: sense};
+      var ndVal      = { x: vars.x2, y: vars.y2, j: j, s: sense};
 
-    var senseclass = sense ? 'points-r' : 'points-f';
+      var line       = self.line( [ stVal, ndVal ] );
 
-    var p = this.vis.append( "path" )
-            .attr("class"    , "points " + senseclass )
-            .attr("d"        , line                   )
-            .attr("j"        , j                      )
-            .attr("scaf"     , vars.nameNum           )
-            .on(  "mouseover", function(d) { self.highlight( this          ); })
-            .on(  "mouseout" , function(d) { self.downlight( this          ); })
-            ;
+      var senseclass = sense ? 'points-r' : 'points-f';
 
-    //coords[ coords.length ] = stVal;
-    //coords[ coords.length ] = ndVal;
-  }
+      self.lines.append( "path" )
+              .attr("class"    , "points " + senseclass )
+              .attr("d"        , line                   )
+              .attr("j"        , j                      )
+              .attr("scaf"     , vars.nameNum           )
+              .on(  "mouseover", function(d) { self.highlight( this          ); })
+              .on(  "mouseout" , function(d) { self.downlight( this          ); })
+              ;
 
-    this.vis.selectAll("svg[uid="+self.options.uid+"] .points").each( function(d, i){
+      //coords[ coords.length ] = stVal;
+      //coords[ coords.length ] = ndVal;
+    }
+
+    self.vis.selectAll("svg[uid="+self.options.uid+"] .points").each( function(d, i){
         //var j    = this.getAttribute('j');
         var d3eventPath = new CustomEvent(
             "d3createdPath",
@@ -279,6 +315,24 @@ SimpleGraph.prototype.update = function() {
         );
         this.dispatchEvent( d3eventPath );
     });
+
+  } else {
+    lines.each( function(d, i){
+      var point      = this;
+      var j          = point.getAttribute('j');
+      var vars       = self.parsepoint( j );
+
+      var stVal      = { x: vars.x1, y: vars.y1, j: j, s: sense};
+      var ndVal      = { x: vars.x2, y: vars.y2, j: j, s: sense};
+
+      var line       = self.line( [ stVal, ndVal ] );
+
+      point.setAttribute('d', line);
+    });
+  }
+
+
+
 
 
     //return;
@@ -460,7 +514,7 @@ SimpleGraph.prototype.reset = function() {
 SimpleGraph.prototype.plot_drag = function() {
   var self = this;
   return function() {
-    //registerKeyboardHandler(self.keydown());
+    registerKeyboardHandler(self.keydown());
 
     d3.select('body').style("cursor", "move");
 
@@ -486,109 +540,6 @@ SimpleGraph.prototype.plot_drag = function() {
 
 
 
-SimpleGraph.prototype.keymove = function() {
-  var self = this;
-  return function() {
-    registerKeyboardHandler(self.keydown());
-
-    //d3.select('body').style("cursor", "move");
-
-    var keyPressed = d3.event.keyCode;
-    //console.log( 'key pressed ' + keyPressed );
-
-    var valPressed = null;
-    switch (keyPressed) {
-      case  37: {  // left
-        valPressed = 'l'; break;
-      };
-      case  108: { // left (Numkey)
-        valPressed = 'l'; break;
-      };
-      case  38: { // top
-        valPressed = 't'; break;
-      };
-      case  104: { // top (Numkey)
-        valPressed = 't'; break;
-      };
-      case  39: { // right
-        valPressed = 'r'; break;
-      };
-      case  102: { // right (Numkey)
-        valPressed = 'r'; break;
-      };
-      case  40: { // bottom
-        valPressed = 'b'; break;
-      };
-      case  98: { // bottom (Numkey)
-        valPressed = 'b'; break;
-      };
-      case  187: { // plus
-        valPressed = '+'; break;
-      };
-      case  107: { // plus (Numkey)
-        valPressed = '+'; break;
-      };
-      case  189: { // minus
-        valPressed = '-'; break;
-      };
-      case  109: { // minus (Numkey)
-        valPressed = '-'; break;
-      };
-      case  48: { // zero
-        valPressed = '0'; break;
-      };
-      case  96: { // zero (Numkey)
-        valPressed = '0'; break;
-      };
-      case  82: { // zero (r)
-        valPressed = '0'; break;
-      };
-    }
-
-    //console.log('val pressed ',valPressed);
-    //console.log('key ' + valPressed+ ' val ',valPressed);
-
-    self.mover( valPressed );
-  }
-}
-
-
-
-
-SimpleGraph.prototype.mover = function(valPressed) {
-    var self = this;
-
-    var blockY = Math.floor(self.size.height / 5);
-    var blockX = Math.floor(self.size.width  / 5);
-
-    switch(valPressed) {
-      case  'l': {  // left
-        self.panIt( blockX,   0); break;
-      };
-      case  'r': {  // right
-        self.panIt(-blockX,   0); break;
-      };
-      case  't': {  // top
-        self.panIt(0,  blockY); break;
-      };
-      case  'b': {  // bottom
-        self.panIt(0, -blockY); break;
-      };
-      case  '+': {  // plus
-        self.zoomIt(1.25); break;
-      };
-      case  '-': {  // -
-        self.zoomIt(0.75); break;
-      };
-      case  '0': {  // zero
-        self.reset(); break;
-      };
-    }
-};
-
-
-
-
 SimpleGraph.prototype.updatePos = function(){
     if (this.options.labelId){
         var cTrans = this.zoom.translate();
@@ -604,60 +555,6 @@ SimpleGraph.prototype.updatePos = function(){
 
         //d3.select('#'+this.options.labelId).html( text );
     }
-}
-
-
-
-
-SimpleGraph.prototype.panIt = function(dx, dy){
-    var self = this;
-    //console.log('pan. self ' + self + ' dx ' + dx + ' dy ' + dy);
-    var cTrans = self.zoom.translate();
-    //console.log( 'cTrans B ' + cTrans );
-
-    var cScale = self.zoom.scale();
-
-    //console.log( 'dx ' + dx );
-    //console.log( 'dy ' + dy );
-
-    var px = cTrans[0];
-    var py = cTrans[1];
-    //console.log( 'px ' + px );
-    //console.log( 'py ' + py );
-
-    var ex = Math.floor(dx / cScale);
-    var ey = Math.floor(dy / cScale);
-    //console.log( 'ex ' + ex );
-    //console.log( 'ey ' + ey );
-
-    var rx = px + ex;
-    var ry = py + ey;
-    //console.log( 'rx ' + rx );
-    //console.log( 'ry ' + ry );
-
-    self.plot.call( self.zoom.translate([ rx, ry ]) );
-    self.redraw()();
-    self.update();
-
-    //cTrans = self.zoom.translate();
-    //console.log( 'cTrans A ' + cTrans );
-}
-
-
-
-
-SimpleGraph.prototype.zoomIt = function(z){
-    var self = this;
-        console.log( 'zoom. z ' + z )
-        var cScale   = self.zoom.scale();
-        var dstScale = cScale * z;
-
-        //console.log( 'c scale ' + cScale + ' dst scale ' + dstScale );
-
-        self.plot.call( self.zoom.scale( dstScale ) );
-
-        self.redraw()();
-        self.update();
 }
 
 
@@ -762,16 +659,69 @@ SimpleGraph.prototype.mouseup = function() {
 SimpleGraph.prototype.keydown = function() {
   var self = this;
   return function() {
-    if (!self.selected) return;
-    switch (d3.event.keyCode) {
-      case  8: // backspace
-      case 46: { // delete
-        var i = self.points.indexOf(self.selected);
-        self.points.splice(i, 1);
-        self.selected = self.points.length ? self.points[i > 0 ? i - 1 : 0] : null;
-        self.update();
-        break;
+    var keyPressed = d3.event.keyCode;
+    if (self.selected) {
+      switch (keyPressed) {
+        case  8: // backspace
+        case 46: { // delete
+          var i = self.points.indexOf(self.selected);
+          self.points.splice(i, 1);
+          self.selected = self.points.length ? self.points[i > 0 ? i - 1 : 0] : null;
+          self.update();
+          break;
+        }
       }
+    } else { // nothing selected. global movement
+      var valPressed = null;
+      switch (keyPressed) {
+        case  37: {  // left
+          valPressed = 'l'; break;
+        };
+        case  108: { // left (Numkey)
+          valPressed = 'l'; break;
+        };
+        case  38: { // top
+          valPressed = 't'; break;
+        };
+        case  104: { // top (Numkey)
+          valPressed = 't'; break;
+        };
+        case  39: { // right
+          valPressed = 'r'; break;
+        };
+        case  102: { // right (Numkey)
+          valPressed = 'r'; break;
+        };
+        case  40: { // bottom
+          valPressed = 'b'; break;
+        };
+        case  98: { // bottom (Numkey)
+          valPressed = 'b'; break;
+        };
+        case  187: { // plus
+          valPressed = '+'; break;
+        };
+        case  107: { // plus (Numkey)
+          valPressed = '+'; break;
+        };
+        case  189: { // minus
+          valPressed = '-'; break;
+        };
+        case  109: { // minus (Numkey)
+          valPressed = '-'; break;
+        };
+        case  48: { // zero
+          valPressed = '0'; break;
+        };
+        case  96: { // zero (Numkey)
+          valPressed = '0'; break;
+        };
+        case  82: { // zero (r)
+          valPressed = '0'; break;
+        };
+      }
+
+      self.mover( valPressed );
     }
   }
 };
@@ -779,10 +729,98 @@ SimpleGraph.prototype.keydown = function() {
 
 
 
+SimpleGraph.prototype.mover = function(valPressed) {
+    var self = this;
+
+    var blockY = Math.floor(self.size.height / 5);
+    var blockX = Math.floor(self.size.width  / 5);
+
+    switch(valPressed) {
+      case  'l': {  // left
+        self.panIt( blockX,   0); break;
+      };
+      case  'r': {  // right
+        self.panIt(-blockX,   0); break;
+      };
+      case  't': {  // top
+        self.panIt(0,  blockY); break;
+      };
+      case  'b': {  // bottom
+        self.panIt(0, -blockY); break;
+      };
+      case  '+': {  // plus
+        self.zoomIt(1.25); break;
+      };
+      case  '-': {  // -
+        self.zoomIt(0.75); break;
+      };
+      case  '0': {  // zero
+        self.reset(); break;
+      };
+    }
+};
+
+
+
+
+SimpleGraph.prototype.panIt = function(dx, dy){
+    var self = this;
+    //console.log('pan. self ' + self + ' dx ' + dx + ' dy ' + dy);
+    var cTrans = self.zoom.translate();
+    //console.log( 'cTrans B ' + cTrans );
+
+    var cScale = self.zoom.scale();
+
+    //console.log( 'dx ' + dx );
+    //console.log( 'dy ' + dy );
+
+    var px = cTrans[0];
+    var py = cTrans[1];
+    //console.log( 'px ' + px );
+    //console.log( 'py ' + py );
+
+    var ex = Math.floor(dx / cScale);
+    var ey = Math.floor(dy / cScale);
+    //console.log( 'ex ' + ex );
+    //console.log( 'ey ' + ey );
+
+    var rx = px + ex;
+    var ry = py + ey;
+    //console.log( 'rx ' + rx );
+    //console.log( 'ry ' + ry );
+
+    self.plot.call( self.zoom.translate([ rx, ry ]) );
+    self.redraw()();
+    self.update();
+
+    //cTrans = self.zoom.translate();
+    //console.log( 'cTrans A ' + cTrans );
+}
+
+
+
+
+SimpleGraph.prototype.zoomIt = function(z){
+    console.log( 'zoom. z ' + z )
+    var self     = this;
+    var cScale   = self.zoom.scale();
+    var dstScale = cScale * z;
+
+    //console.log( 'c scale ' + cScale + ' dst scale ' + dstScale );
+
+    self.plot.call( self.zoom.scale( dstScale ) );
+
+    self.redraw()();
+    self.update();
+}
+
+
+
+
 SimpleGraph.prototype.redraw = function() {
   var self = this;
-  return function() {
 
+  return function() {
     var tx = function(d) {
       return "translate(" + self.x(d) + ",0)";
     },
@@ -1044,8 +1082,8 @@ SimpleGraph.prototype.addDownload = function() {
     var xPos = this.size.width - (3*sW10) + this.padding.right;
     var yPos = 0;
 
-    console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
-    console.log(this.options.downloadIconMaxSize);
+    //console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
+    //console.log(this.options.downloadIconMaxSize);
 
     //var g  = this.btns
     //    .append("g"                            )
@@ -1167,6 +1205,7 @@ SimpleGraph.prototype.addCompass = function() {
             .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ) })
             .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ) });
 
+    // big circle
     g.append("circle")
         .attr("class"  , 'compass-bg')
         .attr("cx"     , startX      )
@@ -1175,28 +1214,30 @@ SimpleGraph.prototype.addCompass = function() {
         .attr("fill"   , "white"     )
         .attr("opacity", 0.75        );
 
+
+    // arrows
     g.append('path')
         .attr('class', 'compass-button'                   )
         .attr('d'    , "M50 10 l12 20 a40,70 0 0,0 -24,0z")
-        .on('click'  ,  function() { console.log('1'); self.mover('t') }    ); //t
+        .on('click'  ,  function() { self.mover('t') }    ); //t
 
     g.append('path')
         .attr('class', 'compass-button'                    )
         .attr('d'    , "M90 50 l-20 -12 a70,40 0 0,1 0,24z")
-        .on('click'  ,  function() { console.log('4'); self.mover('r') }     ); // r
+        .on('click'  ,  function() { self.mover('r') }     ); // r
 
     g.append('path')
         .attr('class', 'compass-button'                    )
         .attr('d'    , "M50 90 l12 -20 a40,70 0 0,1 -24,0z")
-        .on('click'  ,  function() { console.log('3'); self.mover('b') }     ); // b
+        .on('click'  ,  function() { self.mover('b') }     ); // b
 
     g.append('path')
         .attr('class', 'compass-button'                   )
         .attr('d'    , "M10 50 l20 -12 a70,40 0 0,0 0,24z")
-        .on('click'  ,  function() { console.log('2'); self.mover('l') }    ); // l
+        .on('click'  ,  function() { self.mover('l') }    ); // l
 
 
-
+    //white center
     g.append('circle')
         .attr('class', 'compass')
         .attr("cx"   , startX   )
@@ -1204,69 +1245,71 @@ SimpleGraph.prototype.addCompass = function() {
         .attr("r"    , r        );
 
 
+    //zoom buttons
+    //zoom buttons - minus
+    var gm = g.append('g')
+          .on('click'  , function() { self.mover('-') } );
 
-    g.append('circle')
-        .attr('class', 'compass-button')
-        .attr("cx"   , mX              )
-        .attr("cy"   , mY              )
-        .attr("r"    , rb              )
-        .on('click'  , function() { self.mover('-') } );
+        gm.append('circle')
+          .attr('class', 'compass-button')
+          .attr("cx"   , mX              )
+          .attr("cy"   , mY              )
+          .attr("r"    , rb              );
 
-    g.append('circle')
-        .attr('class', 'compass-button')
-        .attr("cx"   , pX              )
-        .attr("cy"   , pY              )
-        .attr("r"    , rb              )
-        .on('click'  ,  function() { self.mover('+') } );
+        gm.append('rect')
+          .attr('class' , 'compass-plus-minus')
+          .attr('x'     , msX                 )
+          .attr('y'     , msY                 )
+          .attr('width' , rb                  )
+          .attr('height', rb/3                );
 
+    //zoom buttons - plus
+    var gp = g.append('g')
+          .on('click'  ,  function() { self.mover('+') } );
 
-    g.append('circle')
-        .attr('class', 'compass-button')
-        .attr("cx"   , zX              )
-        .attr("cy"   , zY              )
-        .attr("r"    , rb              )
-        .on('click'  ,  function() { self.mover('0') } );
+        gp.append('circle')
+          .attr('class', 'compass-button')
+          .attr("cx"   , pX              )
+          .attr("cy"   , pY              )
+          .attr("r"    , rb              );
 
+        // plus signal
+        gp.append('rect')
+          .attr('class' , 'compass-plus-minus')
+          .attr('x'     , ps1X                )
+          .attr('y'     , ps1Y                )
+          .attr('width' , rb                  )
+          .attr('height', rb/3                );
 
-    g.append('circle')
-        .attr('class', 'compass-plus-minus')
-        .attr("cx"   , zX                  )
-        .attr("cy"   , zY                  )
-        .attr("r"    , rb/3*2              );
+        gp.append('rect')
+          .attr('class' , 'compass-plus-minus')
+          .attr('x'     , ps2X                )
+          .attr('y'     , ps2Y                )
+          .attr('width' , rb/3                )
+          .attr('height', rb                  );
 
+    //zoom buttons - zero
+    var gz = g.append('g')
+          .on('click'  ,  function() { self.mover('0') } );
 
-    g.append('circle')
-        .attr('class', 'compass-button')
-        .attr("cx"   , zX              )
-        .attr("cy"   , zY              )
-        .attr("r"    , rb/3            );
+        gz.append('circle')
+          .attr('class', 'compass-button')
+          .attr("cx"   , zX              )
+          .attr("cy"   , zY              )
+          .attr("r"    , rb              );
 
+        gz.append('circle')
+          .attr('class', 'compass-plus-minus')
+          .attr("cx"   , zX                  )
+          .attr("cy"   , zY                  )
+          .attr("r"    , rb/1.5              );
 
+        gz.append('circle')
+          .attr('class', 'compass-button')
+          .attr("cx"   , zX              )
+          .attr("cy"   , zY              )
+          .attr("r"    , rb/3            );
 
-    // minus signal
-    g.append('rect')
-        .attr('class' , 'compass-plus-minus')
-        .attr('x'     , msX                 )
-        .attr('y'     , msY                 )
-        .attr('width' , rb                  )
-        .attr('height', rb/3                );
-
-
-
-    // plus signal
-    g.append('rect')
-        .attr('class' , 'compass-plus-minus')
-        .attr('x'     , ps1X                )
-        .attr('y'     , ps1Y                )
-        .attr('width' , rb                  )
-        .attr('height', rb/3                );
-
-    g.append('rect')
-        .attr('class' , 'compass-plus-minus')
-        .attr('x'     , ps2X                )
-        .attr('y'     , ps2Y                )
-        .attr('width' , rb/3                )
-        .attr('height', rb                  );
 
     //<svg>
     //    <circle cx="50" cy="50" r="42" fill="white" opacity="0.75"/>

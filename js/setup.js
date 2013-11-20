@@ -8,12 +8,10 @@ var chartName  = 'chart1';
  */
 var scriptHolder = 'scriptholder';
 
-//http://stackoverflow.com/questions/799981/document-ready-equivalent-without-jquery
-document.addEventListener('DOMContentLoaded', start )
 
-
-
-
+function gotzoom(e) {
+  console.log('zoom');
+}
 
 function start() {
     /*
@@ -353,6 +351,16 @@ function selclick(){
 function basename(path) {
     return path.replace(/\\/g,'/').replace( /.*\//, '' );
 }
+
+
+//registerKeyboardHandler = function(callback) {
+//  var callback = callback;
+//  d3.select(window).on("keydown", callback);
+//};
+
+
+//http://stackoverflow.com/questions/799981/document-ready-equivalent-without-jquery
+document.addEventListener('DOMContentLoaded', start )
 
 
 
