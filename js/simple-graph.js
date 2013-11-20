@@ -57,14 +57,156 @@ registerKeyboardHandler = function(callback) {
 
 
 
+SyncSimpleGraph = function (sync) {
+    var self  = this;
+    this.sync = sync;
+    this.db   = {};
 
-SimpleGraph = function (elemid, options) {
+    document.body.addEventListener('d3zoom' , function(e) { self.d3zoomed( e ) }, false);
+    document.body.addEventListener('d3close', function(e) { self.d3closed( e ) }, false);
+};
+
+
+
+SyncSimpleGraph.prototype.shouldSync = function() {
+    //console.log( typeof(this.sync) );
+
+    if (typeof(this.sync) === 'function') {
+        return this.sync();
+    }
+    else if (typeof(this.sync) === 'boolean') {
+        this.shouldSync = function() { return true; };
+        return true;
+    }
+};
+
+
+
+
+SyncSimpleGraph.prototype.add = function(chartHolder, options) {
+    var uid = options.uid || 'uid_' + new Date();;
+
+    console.log( 'creating ' + uid );
+
+    if ( this.db[uid] ) {
+        console.log( 'el ' + uid + 'already exists. closing');
+        var el = this.db[uid];
+        el.close();
+        console.log( 'el ' + uid + 'already exists. closed');
+        delete this.db[uid];
+    }
+
+    console.log( 'calling ' + uid );
+
+    this.db[ uid ] = new SimpleGraph(chartHolder, options);
+
+    if ( this.shouldSync() ) {
+        console.log( 'syncing ' + uid );
+    }
+};
+
+
+
+
+SyncSimpleGraph.prototype.d3zoomed = function (e) {
+    var obj  = e.detail.self;
+    var el   = e.detail.el;
+    var uid  = obj.uid;
+
+    console.log(uid+' zoomed ');
+    console.log(el);
+
+    if ( Object.keys(this.db).length > 1 ) {
+        console.log('more than one graph');
+        for ( var dbuid in this.db ) {
+            if (uid == dbuid) { continue; };
+
+            console.log( 'syncing ' + dbuid + ' to ' + uid);
+
+            //var data = {
+            //        'currScale'       : self.currScale,
+            //        'currTranslationX': self.currTranslationX,
+            //        'currTranslationY': self.currTranslationY,
+            //        'scale'           : scale,
+            //        'translationX'    : translationX,
+            //        'translationY'    : translationY,
+            //        'reset'           : reset
+            //    };
+
+            var obj2        = this.db[dbuid];
+
+            obj2.syncing = true;
+            if ( el.reset ) {
+                obj2.reset();
+            } else {
+                obj2.applyZoom( el.scale, el.translationX, el.translationY );
+            }
+            obj2.syncing = false;
+        }
+    } else {
+        console.log('only one graph');
+        console.log(Object.keys(this.db).length);
+    }
+};
+
+
+
+
+SyncSimpleGraph.prototype.d3closed = function (e) {
+    var obj = e.detail.self;
+    var uid = obj.uid;
+
+    console.log( uid+' closed' );
+
+    if (this.db[uid]) {
+        console.log('has uid '+this.db.uid);
+        delete this.db[uid];
+        console.log(this.db);
+    } else {
+        console.log('uid '+uid+' not present');
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+SimpleGraph = function (chartHolder, options) {
     var self                         = this;
-    this.chart                       = document.getElementById( elemid );
+    this.uid                         = options.uid                 || 'uid_' + new Date();
+
+    this.options                     = options                     || {};
+
+    this.elemid                      = 'div_' + this.uid;
+
+    console.log(' adding '+this.elemid+' to ' + chartHolder );
+
+    this.chartHolder = document.getElementById( chartHolder );
+    this.chart       = document.getElementById( this.elemid );
+
+    if ( this.chart ) {
+        var pa = this.chart.parentElement;
+        pa.removeChild( this.chart );
+    }
+
+    this.chart                       = document.createElement('div');
+    this.chart.id                    = this.elemid;
+    this.chart.className             = 'chart chartpart';
+    this.chart.tabindex              = -1;
+
+    this.chartHolder.appendChild( this.chart );
+
+    this.chart                       = document.getElementById( this.elemid );
+
     this.cx                          = this.chart.clientWidth;
     this.cy                          = this.chart.clientHeight;
-    this.elemid                      = elemid;
-    this.options                     = options                     || {};
     this.scaffs                      = options.scaffs              || null;
                                                                    //              from scaffs
                                                                    //                   f/r
@@ -72,7 +214,6 @@ SimpleGraph = function (elemid, options) {
     this.points                      = options.points              ||  [0 , 0, 0, 0, 0,   0,  0.0];
 
     this.options.labelId             = options.labelId             || null;
-    this.options.uid                 = options.uid                 || 'uid';
 
     this.options.xlabel              = options.xlabel              || 'x';
     this.options.ylabel              = options.ylabel              || 'y';
@@ -105,7 +246,7 @@ SimpleGraph = function (elemid, options) {
     this.options.compassMinSize      = options.compassMinSize      ||  20;
     //this.options.radius         = options.radius         || 5.0;
 
-
+    this.syncing = false;
 
     this.regSize = 7;
     this.numRegs = (this.points.length / this.regSize);
@@ -170,7 +311,7 @@ SimpleGraph = function (elemid, options) {
         .attr("width"    , this.cx         )
         .attr("height"   , this.cy         )
         .attr("class"    , "svgmain"       )
-        .attr("uid"      , this.options.uid);
+        .attr("uid"      , this.uid);
 
 
     this.vis = this.svg.append("g")
@@ -180,7 +321,7 @@ SimpleGraph = function (elemid, options) {
 
     this.plot = this.vis.append("rect")
         .attr( "class"          , 'matrix'          )
-        .attr( 'id'             , 'rect_'+this.options.uid )
+        .attr( 'id'             , 'rect_'+this.uid )
         .attr( "width"          , this.size.width   )
         .attr( "height"         , this.size.height  )
         .attr( "pointer-events" , "all"             )
@@ -250,11 +391,13 @@ SimpleGraph = function (elemid, options) {
 
     this.addCompass();
 
-    this.addDownload();
+    this.addDownloadIcon();
 
-    this.addClose();
+    this.addCloseIcon();
 
     this.redraw()();
+
+    this.chart.focus();
 };
 
 
@@ -276,25 +419,7 @@ SimpleGraph.prototype.update = function() {
     var self   = this;
     //var coords = [];
 
-    var lines = this.vis.selectAll("svg[uid="+self.options.uid+"] .points");
-
-    if ( d3.event ) {
-        if (d3.event.type && d3.event.type=='zoom') {
-            console.log( d3.event );
-            console.log( d3.event.scale );
-            console.log( d3.event.translate );
-
-            var scale        = d3.event.scale;
-            var translationX = d3.event.translate[0];
-            var translationY = d3.event.translate[1];
-
-            this.currScale        = this.currScale        * scale;
-            this.currTranslationX = this.currTranslationX + translationX;
-            this.currTranslationY = this.currTranslationY + translationY;
-
-            console.log('scale ' + this.currScale + ' translation [' + this.currTranslationX + ', '+this.currTranslationX+']' );
-        }
-    }
+    var lines = this.vis.selectAll("svg[uid="+self.uid+"] .points");
 
     if ( lines.size() === 0 ) {
         for (var j = 0; j < self.numRegs; j++) {
@@ -322,7 +447,7 @@ SimpleGraph.prototype.update = function() {
         }
 
 
-        self.vis.selectAll("svg[uid="+self.options.uid+"] .points").each( function(d, i){
+        self.vis.selectAll("svg[uid="+self.uid+"] .points").each( function(d, i){
             //var j    = this.getAttribute('j');
             var d3eventPath = new CustomEvent(
                 "d3createdPath",
@@ -394,6 +519,8 @@ SimpleGraph.prototype.update = function() {
         d3.event.preventDefault();
         d3.event.stopPropagation();
     }
+
+    self.updatePos( );
 };
 
 
@@ -543,18 +670,11 @@ SimpleGraph.prototype.plot_drag = function() {
 
 SimpleGraph.prototype.updatePos = function(){
     if (this.options.labelId){
-        var cTrans = this.zoom.translate();
-        var cScale = this.zoom.scale();
 
-        //console.log(cScale);
+        var text   = ' - <b>Zoom:</b> ' + toFixed(this.currScale,1) + 'X - ';
+            text  += '<b>Pos:</b> <i>min X</i> '  + Math.floor(this.x.invert(this.currTranslationX)) + ' <i>max Y</i> ' + Math.floor(this.y.invert(this.currTranslationY));
 
-        var rx     = cTrans[0];
-        var ry     = cTrans[1];
-
-        var text   = '<b>Zoom:</b> ' + toFixed(cScale,1) + 'X - ';
-            text   = '<b>Pos:</b> '  + Math.floor(this.x.invert(rx)) + ' x ' + Math.floor(this.y.invert(ry));
-
-        //d3.select('#'+this.options.labelId).html( text );
+        document.getElementById(this.options.labelId).innerHTML = text;
     }
 };
 
@@ -758,9 +878,11 @@ SimpleGraph.prototype.reset = function() {
         .range( [0, self.size.height])
         .nice();
 
-    this.currScale        = 1;
-    this.currTranslationX = 0;
-    this.currTranslationY = 0;
+    //this.currScale        = 1;
+    //this.currTranslationX = 0;
+    //this.currTranslationY = 0;
+
+    self.updateCurrentZoom( 1, [0,0] );
 
     self.redraw()();
 };
@@ -794,8 +916,7 @@ SimpleGraph.prototype.panIt = function(dx, dy){
     //console.log( 'rx ' + rx );
     //console.log( 'ry ' + ry );
 
-    self.plot.call( self.zoom.translate([ rx, ry ]) );
-    self.redraw()();
+    self.applyZoom( 1, rx, ry );
 
     //cTrans = self.zoom.translate();
     //console.log( 'cTrans A ' + cTrans );
@@ -805,14 +926,20 @@ SimpleGraph.prototype.panIt = function(dx, dy){
 
 
 SimpleGraph.prototype.zoomIt = function(z){
-    console.log( 'zoom. z ' + z )
+    //console.log( 'zoom. z ' + z )
     var self     = this;
-    var cScale   = self.zoom.scale();
-    var dstScale = cScale * z;
 
-    //console.log( 'c scale ' + cScale + ' dst scale ' + dstScale );
+    self.applyZoom( z, 0, 0 );
+};
 
-    self.plot.call( self.zoom.scale( dstScale ) );
+
+
+
+SimpleGraph.prototype.applyZoom = function(z, x, y){
+    var self = this;
+    console.log('applying zoom z: ' + z + ' x: ' + x + ' y: ' + y);
+
+    self.plot.call( self.zoom.scale( z ).translate([ x, y ]) );
 
     self.redraw()();
 };
@@ -905,12 +1032,87 @@ SimpleGraph.prototype.redraw = function() {
 
     gy.exit().remove();
 
-    self.updatePos( );
+    var d3e    = false;
+    if ( d3.event ) {
+        if (d3.event.type && d3.event.type=='zoom') {
+            d3e    = true;
+
+            var scale             = d3.event.scale;
+            var translate         = d3.event.translate;
+
+            self.updateCurrentZoom( scale, translate );
+        }
+    }
+
+    if (!d3e) {
+        var scale     = self.zoom.scale();
+        var translate = self.zoom.translate();
+
+        if ( (scale != 1) || (translate[0] != 0) || (translate[1] != 0) ) {
+            self.updateCurrentZoom( scale, translate );
+        }
+    }
 
     self.plot.call( self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
 
     self.update();
   };
+};
+
+
+
+
+SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
+    var self              = this;
+
+    var translationX      = translate[0];
+    var translationY      = translate[1];
+
+    var reset             = (scale === 1 && translationX === 0 &&  translationY === 0);
+
+    //console.log('current scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
+    //console.log('correct scale ' +          scale + ' translation X ' +          translationX + ' translation Y ' +          translationY + ' reset ' + reset);
+
+    if ( reset ) {
+        self.currScale        = 1;
+        self.currTranslationX = 0;
+        self.currTranslationY = 0;
+    } else {
+        self.currScale        = self.currScale        * scale;
+        self.currTranslationX = self.currTranslationX + translationX;
+        self.currTranslationY = self.currTranslationY + translationY;
+    }
+
+    //console.log('result  scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
+    //console.log('\n');
+
+    if (!self.syncing) {
+        var data = {
+            'currScale'       : self.currScale,
+            'currTranslationX': self.currTranslationX,
+            'currTranslationY': self.currTranslationY,
+            'scale'           : scale,
+            'translationX'    : translationX,
+            'translationY'    : translationY,
+            'reset'           : reset
+        };
+
+        var d3eventZoom = new CustomEvent(
+            "d3zoom",
+            {
+                detail: {
+                    message: 'd3 has zoom',
+                    self   : self,
+                    el     : data,
+                    time   : new Date()
+                },
+                bubbles   : true,
+                cancelable: true
+            }
+        );
+
+        self.plot.each( function (d,i) { this.dispatchEvent( d3eventZoom ); } );
+    }
 };
 
 
@@ -945,9 +1147,9 @@ SimpleGraph.prototype.download = function() {
     var doctype = '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
     var svg     = self.svg;
 
-    svg.selectAll("svg[uid="+self.options.uid+"] .download-icon").remove();
-    svg.selectAll("svg[uid="+self.options.uid+"] .compass-g"    ).remove();
-    svg.selectAll("svg[uid="+self.options.uid+"] .close-icon"   ).remove();
+    svg.selectAll("svg[uid="+self.uid+"] .download-icon").remove();
+    svg.selectAll("svg[uid="+self.uid+"] .compass-g"    ).remove();
+    svg.selectAll("svg[uid="+self.uid+"] .close-icon"   ).remove();
 
     var styles  = self.getStyles();
     styles      = (styles === undefined) ? "" : styles;
@@ -1017,9 +1219,9 @@ SimpleGraph.prototype.download = function() {
 
     this.addCompass();
 
-    this.addDownload();
+    this.addDownloadIcon();
 
-    this.addClose();
+    this.addCloseIcon();
 };
 
 
@@ -1064,13 +1266,37 @@ SimpleGraph.prototype.getStyles = function() {
 
 SimpleGraph.prototype.close = function() {
     var el = document.getElementById( this.elemid );
-    el.parentElement.removeChild( el );
+
+    if ( el ) {
+        console.log('has el');
+        var pa = el.parentElement;
+
+        var d3eventClose = new CustomEvent(
+            "d3close",
+            {
+                detail: {
+                    message: 'd3 has close',
+                    self   : self,
+                    el     : this,
+                    time   : new Date()
+                },
+                bubbles   : true,
+                cancelable: true
+            }
+        );
+
+        console.log('removing child');
+        pa.removeChild( el );
+        console.log('dispatching event');
+        pa.dispatchEvent( d3eventClose );
+        console.log('leaving');
+    }
 };
 
 
 
 
-SimpleGraph.prototype.addDownload = function() {
+SimpleGraph.prototype.addDownloadIcon = function() {
     //.attr("transform", "matrix(1,0,0,-1,113.89831,1293.0169)")
     //.attr("transform", "scale(0.05)")
 
@@ -1335,7 +1561,7 @@ SimpleGraph.prototype.addCompass = function() {
 
 
 
-SimpleGraph.prototype.addClose = function() {
+SimpleGraph.prototype.addCloseIcon = function() {
     var self   = this;
 
     var gW     = 300;

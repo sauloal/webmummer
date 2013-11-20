@@ -9,9 +9,6 @@ var chartName  = 'chart1';
 var scriptHolder = 'scriptholder';
 
 
-function gotzoom(e) {
-  console.log('zoom');
-}
 
 function start() {
     /*
@@ -43,6 +40,11 @@ function start() {
     bfc = bdy.firstChild;
     bdy.insertBefore( sel, bfc );
 
+
+
+    graphdb = new SyncSimpleGraph( function () { return true; } );
+    //graphdb = new SyncSimpleGraph( true );
+
     // automatically select the last option in all fields
     for ( var o = 0; o < opts.length; o++ ) {
         var opt   = opts[o];
@@ -55,7 +57,7 @@ function start() {
     }
 
     okb.onclick();
-};
+}
 
 /*
  * Available fields to be queried in the database
@@ -185,19 +187,16 @@ function loadGraph( reg ) {
      * Deletes from register
      */
     var uid    = reg[ 'uid'   ];
-    var divid  = reg[ 'divid' ];
 
     var holder = document.getElementById( scriptHolder );
     var script = document.getElementById( reg.scriptid );
-    var chr    = document.getElementById( divid        );
+
 
     holder.removeChild( script );
 
-    chr.innerHTML = '';
-
     //document.body.addEventListener('d3createdPath', addTipsy, false);
 
-    var graph  = new SimpleGraph(divid, {
+    graphdb.add(chartName, {
         "uid"     : uid,
         "xmin"    : reg.xmin,
         "xmax"    : reg.xmax,
@@ -214,8 +213,6 @@ function loadGraph( reg ) {
         "ylabelDy": "-3.3em",
         "labelId" : "pos"
     });
-
-    //reg['graph'] = graph;
 
     delete reg.points;
     delete reg.scaffs;
@@ -286,7 +283,6 @@ function getRegister( vals ){
         reg['uid'     ] = vals.uid;
         reg['filepath'] = datafolder + reg.filename;
         reg['scriptid'] = 'script_'  + reg.uid;
-        reg['divid'   ] = 'div_'     + reg.uid;
         return reg;
     }
     catch(err) {
@@ -327,23 +323,6 @@ function selclick(){
         return;
     }
 
-    var chr = document.getElementById(reg.divid);
-
-    if ( ! chr ) {
-        var chr           = document.createElement('div');
-            chr.id        = reg.divid;
-            chr.className = 'chart chartpart';
-            chr.tabindex  = -1;
-    }
-
-    chr.innerHTML = 'loading ' + obj2str(vals);
-
-    var chart         = document.getElementById( chartName );
-    chart.appendChild( chr );
-
-    var div = document.getElementById(reg.divid);
-    div.focus();
-
     loadScript( reg );
 }
 
@@ -351,6 +330,7 @@ function selclick(){
 function basename(path) {
     return path.replace(/\\/g,'/').replace( /.*\//, '' );
 }
+
 
 
 //registerKeyboardHandler = function(callback) {
