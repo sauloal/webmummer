@@ -56,11 +56,31 @@ registerKeyboardHandler = function(callback) {
 };
 
 
+d3.selection.prototype.size = function(){
+    var n = 0;
+    this.each( function() { ++n; } );
+    return n;
+};
 
+
+
+
+
+
+
+/////////////////////////////////////
+// SyncSimpleGraph
+/////////////////////////////////////
 SyncSimpleGraph = function (sync) {
-    var self  = this;
-    this.sync = sync;
-    this.db   = {};
+    var self   = this;
+    this.sync  = sync;
+    this.db    = {};
+    this.props = {
+        minX      : Number.MAX_VALUE,
+        maxX      : 0,
+        minY      : Number.MAX_VALUE,
+        maxY      : 0,
+    }
 
     document.body.addEventListener('d3zoom' , function(e) { self.d3zoomed( e ) }, false);
     document.body.addEventListener('d3close', function(e) { self.d3closed( e ) }, false);
@@ -68,6 +88,9 @@ SyncSimpleGraph = function (sync) {
 
 
 
+//
+// SimpleGraph methods
+//
 SyncSimpleGraph.prototype.shouldSync = function() {
     //console.log( typeof(this.sync) );
 
@@ -84,31 +107,51 @@ SyncSimpleGraph.prototype.shouldSync = function() {
 
 
 SyncSimpleGraph.prototype.add = function(chartHolder, options) {
-    var uid = options.uid || 'uid_' + new Date();;
+    var uid  = options.uid || 'uid_' + new Date();
+    var self = this;
+
+    this.props.minX = this.props.minX > options.xmin ? options.xmin : this.props.minX;
+    this.props.minY = this.props.minY > options.ymin ? options.ymin : this.props.minY;
+    this.props.maxX = this.props.maxX < options.xmax ? options.xmax : this.props.maxX;
+    this.props.maxY = this.props.maxY < options.ymax ? options.ymax : this.props.maxY;
+
+    options.xmin = this.props.minX;
+    //options.ymin = this.props.minY;
+    options.xmax = this.props.maxX;
+    //options.ymax = this.props.maxY;
 
     console.log( 'creating ' + uid );
 
-    if ( this.db[uid] ) {
-        console.log( 'el ' + uid + 'already exists. closing');
-        var el = this.db[uid];
-        el.close();
-        console.log( 'el ' + uid + 'already exists. closed');
-        delete this.db[uid];
-    }
+    this.deleteUid(uid);
 
-    console.log( 'calling ' + uid );
 
-    this.db[ uid ] = new SimpleGraph(chartHolder, options);
+    console.log( 'calling  ' + uid );
+
 
     if ( this.shouldSync() ) {
         console.log( 'syncing ' + uid );
+
+        if ( Object.keys(this.db).length > 1 ) {
+            for ( var dbuid in self.db ) {
+                if (uid == dbuid) { continue; }
+                var obj2 = self.db[dbuid];
+                obj2.options.xmin = self.props.minX;
+                //obj2.options.ymin = self.props.minY;
+                obj2.options.xmax = self.props.maxX;
+                //obj2.options.ymax = self.props.maxY;
+                obj2.draw();
+            }
+        }
     }
+
+    this.db[ uid ] = new SimpleGraph(chartHolder, options);
 };
 
 
 
 
 SyncSimpleGraph.prototype.d3zoomed = function (e) {
+    var self = this;
     var obj  = e.detail.self;
     var el   = e.detail.el;
     var uid  = obj.uid;
@@ -118,8 +161,8 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
 
     if ( Object.keys(this.db).length > 1 ) {
         console.log('more than one graph');
-        for ( var dbuid in this.db ) {
-            if (uid == dbuid) { continue; };
+        for ( var dbuid in self.db ) {
+            if (uid == dbuid) { continue; }
 
             console.log( 'syncing ' + dbuid + ' to ' + uid);
 
@@ -152,14 +195,11 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
 
 
 
-SyncSimpleGraph.prototype.d3closed = function (e) {
-    var obj = e.detail.self;
-    var uid = obj.uid;
-
-    console.log( uid+' closed' );
-
+SyncSimpleGraph.prototype.deleteUid = function (uid) {
     if (this.db[uid]) {
         console.log('has uid '+this.db.uid);
+        var el = this.db[uid];
+        el.close();
         delete this.db[uid];
         console.log(this.db);
     } else {
@@ -170,11 +210,25 @@ SyncSimpleGraph.prototype.d3closed = function (e) {
 
 
 
+SyncSimpleGraph.prototype.d3closed = function (e) {
+    var obj = e.detail.self;
+    var uid = obj.uid;
+
+    console.log( uid+' closed' );
+
+    this.deleteUid( uid );
+};
 
 
 
 
 
+
+
+
+/////////////////////////////////////
+// SimpleGraph
+/////////////////////////////////////
 
 
 
@@ -205,8 +259,6 @@ SimpleGraph = function (chartHolder, options) {
 
     this.chart                       = document.getElementById( this.elemid );
 
-    this.cx                          = this.chart.clientWidth;
-    this.cy                          = this.chart.clientHeight;
     this.scaffs                      = options.scaffs              || null;
                                                                    //              from scaffs
                                                                    //                   f/r
@@ -253,6 +305,22 @@ SimpleGraph = function (chartHolder, options) {
     console.log("num vals " + this.points.length);
     console.log("num regs " + this.numRegs);
 
+    this.draw();
+};
+
+
+
+
+
+//
+// SimpleGraph methods
+//
+SimpleGraph.prototype.draw = function() {
+    var self = this;
+    this.cx  = this.chart.clientWidth;
+    this.cy  = this.chart.clientHeight;
+
+    this.chart.innerHTML = '';
 
     this.padding = {
         "top"   : this.options.title  ? this.options.padding.top   [0] : this.options.padding.top   [1],
@@ -403,18 +471,6 @@ SimpleGraph = function (chartHolder, options) {
 
 
 
-d3.selection.prototype.size = function(){
-    var n = 0;
-    this.each( function() { ++n; } );
-    return n;
-};
-
-
-
-
-//
-// SimpleGraph methods
-//
 SimpleGraph.prototype.update = function() {
     var self   = this;
     //var coords = [];

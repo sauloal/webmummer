@@ -46,17 +46,17 @@ function start() {
     //graphdb = new SyncSimpleGraph( true );
 
     // automatically select the last option in all fields
-    for ( var o = 0; o < opts.length; o++ ) {
-        var opt   = opts[o];
-        var field = document.getElementById( opt[1] );
-        if ( field.localName == 'select' ) {
-            field.lastChild.selected = true;
-        } else {
-            //console.log('not select');
-        }
-    }
-
-    okb.onclick();
+    //for ( var o = 0; o < opts.length; o++ ) {
+    //    var opt   = opts[o];
+    //    var field = document.getElementById( opt[1] );
+    //    if ( field.localName == 'select' ) {
+    //        field.lastChild.selected = true;
+    //    } else {
+    //        //console.log('not select');
+    //    }
+    //}
+    //
+    //okb.onclick();
 }
 
 /*
@@ -242,6 +242,7 @@ function addTipsy( e ) {
     //});
 }
 
+
 function getVals(){
     var vals = {};
 
@@ -258,9 +259,11 @@ function getVals(){
             val = field.value;
         }
 
-        if (!val) {
+        if (val=='null') {
             console.log( 'no ' + opt[1] + ' selected' );
             return;
+        } else {
+            console.log( opt[1] + ' selected ' + val );
         }
 
         //console.log( 'appending '+opt[1]+' = '+val );
