@@ -25,7 +25,7 @@ function start() {
     var okb = document.createElement('button');   // add button and it's click action
         okb.onclick   = selclick;
         okb.innerHTML = 'view';
-		
+
 	var clb = document.createElement('button');   // add button and it's click action
         clb.onclick   = clearPics;
         clb.innerHTML = 'clear';
@@ -48,22 +48,28 @@ function start() {
 
 
 
-    graphdb = new SyncSimpleGraph( function () { return true; } );
+    graphdb = new SyncSimpleGraph( {
+        sync   : function () { return true; },
+        resizeX: function () { return true; },
+        resizeY: function () { return true; }
+    });
     //graphdb = new SyncSimpleGraph( true );
 
-    // automatically select the last option in all fields
-    //for ( var o = 0; o < opts.length; o++ ) {
-    //    var opt   = opts[o];
-    //    var field = document.getElementById( opt[1] );
-    //    if ( field.localName == 'select' ) {
-    //        field.lastChild.selected = true;
-    //    } else {
-    //        //console.log('not select');
-    //    }
-    //}
-    //
-    //okb.onclick();
-}
+    if ( true ) {
+        // automatically select the last option in all fields
+        for ( var optName in opts ) {
+            var field = document.getElementById( optName );
+            if ( field.localName == 'select' ) {
+                console.log( field.lastChild.previousSibling );
+                field.lastChild.previousSibling.selected = true;
+            } else {
+                //console.log('not select');
+            }
+        }
+
+        okb.onclick();
+    }
+};
 
 /*
  * Available fields to be queried in the database
@@ -136,7 +142,7 @@ function genSelectors(){
 			var allOp           = document.createElement('option');
                 allOp.value     = '*all*';
                 allOp.innerHTML = 'All';
-				
+
             var refSel     = document.createElement("select");
                 refSel.id  = optName;
                 refSel.alt = optLabel;
@@ -212,7 +218,7 @@ function loadGraph( reg ) {
 
     graphdb.add(chartName, {
         "uid"     : uid,
-		"chartClass": 'chartquart', 
+		"chartClass": 'chartquart',
 		//"chartClass": 'chartpart',
         "xmin"    : reg.xmin,
         "xmax"    : reg.xmax,
@@ -268,7 +274,7 @@ function getVals(){
 		var opt      = opts[optName];
         var optVar   = opt[0];
         var optLabel = opt[1];
-        
+
 		var field    = document.getElementById( optName );
         var val      = null;
 
@@ -300,7 +306,7 @@ function getRegister( gvals ){
 	var chroms   = new Array();
 	var spps     = new Array();
 	var statuses = new Array();
-	
+
 	if (gvals.ref == '*all*') {
 		opts.ref[0].map( function(ref) {
 			refs.push( ref );
@@ -308,7 +314,7 @@ function getRegister( gvals ){
 	} else {
 		refs.push( gvals.ref );
 	}
-	
+
 	if (gvals.chrom == '*all*') {
 		opts.chrom[0].map( function(chrom) {
 			chroms.push( chrom );
@@ -316,7 +322,7 @@ function getRegister( gvals ){
 	} else {
 		chroms.push( gvals.chrom );
 	}
-	
+
 	if (gvals.spp == '*all*') {
 		opts.spp[0].map( function(spp) {
 			spps.push( spp );
@@ -324,7 +330,7 @@ function getRegister( gvals ){
 	} else {
 		spps.push( gvals.spp );
 	}
-	
+
 	if (gvals.status == '*all*') {
 		opts.status[0].map( function(status) {
 			statuses.push( status );
@@ -332,8 +338,8 @@ function getRegister( gvals ){
 	} else {
 		statuses.push( gvals.status );
 	}
-	
-	
+
+
 	refs.map( function(ref) {
 		chroms.map( function(chrom) {
 			spps.map( function(spp) {
@@ -350,19 +356,19 @@ function getRegister( gvals ){
 			});
 		});
 	});
-	
+
 	console.log( evals );
-	
+
 	var regs = [];
-	
+
 	evals.map( function(vals) {
 		try {
 			var reg = filelist[ vals.ref ][ vals.chrom ][ vals.spp ][ vals.status ];
 			//console.log( reg );
-	
+
 			var uid = vals.ref + vals.chrom + vals.spp + vals.status;
 				uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
-	
+
 			reg['uid'     ] = uid;
 			reg['filepath'] = datafolder + reg.filename;
 			reg['scriptid'] = 'script_'  + reg.uid;
@@ -374,7 +380,7 @@ function getRegister( gvals ){
 			//return;
 		}
 	});
-	
+
 	return regs;
 }
 

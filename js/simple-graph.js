@@ -71,11 +71,13 @@ d3.selection.prototype.size = function(){
 /////////////////////////////////////
 // SyncSimpleGraph
 /////////////////////////////////////
-SyncSimpleGraph = function (sync) {
-    var self   = this;
-    this.sync  = sync;
-    this.db    = {};
-    this.props = {
+SyncSimpleGraph = function (opts) {
+    var self     = this;
+    this.sync    = opts.sync    || true;
+    this.resizeX = opts.resizeX || true;
+    this.resizeY = opts.resizeY || true;
+    this.db      = {};
+    this.props   = {
         minX      : Number.MAX_VALUE,
         maxX      : 0,
         minY      : Number.MAX_VALUE,
@@ -91,15 +93,14 @@ SyncSimpleGraph = function (sync) {
 //
 // SimpleGraph methods
 //
-SyncSimpleGraph.prototype.shouldSync = function() {
+SyncSimpleGraph.prototype.getVar = function( vari ) {
     //console.log( typeof(this.sync) );
 
-    if (typeof(this.sync) === 'function') {
-        return this.sync();
+    if      (typeof(vari) === 'function') {
+        return vari();
     }
-    else if (typeof(this.sync) === 'boolean') {
-        this.shouldSync = function() { return true; };
-        return true;
+    else if (typeof(vari) === 'boolean') {
+        return vari;
     }
 };
 
@@ -111,7 +112,7 @@ SyncSimpleGraph.prototype.clear = function() {
 		console.log( 'cleaning ' + uid )
 		this.deleteUid(uid);
 	}
-}
+};
 
 
 
@@ -138,17 +139,24 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
     console.log( 'calling  ' + uid );
 
 
-    if ( this.shouldSync() ) {
+    if ( this.getVar( this.sync ) ) {
         console.log( 'syncing ' + uid );
 
         if ( Object.keys(this.db).length > 1 ) {
             for ( var dbuid in self.db ) {
                 if (uid == dbuid) { continue; }
                 var obj2 = self.db[dbuid];
-                obj2.options.xmin = self.props.minX;
-                //obj2.options.ymin = self.props.minY;
-                obj2.options.xmax = self.props.maxX;
-                //obj2.options.ymax = self.props.maxY;
+
+                if ( this.getVar( this.resizeX ) ) {
+                    obj2.options.xmin = self.props.minX;
+                    obj2.options.xmax = self.props.maxX;
+                }
+
+                if ( this.getVar( this.resizeY ) ) {
+                    obj2.options.ymin = self.props.minY;
+                    obj2.options.ymax = self.props.maxY;
+                }
+
                 obj2.draw();
             }
         }
@@ -188,13 +196,15 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
 
             var obj2        = this.db[dbuid];
 
-            obj2.syncing = true;
-            if ( el.reset ) {
-                obj2.reset();
-            } else {
-                obj2.applyZoom( el.scale, el.translationX, el.translationY );
+            if ( objs.shouldSync ) {
+                obj2.syncing = true;
+                if ( el.reset ) {
+                    obj2.reset();
+                } else {
+                    obj2.applyZoom( el.scale, el.translationX, el.translationY );
+                }
+                obj2.syncing = false;
             }
-            obj2.syncing = false;
         }
     } else {
         console.log('only one graph');
@@ -259,7 +269,7 @@ SimpleGraph = function (chartHolder, options) {
         var pa = this.chart.parentElement;
         pa.removeChild( this.chart );
     }
-	
+
 	this.options.chartClass          = options.chartClass           || 'chartpart';
     this.chart                       = document.createElement('div');
     this.chart.id                    = this.elemid;
@@ -310,7 +320,8 @@ SimpleGraph = function (chartHolder, options) {
     this.options.compassMinSize      = options.compassMinSize      ||  20;
     //this.options.radius         = options.radius         || 5.0;
 
-    this.syncing = false;
+    this.syncing    = false;
+    this.shouldSync = true;
 
     this.regSize = 7;
     this.numRegs = (this.points.length / this.regSize);
@@ -469,13 +480,13 @@ SimpleGraph.prototype.draw = function() {
     this.currTranslationX = 0;
     this.currTranslationY = 0;
 
+    this.redraw()();
+
     this.addCompass();
 
     this.addDownloadIcon();
 
     this.addCloseIcon();
-
-    this.redraw()();
 
     this.chart.focus();
 };
@@ -539,15 +550,14 @@ SimpleGraph.prototype.update = function() {
             var j          = point.getAttribute('j');
             var vars       = self.parsepoint( j );
 
-            var stVal      = { x: vars.x1, y: vars.y1, j: j, s: sense};
-            var ndVal      = { x: vars.x2, y: vars.y2, j: j, s: sense};
+            var stVal      = { x: vars.x1, y: vars.y1 };
+            var ndVal      = { x: vars.x2, y: vars.y2 };
 
             var line       = self.line( [ stVal, ndVal ] );
 
             point.setAttribute('d', line);
         });
     }
-
 
 
 
@@ -1731,3 +1741,39 @@ SimpleGraph.prototype.addCloseIcon = function() {
     //    .attr('d', "m532.64 362.87-356.13 356.13");
 
 };
+
+
+
+
+SimpleGraph.prototype.addPadLockIcon = function() {
+//<g
+//     id="layer2">
+//    <path
+//       d="m 244.28571,26.428572 a 210,223.57143 0 1 1 -420,0 210,223.57143 0 1 1 420,0 z"
+//       transform="matrix(0.66803956,0,0,0.62748765,127.09579,133.4164)"
+//       id="path2987"
+//       style="fill:#000000;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//  </g>
+//  <g
+//     transform="translate(0,-752.36218)"
+//     id="layer1" />
+//  <g
+//     id="layer4">
+//    <path
+//       d="m 206.42857,92.14286 a 57.857143,50 0 1 1 -115.714287,0 57.857143,50 0 1 1 115.714287,0 z"
+//       transform="matrix(0.82629984,0,0,0.93614691,27.235457,34.169319)"
+//       id="path3759-1"
+//       style="fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//  </g>
+//  <g
+//     id="layer3">
+//    <rect
+//       width="116.98698"
+//       height="66.986992"
+//       x="91.506516"
+//       y="149.93507"
+//       id="rect3757"
+//       style="fill:#fcffff;fill-opacity:1;stroke:#ffffff;stroke-width:33.01300049;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//  </g>
+
+}
