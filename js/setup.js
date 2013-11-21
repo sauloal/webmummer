@@ -25,6 +25,10 @@ function start() {
     var okb = document.createElement('button');   // add button and it's click action
         okb.onclick   = selclick;
         okb.innerHTML = 'view';
+		
+	var clb = document.createElement('button');   // add button and it's click action
+        clb.onclick   = clearPics;
+        clb.innerHTML = 'clear';
 
     var sel = genSelectors(); // generate selectors based on "opts" variable
 
@@ -35,6 +39,8 @@ function start() {
     bdy.insertBefore( pos, bfc );
     bfc = bdy.firstChild;
     bdy.insertBefore( hlp, bfc );
+    bfc = bdy.firstChild;
+    bdy.insertBefore( clb, bfc );
     bfc = bdy.firstChild;
     bdy.insertBefore( okb, bfc );
     bfc = bdy.firstChild;
@@ -63,16 +69,20 @@ function start() {
  * Available fields to be queried in the database
  * Used to create drop-down boxes
  */
-var opts   = [
-    [ refs    , 'ref'   , 'Select Reference'  ],
-    [ chroms  , 'chrom' , 'Select Chromosome' ],
-    [ spps    , 'spp'   , 'Select Species'    ],
-    [ statuses, 'status', 'Select Status'     ],
-];
+var opts   = {
+    'ref'   : [ refs    , 'Select Reference'  ],
+    'chrom' : [ chroms  , 'Select Chromosome' ],
+    'spp'   : [ spps    , 'Select Species'    ],
+    'status': [ statuses, 'Select Status'     ],
+};
 
 
 
-
+function clearPics(){
+	console.log('cleaning');
+	console.log(graphdb);
+	graphdb.clear();
+}
 
 function genOpts(obj, refSel){
     /*
@@ -104,11 +114,10 @@ function genSelectors(){
     var sels    = document.createElement('span');
         sels.id = 'selectors';
 
-    for ( var o = 0; o < opts.length; o++ ) {
-        var opt = opts[o];
+    for ( var optName in opts ) {
+		var opt      = opts[optName];
         var optVar   = opt[0];
-        var optName  = opt[1];
-        var optLabel = opt[2];
+        var optLabel = opt[1];
 
         if ( optVar.length == 1 ) {
             var refSel           = document.createElement("label");
@@ -124,11 +133,16 @@ function genSelectors(){
                 refOp.value     = null;
                 refOp.innerHTML = optLabel;
 
+			var allOp           = document.createElement('option');
+                allOp.value     = '*all*';
+                allOp.innerHTML = 'All';
+				
             var refSel     = document.createElement("select");
                 refSel.id  = optName;
                 refSel.alt = optLabel;
-                refSel.appendChild( refOp )
+                refSel.appendChild( refOp );
                 genOpts( optVar, refSel );
+                refSel.appendChild( allOp );
 
             sels.appendChild(refSel);
         }
@@ -198,6 +212,8 @@ function loadGraph( reg ) {
 
     graphdb.add(chartName, {
         "uid"     : uid,
+		"chartClass": 'chartquart', 
+		//"chartClass": 'chartpart',
         "xmin"    : reg.xmin,
         "xmax"    : reg.xmax,
         "ymin"    : reg.ymin,
@@ -248,51 +264,118 @@ function getVals(){
 
     var uid  = '';
 
-    for ( var o = 0; o < opts.length; o++ ) {
-        var opt   = opts[o];
-        var field = document.getElementById(opt[1]);
-        var val   = null;
+    for ( var optName in opts ) {
+		var opt      = opts[optName];
+        var optVar   = opt[0];
+        var optLabel = opt[1];
+        
+		var field    = document.getElementById( optName );
+        var val      = null;
 
         if ( field.localName == 'select' ) {
-            val = field.options[field.selectedIndex].value;
+            val = field.options[ field.selectedIndex ].value;
         } else {
             val = field.value;
         }
 
         if (val=='null') {
-            console.log( 'no ' + opt[1] + ' selected' );
+            console.log( 'no ' + optName + ' selected' );
             return;
         } else {
-            console.log( opt[1] + ' selected ' + val );
+            console.log( optName + ' selected ' + val );
         }
 
-        //console.log( 'appending '+opt[1]+' = '+val );
-        vals[opt[1]] = val;
+        //console.log( 'appending '+optName+' = '+val );
+        vals[ optName ] = val;
         uid += val;
     }
-
-
-    uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
-    vals['uid'] = uid;
 
     return vals;
 }
 
 
-function getRegister( vals ){
-    try {
-        var reg = filelist[ vals['ref'] ][ vals['chrom'] ][ vals['spp'] ][ vals['status'] ];
-        //console.log( reg );
-        reg['uid'     ] = vals.uid;
-        reg['filepath'] = datafolder + reg.filename;
-        reg['scriptid'] = 'script_'  + reg.uid;
-        return reg;
-    }
-    catch(err) {
-        console.error('combination does not exists for:')
-        console.error( vals );
-        return;
-    }
+function getRegister( gvals ){
+	var evals    = new Array();
+	var refs     = new Array();
+	var chroms   = new Array();
+	var spps     = new Array();
+	var statuses = new Array();
+	
+	if (gvals.ref == '*all*') {
+		opts.ref[0].map( function(ref) {
+			refs.push( ref );
+		});
+	} else {
+		refs.push( gvals.ref );
+	}
+	
+	if (gvals.chrom == '*all*') {
+		opts.chrom[0].map( function(chrom) {
+			chroms.push( chrom );
+		});
+	} else {
+		chroms.push( gvals.chrom );
+	}
+	
+	if (gvals.spp == '*all*') {
+		opts.spp[0].map( function(spp) {
+			spps.push( spp );
+		});
+	} else {
+		spps.push( gvals.spp );
+	}
+	
+	if (gvals.status == '*all*') {
+		opts.status[0].map( function(status) {
+			statuses.push( status );
+		});
+	} else {
+		statuses.push( gvals.status );
+	}
+	
+	
+	refs.map( function(ref) {
+		chroms.map( function(chrom) {
+			spps.map( function(spp) {
+				statuses.map( function(status) {
+					console.log(ref + ' ' + chrom + ' ' + spp + ' ' + status);
+					var reg = {
+						ref   : ref,
+						chrom : chrom,
+						spp   : spp,
+						status: status
+					};
+					evals.push( reg );
+				});
+			});
+		});
+	});
+	
+	console.log( evals );
+	
+	var regs = [];
+	
+	evals.map( function(vals) {
+		try {
+			var reg = filelist[ vals.ref ][ vals.chrom ][ vals.spp ][ vals.status ];
+			//console.log( reg );
+	
+			var uid = vals.ref + vals.chrom + vals.spp + vals.status;
+				uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+	
+			reg['uid'     ] = uid;
+			reg['filepath'] = datafolder + reg.filename;
+			reg['scriptid'] = 'script_'  + reg.uid;
+			regs.push( reg );
+		}
+		catch(err) {
+			console.error('combination does not exists for:')
+			console.error( vals );
+			//return;
+		}
+	});
+	
+	return regs;
 }
 
 
@@ -314,19 +397,22 @@ function selclick(){
 
     //console.log( vals );
 
-    var reg  = getRegister( vals );
-    if (!reg) {
+    var regs  = getRegister( vals );
+    if ( regs.length == 0 ) {
         console.log('no reg');
         return;
     }
 
-    var file = reg[ 'filename' ];
-    if (!file) {
-        console.log('no filename');
-        return;
-    }
-
-    loadScript( reg );
+	var count = 0;
+	regs.map( function(reg) {
+		var file = reg[ 'filename' ];
+		if (!file) {
+			console.log('no filename');
+		} else {
+			setTimeout( function() { loadScript( reg ); }, (Math.pow(1.5, count) * 100));
+			count += 1;
+		}
+	});
 }
 
 

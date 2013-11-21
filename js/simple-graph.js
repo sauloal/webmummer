@@ -106,6 +106,16 @@ SyncSimpleGraph.prototype.shouldSync = function() {
 
 
 
+SyncSimpleGraph.prototype.clear = function() {
+	for ( var uid in this.db ) {
+		console.log( 'cleaning ' + uid )
+		this.deleteUid(uid);
+	}
+}
+
+
+
+
 SyncSimpleGraph.prototype.add = function(chartHolder, options) {
     var uid  = options.uid || 'uid_' + new Date();
     var self = this;
@@ -249,15 +259,17 @@ SimpleGraph = function (chartHolder, options) {
         var pa = this.chart.parentElement;
         pa.removeChild( this.chart );
     }
-
+	
+	this.options.chartClass          = options.chartClass           || 'chartpart';
     this.chart                       = document.createElement('div');
     this.chart.id                    = this.elemid;
-    this.chart.className             = 'chart chartpart';
+    this.chart.className             = this.options.chartClass;
     this.chart.tabindex              = -1;
 
     this.chartHolder.appendChild( this.chart );
 
     this.chart                       = document.getElementById( this.elemid );
+
 
     this.scaffs                      = options.scaffs              || null;
                                                                    //              from scaffs
