@@ -112,6 +112,14 @@ SyncSimpleGraph.prototype.clear = function() {
 		console.log( 'cleaning ' + uid )
 		this.deleteUid(uid);
 	}
+
+    this.db      = {};
+    this.props   = {
+        minX      : Number.MAX_VALUE,
+        maxX      : 0,
+        minY      : Number.MAX_VALUE,
+        maxY      : 0,
+    }
 };
 
 
@@ -147,14 +155,16 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
                 if (uid == dbuid) { continue; }
                 var obj2 = self.db[dbuid];
 
-                if ( this.getVar( this.resizeX ) ) {
-                    obj2.options.xmin = self.props.minX;
-                    obj2.options.xmax = self.props.maxX;
-                }
+                if ( obj2.shouldSync ) {
+                    if ( this.getVar( this.resizeX ) ) {
+                        obj2.options.xmin = self.props.minX;
+                        obj2.options.xmax = self.props.maxX;
+                    }
 
-                if ( this.getVar( this.resizeY ) ) {
-                    obj2.options.ymin = self.props.minY;
-                    obj2.options.ymax = self.props.maxY;
+                    if ( this.getVar( this.resizeY ) ) {
+                        obj2.options.ymin = self.props.minY;
+                        obj2.options.ymax = self.props.maxY;
+                    }
                 }
 
                 obj2.draw();
@@ -196,7 +206,7 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
 
             var obj2        = this.db[dbuid];
 
-            if ( objs.shouldSync ) {
+            if ( obj2.shouldSync ) {
                 obj2.syncing = true;
                 if ( el.reset ) {
                     obj2.reset();
@@ -249,9 +259,6 @@ SyncSimpleGraph.prototype.d3closed = function (e) {
 /////////////////////////////////////
 // SimpleGraph
 /////////////////////////////////////
-
-
-
 SimpleGraph = function (chartHolder, options) {
     var self                         = this;
     this.uid                         = options.uid                 || 'uid_' + new Date();
@@ -467,8 +474,13 @@ SimpleGraph.prototype.draw = function() {
             //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
     ;
 
-    this.lines = this.vis.append("g")
-        .attr("class", 'glines');
+    this.lines = this.vis.append("svg")
+        .attr("class"  , 'glines'        )
+        .attr("width"  , this.size.width )
+        .attr("height" , this.size.height)
+        .attr("top"    , '0'             )
+        .attr("left"   , '0'             )
+        .attr("viewbox", '0 0 '+this.size.width+' '+this.size.height);
 
     d3.select(this.chart)
         .on("mousemove.drag", self.mousemove())

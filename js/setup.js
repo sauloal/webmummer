@@ -32,17 +32,31 @@ function start() {
 
     var sel = genSelectors(); // generate selectors based on "opts" variable
 
+    var sizeSel           = createSize();
+
+    var syncs             = createSyncs();
+
     // append elements
     var bdy = document.getElementsByTagName('body')[0];
-    var bfc = bdy.firstChild;
 
+    var bfc = bdy.firstChild;
     bdy.insertBefore( pos, bfc );
+
     bfc = bdy.firstChild;
     bdy.insertBefore( hlp, bfc );
+
+    bfc = bdy.firstChild;
+    bdy.insertBefore( syncs, bfc );
+
+    bfc = bdy.firstChild;
+    bdy.insertBefore( sizeSel, bfc );
+
     bfc = bdy.firstChild;
     bdy.insertBefore( clb, bfc );
+
     bfc = bdy.firstChild;
     bdy.insertBefore( okb, bfc );
+
     bfc = bdy.firstChild;
     bdy.insertBefore( sel, bfc );
 
@@ -83,12 +97,67 @@ var opts   = {
 };
 
 
+var sizes = {
+        chartfull : 'Full'   ,
+        chartpart : 'Half'   ,
+        chartquart: 'Quarter',
+    };
+
+
+function createSyncs() {
+    var span = document.createElement('span');
+    var lbl  = document.createElement('label');
+    lbl.innerHTML = '<b>Synchronize</b> ';
+
+    var chkS = document.createElement('checkbox');
+    var chkX = document.createElement('checkbox');
+    var chkY = document.createElement('checkbox');
+
+    chkS.id = 'sync'   ; chkS.alt = 'Synchronize Movement';
+    chkX.id = 'resizeX'; chkS.alt = 'Resize X';
+    chkY.id = 'resizeY'; chkS.alt = 'Resize Y';
+
+    span.appendChild( lbl  );
+    span.appendChild( chkS );
+    span.appendChild( chkX );
+    span.appendChild( chkY );
+
+    return span;
+}
+
+
+function createSize(){
+    var sizeSel         = document.createElement("select");
+        sizeSel.id      = 'size';
+        sizeSel.alt     = 'Select Graphic Size';
+
+    for ( var size in sizes ){
+        var opf       = document.createElement("option");
+        opf.value     = size;
+        opf.innerHTML = sizes[size];
+
+        sizeSel.appendChild( opf );
+    }
+
+    return sizeSel;
+}
+
+
+function getSelSize() {
+	var field    = document.getElementById( 'size' );
+
+    val = field.options[ field.selectedIndex ].value;
+
+    return val;
+}
+
 
 function clearPics(){
 	console.log('cleaning');
 	console.log(graphdb);
 	graphdb.clear();
 }
+
 
 function genOpts(obj, refSel){
     /*
@@ -217,23 +286,23 @@ function loadGraph( reg ) {
     //document.body.addEventListener('d3createdPath', addTipsy, false);
 
     graphdb.add(chartName, {
-        "uid"     : uid,
-		"chartClass": 'chartquart',
+        "uid"       : uid,
+		"chartClass": reg.size,
 		//"chartClass": 'chartpart',
-        "xmin"    : reg.xmin,
-        "xmax"    : reg.xmax,
-        "ymin"    : reg.ymin,
-        "ymax"    : reg.ymax,
-        "xlabel"  : reg.xlabel,
-        "ylabel"  : reg.ylabel,
-        "title"   : reg.title,
-        "points"  : reg.points,
-        "scaffs"  : reg.scaffs,
-        "xTicks"  : 5,
-        "yTicks"  : 5,
-        "padding" : { 'left': [120, 45] },
-        "ylabelDy": "-3.3em",
-        "labelId" : "pos"
+        "xmin"      : reg.xmin,
+        "xmax"      : reg.xmax,
+        "ymin"      : reg.ymin,
+        "ymax"      : reg.ymax,
+        "xlabel"    : reg.xlabel,
+        "ylabel"    : reg.ylabel,
+        "title"     : reg.title,
+        "points"    : reg.points,
+        "scaffs"    : reg.scaffs,
+        "xTicks"    : 5,
+        "yTicks"    : 5,
+        "padding"   : { 'left': [120, 45] },
+        "ylabelDy"  : "-3.3em",
+        //"labelId"   : "pos"
     });
 
     delete reg.points;
@@ -372,6 +441,11 @@ function getRegister( gvals ){
 			reg['uid'     ] = uid;
 			reg['filepath'] = datafolder + reg.filename;
 			reg['scriptid'] = 'script_'  + reg.uid;
+            reg['ref'     ] = vals.ref;
+            reg['chrom'   ] = vals.chrom;
+            reg['spp'     ] = vals.spp;
+            reg['status'  ] = vals.status;
+            reg['size'    ] = getSelSize();
 			regs.push( reg );
 		}
 		catch(err) {
