@@ -9,81 +9,18 @@ var chartName  = 'chart1';
 var scriptHolder = 'scriptholder';
 
 
-
-function start() {
-    /*
-     * Creates page elements
-     */
-    //$('#chart1').html( 'please select' );
-
-    var pos = document.createElement('label');
-        pos.id = 'pos'; // creates position label
-
-    var hlp = document.createElement('label');
-        hlp.innerHTML = '<b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
-
-    var okb = document.createElement('button');   // add button and it's click action
-        okb.onclick   = selclick;
-        okb.innerHTML = 'view';
-
-	var clb = document.createElement('button');   // add button and it's click action
-        clb.onclick   = clearPics;
-        clb.innerHTML = 'clear';
-
-    var sel = genSelectors(); // generate selectors based on "opts" variable
-
-    var sizeSel           = createSize();
-
-    var syncs             = createSyncs();
-
-    // append elements
-    var bdy = document.getElementsByTagName('body')[0];
-
-    var bfc = bdy.firstChild;
-    bdy.insertBefore( pos, bfc );
-
-    bfc = bdy.firstChild;
-    bdy.insertBefore( hlp, bfc );
-
-    bfc = bdy.firstChild;
-    bdy.insertBefore( syncs, bfc );
-
-    bfc = bdy.firstChild;
-    bdy.insertBefore( sizeSel, bfc );
-
-    bfc = bdy.firstChild;
-    bdy.insertBefore( clb, bfc );
-
-    bfc = bdy.firstChild;
-    bdy.insertBefore( okb, bfc );
-
-    bfc = bdy.firstChild;
-    bdy.insertBefore( sel, bfc );
-
-
-
-    graphdb = new SyncSimpleGraph( {
-        sync   : function () { return true; },
-        resizeX: function () { return true; },
-        resizeY: function () { return true; }
-    });
-    //graphdb = new SyncSimpleGraph( true );
-
-    if ( true ) {
-        // automatically select the last option in all fields
-        for ( var optName in opts ) {
-            var field = document.getElementById( optName );
-            if ( field.localName == 'select' ) {
-                console.log( field.lastChild.previousSibling );
-                field.lastChild.previousSibling.selected = true;
-            } else {
-                //console.log('not select');
-            }
-        }
-
-        okb.onclick();
+function hasStorage() {
+    try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+    } catch(e) {
+        //alert('no storage');
+        return false;
     }
-};
+}
+
+var hasstorage = hasStorage();
+
+
 
 /*
  * Available fields to be queried in the database
@@ -104,51 +41,195 @@ var sizes = {
     };
 
 
-function createSyncs() {
-    var span = document.createElement('span');
-    var lbl  = document.createElement('label');
-    lbl.innerHTML = '<b>Synchronize</b> ';
 
-    var chkS = document.createElement('checkbox');
-    var chkX = document.createElement('checkbox');
-    var chkY = document.createElement('checkbox');
 
-    chkS.id = 'sync'   ; chkS.alt = 'Synchronize Movement';
-    chkX.id = 'resizeX'; chkS.alt = 'Resize X';
-    chkY.id = 'resizeY'; chkS.alt = 'Resize Y';
+function start() {
+    /*
+     * Creates page elements
+     */
+    //$('#chart1').html( 'please select' );
 
-    span.appendChild( lbl  );
-    span.appendChild( chkS );
-    span.appendChild( chkX );
-    span.appendChild( chkY );
+    var sels    = document.createElement('span');
+        sels.id = 'selectors';
 
-    return span;
+    var bdy = document.getElementsByTagName('body')[0];
+
+    var bfc = bdy.firstChild;
+    sels = bdy.insertBefore( sels, bfc );
+
+
+
+    genSelectors(sels); // generate selectors based on "opts" variable
+
+
+
+    var okb = document.createElement('button');   // add button and it's click action
+        okb.onclick   = selclick;
+        okb.innerHTML = 'view';
+    sels.appendChild( okb );
+
+
+
+	var clb = document.createElement('button');   // add button and it's click action
+        clb.onclick   = clearPics;
+        clb.innerHTML = 'clear';
+    sels.appendChild(clb);
+
+
+
+    var pos = document.createElement('label');
+        pos.id = 'pos'; // creates position label
+    sels.appendChild(pos);
+
+
+
+
+    graphdb = new SyncSimpleGraph( {
+        sync   : function () { return document.getElementById('sync'   ).checked; },
+        resizeX: function () { return document.getElementById('resizeX').checked; },
+        resizeY: function () { return document.getElementById('resizeY').checked; }
+    });
+    //graphdb = new SyncSimpleGraph( true );
+
+
+    createOptions();
+
+
+    if ( false ) {
+        // automatically select the last option in all fields
+        for ( var optName in opts ) {
+            var field = document.getElementById( optName );
+            if ( field.localName == 'select' ) {
+                //console.log( field.lastChild.previousSibling );
+                field.lastChild.previousSibling.selected = true;
+            } else {
+                //console.log('not select');
+            }
+        }
+
+        okb.onclick();
+    }
+};
+
+
+function createOptions(){
+    var bdy = document.getElementsByTagName('body')[0];
+
+    var divH = bdy.appendChild( document.createElement('div') );
+    divH.className   = 'htmlDiv htmlDivHide';
+    divH.onmouseover = function(e) { divH.className = 'htmlDiv htmlDivShow'; };
+    divH.onmouseout  = function(e) { divH.className = 'htmlDiv htmlDivHide'; };
+
+
+    var hlp = document.createElement('label');
+        hlp.innerHTML = '<b>Help</b><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
+
+    divH.appendChild( hlp     );
+    divH.appendChild( document.createElement('br') );
+
+    var syncs             = createSyncs(divH);
+    divH.appendChild( document.createElement('br') );
+
+    var sizeSel           = createSize(divH);
+    divH.appendChild( document.createElement('br') );
 }
 
 
-function createSize(){
-    var sizeSel         = document.createElement("select");
+function createSyncs(div) {
+    var span = div.appendChild( document.createElement('span') );
+    span.style.display = "inline-block";
+
+
+
+    var lblS  = document.createElement('label');
+    lblS.innerHTML = '<b>Synchronize</b> ';
+    span.appendChild( lblS );
+
+    var chkS = span.appendChild(document.createElement('input'));
+    chkS.id      = 'sync'   ;
+    chkS.alt     = 'Synchronize Movement';
+    chkS.type    = 'checkbox';
+    chkS.onclick = function(e) { console.log('saving'); saveOpt('sync'   , chkS.checked); };
+    chkS.checked = getOpt('sync'   , false) == 'true';
+
+
+
+
+    var lblX  = document.createElement('label');
+    lblX.innerHTML = '<b>Resize X</b> ';
+    span.appendChild( lblX );
+
+    var chkX     = span.appendChild( document.createElement('input') );
+    chkX.id      = 'resizeX';
+    chkX.alt     = 'Resize X'            ;
+    chkX.type    = 'checkbox';
+    chkX.onclick = function(e) { saveOpt('resizeX', chkX.checked) };
+    chkX.checked = getOpt('resizeX', false) == 'true';
+
+
+
+
+    var lblY  = document.createElement('label');
+    lblY.innerHTML = '<b>Resize Y</b> ';
+    span.appendChild( lblY );
+
+    var chkY     = span.appendChild( document.createElement('input') );
+    chkY.id      = 'resizeY';
+    chkY.alt     = 'Resize Y'            ;
+    chkY.type    = 'checkbox';
+    chkY.onclick = function(e) { saveOpt('resizeY', chkY.checked) };
+    chkY.checked = getOpt('resizeY', false) == 'true';
+
+}
+
+
+function saveOpt (k ,v) {
+    console.log('saving k "' + k + '" v "' + v + '"');
+    if ( hasstorage ) {
+        localStorage[k] = v;
+    }
+}
+
+
+function getOpt(k, d) {
+    console.log('getting ' + k);
+    if ( hasstorage ) {
+        try {
+            var res = localStorage[k];
+            console.log('getting ' + k + ' val ' + res);
+            return res;
+        } catch (e) {
+            return d;
+        }
+    } else {
+        return d;
+    }
+}
+
+
+function createSize(div){
+    var sizeSel         = div.appendChild(  document.createElement("select") );
         sizeSel.id      = 'size';
         sizeSel.alt     = 'Select Graphic Size';
+
+    var val = getOpt('size', null);
 
     for ( var size in sizes ){
         var opf       = document.createElement("option");
         opf.value     = size;
         opf.innerHTML = sizes[size];
 
+        if (val)
+        {
+            if (val == size) {
+                opf.selected = true;
+            }
+        }
+
         sizeSel.appendChild( opf );
     }
 
-    return sizeSel;
-}
-
-
-function getSelSize() {
-	var field    = document.getElementById( 'size' );
-
-    val = field.options[ field.selectedIndex ].value;
-
-    return val;
+    sizeSel.onchange  = function(e) { saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) ); };
 }
 
 
@@ -159,7 +240,7 @@ function clearPics(){
 }
 
 
-function genOpts(obj, refSel){
+function genOpts(obj, refSel, dflt){
     /*
      * Generate drop-down lists options base on "opts"
      */
@@ -170,12 +251,19 @@ function genOpts(obj, refSel){
             op.value     = opt;
             op.innerHTML = opt;
 
+        if (dflt)
+        {
+            if (dflt == opt) {
+                op.selected = true;
+            }
+        }
+
         refSel.appendChild( op );
     }
 }
 
 
-function genSelectors(){
+function genSelectors(sels){
     /*
      * Generate "select" elements. Calls genOpts to read options
      * If only one option available, adds a label field, otherwise, adds a drop-down menu.
@@ -186,8 +274,6 @@ function genSelectors(){
     //var refs     = ['solanum lycopersicum heinz'];
     //var filelist = {
 
-    var sels    = document.createElement('span');
-        sels.id = 'selectors';
 
     for ( var optName in opts ) {
 		var opt      = opts[optName];
@@ -212,18 +298,28 @@ function genSelectors(){
                 allOp.value     = '*all*';
                 allOp.innerHTML = 'All';
 
-            var refSel     = document.createElement("select");
-                refSel.id  = optName;
-                refSel.alt = optLabel;
+            var val = getOpt(optName, null);
+
+            if (val)
+            {
+                if (val == '*all*') {
+                    allOp.selected = true;
+                }
+            }
+
+            var refSel          = document.createElement("select");
+                refSel.id       = optName;
+                refSel.alt      = optLabel;
+
                 refSel.appendChild( refOp );
-                genOpts( optVar, refSel );
+                genOpts( optVar, refSel, val );
                 refSel.appendChild( allOp );
+
+                refSel.onchange  = function(e) { saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) ); };
 
             sels.appendChild(refSel);
         }
     }
-
-    return sels;
 }
 
 
@@ -334,6 +430,24 @@ function addTipsy( e ) {
 }
 
 
+function getFieldValue(fieldId) {
+	var field = document.getElementById( fieldId );
+    var val   = null;
+
+    if ( field.localName == 'select' ) {
+        val = field.options[ field.selectedIndex ].value;
+    } else {
+        val = field.value;
+    }
+
+    if (val=='null') {
+        val = null;
+    }
+
+    return val;
+}
+
+
 function getVals(){
     var vals = {};
 
@@ -344,20 +458,10 @@ function getVals(){
         var optVar   = opt[0];
         var optLabel = opt[1];
 
-		var field    = document.getElementById( optName );
-        var val      = null;
+        var val      = getFieldValue( optName );
 
-        if ( field.localName == 'select' ) {
-            val = field.options[ field.selectedIndex ].value;
-        } else {
-            val = field.value;
-        }
-
-        if (val=='null') {
-            console.log( 'no ' + optName + ' selected' );
+        if ( val === null ) {
             return;
-        } else {
-            console.log( optName + ' selected ' + val );
         }
 
         //console.log( 'appending '+optName+' = '+val );
@@ -413,7 +517,7 @@ function getRegister( gvals ){
 		chroms.map( function(chrom) {
 			spps.map( function(spp) {
 				statuses.map( function(status) {
-					console.log(ref + ' ' + chrom + ' ' + spp + ' ' + status);
+					//console.log(ref + ' ' + chrom + ' ' + spp + ' ' + status);
 					var reg = {
 						ref   : ref,
 						chrom : chrom,
@@ -426,7 +530,7 @@ function getRegister( gvals ){
 		});
 	});
 
-	console.log( evals );
+	//console.log( evals );
 
 	var regs = [];
 
@@ -445,7 +549,7 @@ function getRegister( gvals ){
             reg['chrom'   ] = vals.chrom;
             reg['spp'     ] = vals.spp;
             reg['status'  ] = vals.status;
-            reg['size'    ] = getSelSize();
+            reg['size'    ] = getFieldValue('size');
 			regs.push( reg );
 		}
 		catch(err) {
@@ -549,6 +653,8 @@ document.addEventListener('DOMContentLoaded', start )
   options.ylabelDx       || "0em";
   options.ylabelDy       || "-2.3em";
   options.downloadIconMaxSize ||  10;
+  options.closeIconMaxSize    ||  30;
+  options.padlockIconMaxSize  ||  30;
   options.compassMaxSize      || 300;
   options.compassMinSize      || 100;
 

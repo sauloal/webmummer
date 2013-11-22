@@ -94,10 +94,12 @@ SyncSimpleGraph = function (opts) {
 // SimpleGraph methods
 //
 SyncSimpleGraph.prototype.getVar = function( vari ) {
-    //console.log( typeof(this.sync) );
+    //console.log( typeof(vari) );
 
     if      (typeof(vari) === 'function') {
-        return vari();
+        var res = vari();
+        //console.log( res );
+        return res;
     }
     else if (typeof(vari) === 'boolean') {
         return vari;
@@ -184,41 +186,45 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
     var el   = e.detail.el;
     var uid  = obj.uid;
 
-    console.log(uid+' zoomed ');
-    console.log(el);
+    //console.log(uid+' zoomed ');
+    //console.log(el);
 
     if ( Object.keys(this.db).length > 1 ) {
-        console.log('more than one graph');
-        for ( var dbuid in self.db ) {
-            if (uid == dbuid) { continue; }
+        //console.log('more than one graph');
+        if ( this.getVar( this.sync ) ) {
+            for ( var dbuid in self.db ) {
+                if (uid == dbuid) { continue; }
 
-            console.log( 'syncing ' + dbuid + ' to ' + uid);
+                console.log( 'syncing ' + dbuid + ' to ' + uid);
 
-            //var data = {
-            //        'currScale'       : self.currScale,
-            //        'currTranslationX': self.currTranslationX,
-            //        'currTranslationY': self.currTranslationY,
-            //        'scale'           : scale,
-            //        'translationX'    : translationX,
-            //        'translationY'    : translationY,
-            //        'reset'           : reset
-            //    };
+                //var data = {
+                //        'currScale'       : self.currScale,
+                //        'currTranslationX': self.currTranslationX,
+                //        'currTranslationY': self.currTranslationY,
+                //        'scale'           : scale,
+                //        'translationX'    : translationX,
+                //        'translationY'    : translationY,
+                //        'reset'           : reset
+                //    };
 
-            var obj2        = this.db[dbuid];
+                var obj2        = this.db[dbuid];
 
-            if ( obj2.shouldSync ) {
-                obj2.syncing = true;
-                if ( el.reset ) {
-                    obj2.reset();
-                } else {
-                    obj2.applyZoom( el.scale, el.translationX, el.translationY );
+                if ( obj2.shouldSync ) {
+                    obj2.syncing = true;
+                    if ( el.reset ) {
+                        obj2.reset();
+                    } else {
+                        obj2.applyZoom( el.scale, el.translationX, el.translationY );
+                    }
+                    obj2.syncing = false;
                 }
-                obj2.syncing = false;
             }
+        } else {
+            console.log('syncing disabled');
         }
     } else {
-        console.log('only one graph');
-        console.log(Object.keys(this.db).length);
+        //console.log('only one graph');
+        //console.log(Object.keys(this.db).length);
     }
 };
 
@@ -231,7 +237,7 @@ SyncSimpleGraph.prototype.deleteUid = function (uid) {
         var el = this.db[uid];
         el.close();
         delete this.db[uid];
-        console.log(this.db);
+        //console.log(this.db);
     } else {
         console.log('uid '+uid+' not present');
     }
@@ -283,10 +289,7 @@ SimpleGraph = function (chartHolder, options) {
     this.chart.className             = this.options.chartClass;
     this.chart.tabindex              = -1;
 
-    this.chartHolder.appendChild( this.chart );
-
-    this.chart                       = document.getElementById( this.elemid );
-
+    this.chart                       = this.chartHolder.appendChild( this.chart );
 
     this.scaffs                      = options.scaffs              || null;
                                                                    //              from scaffs
@@ -323,6 +326,7 @@ SimpleGraph = function (chartHolder, options) {
     this.options.ylabelDy            = options.ylabelDy            || "-2.3em";
     this.options.downloadIconMaxSize = options.downloadIconMaxSize ||  30;
     this.options.closeIconMaxSize    = options.closeIconMaxSize    ||  30;
+    this.options.padlockIconMaxSize  = options.padlockIconMaxSize  ||  30;
     this.options.compassMaxSize      = options.compassMaxSize      ||  75;
     this.options.compassMinSize      = options.compassMinSize      ||  20;
     //this.options.radius         = options.radius         || 5.0;
@@ -412,6 +416,15 @@ SimpleGraph.prototype.draw = function() {
         .attr("uid"      , this.uid);
 
 
+    this.svg
+        .append('defs')
+            .append('filter')
+                .attr('id', 'red')
+                .append('feColorMatrix')
+                    .attr('type'       , 'luminanceToAlpha')
+    ;
+
+
     this.vis = this.svg.append("g")
         .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")")
         .attr("class"    , "gvis");
@@ -496,9 +509,12 @@ SimpleGraph.prototype.draw = function() {
 
     this.addCompass();
 
-    this.addDownloadIcon();
 
     this.addCloseIcon();
+
+    this.addDownloadIcon();
+
+    this.addPadLockIcon();
 
     this.chart.focus();
 };
@@ -1232,14 +1248,15 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
 
 
 
-SimpleGraph.prototype.download = function() {
+SimpleGraph.prototype.download = function(obj) {
     var self = this;
     var doctype = '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
     var svg     = self.svg;
 
-    svg.selectAll("svg[uid="+self.uid+"] .download-icon").remove();
     svg.selectAll("svg[uid="+self.uid+"] .compass-g"    ).remove();
     svg.selectAll("svg[uid="+self.uid+"] .close-icon"   ).remove();
+    svg.selectAll("svg[uid="+self.uid+"] .download-icon").remove();
+    svg.selectAll("svg[uid="+self.uid+"] .padlock-icon").remove();
 
     var styles  = self.getStyles();
     styles      = (styles === undefined) ? "" : styles;
@@ -1309,9 +1326,11 @@ SimpleGraph.prototype.download = function() {
 
     this.addCompass();
 
+    this.addCloseIcon();
+
     this.addDownloadIcon();
 
-    this.addCloseIcon();
+    this.addPadLockIcon();
 };
 
 
@@ -1354,7 +1373,7 @@ SimpleGraph.prototype.getStyles = function() {
 
 
 
-SimpleGraph.prototype.close = function() {
+SimpleGraph.prototype.close = function(obj) {
     var el = document.getElementById( this.elemid );
 
     if ( el ) {
@@ -1386,95 +1405,20 @@ SimpleGraph.prototype.close = function() {
 
 
 
-SimpleGraph.prototype.addDownloadIcon = function() {
-    //.attr("transform", "matrix(1,0,0,-1,113.89831,1293.0169)")
-    //.attr("transform", "scale(0.05)")
+SimpleGraph.prototype.toggleLock = function(obj) {
+    var self        = this;
+    this.shouldSync = !this.shouldSync;
 
-    var self = this;
+    var padIcon = this.btns.select('#padlock-icon');
 
-    var gW   = 300;
-    var sW   = this.size.width > this.size.height ? this.size.height : this.size.width;
-    var sW10 = sW * 0.025;
-    if ( sW10 < this.options.downloadIconMaxSize ) {
-        sW10 = this.options.downloadIconMaxSize;
-    }
-
-    var wP   = sW10 / gW;
-        sW10 = gW * wP;
-    var xPos = this.size.width - (3*sW10) + this.padding.right;
-    var yPos = 0;
-
-    //console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
-    //console.log(this.options.downloadIconMaxSize);
-
-    //var g  = this.btns
-    //    .append("g"                            )
-    //        .attr("class"    , 'download-icon compass-opaque')
-    //        .attr("transform", "rotate(180) scale("+wP+")")
-    //        //.attr("transform", "translate("+xPos+","+yPos+") rotate(180) scale("+wP+")")
-    //        .on(  'click'    , function()  { self.download() } )
-    //        .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ) })
-    //        .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ) })
-    //    .append("path")
-    //        .attr("d", "m 1120,608 q 0,-12 -10,-24 L 791,265 q -9,-9 -23,-9 -14,0 -23,9 L 425,585 q -9,9 -9,23 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 v 352 q 0,13 9.5,22.5 9.5,9.5 22.5,9.5 h 192 q 13,0 22.5,-9.5 Q 896,1005 896,992 V 640 h 192 q 14,0 23,-9 9,-9 9,-23 z m 160,32 q 0,104 -40.5,198.5 Q 1199,933 1130,1002 1061,1071 966.5,1111.5 872,1152 768,1152 664,1152 569.5,1111.5 475,1071 406,1002 337,933 296.5,838.5 256,744 256,640 256,536 296.5,441.5 337,347 406,278 475,209 569.5,168.5 664,128 768,128 872,128 966.5,168.5 1061,209 1130,278 1199,347 1239.5,441.5 1280,536 1280,640 z m 256,0 Q 1536,431 1433,254.5 1330,78 1153.5,-25 977,-128 768,-128 559,-128 382.5,-25 206,78 103,254.5 0,431 0,640 0,849 103,1025.5 206,1202 382.5,1305 559,1408 768,1408 977,1408 1153.5,1305 1330,1202 1433,1025.5 1536,849 1536,640 z")
-    //;
-
-
-
-    var g1  = this.btns
-            .append("g"                            )
-                .attr("class"    , 'download-icon compass-opaque')
-                .attr("transform", "translate("+sW10+","+(sW10/10)+") scale("+wP+")")
-                .on(  'click'    , function( ) { self.download(); } )
-                .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
-                .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); });
-
-    g1.append('path')
-        .attr("style"       , "fill:#000000;fill-opacity:1;stroke:none")
-        .attr("transform"   , "matrix(1.5535248,0,0,1.5535248,83.172743,0)")
-        .attr("d"           , "m 139.90613,72.463142 a 96.722107,96.722107 0 1 1 -193.444216,0 96.722107,96.722107 0 1 1 193.444216,0 z");
-
-    var g2 = g1.append('g');
-
-    g2.append('path')
-        .attr("style"       , "fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
-        .attr("transform"   , "matrix(0.92827428,0.00326311,-0.00213854,0.60836285,113.39003,55.97555)")
-        .attr("d"           , "m -55.558393,104.53548 95.913655,-1.83769 95.913648,-1.83769 -46.365336,83.98251 -46.365337,83.9825 -49.5483166,-82.14482 z");
-
-    g2.append('rect')
-        .attr("style"       , "fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
-        .attr("width"       , "41.921329")
-        .attr("height"      , "138.89598")
-        .attr("x"           , "129.29953")
-        .attr("y"           , "10.319729")
-        .attr("d"           , "");
-
-//<g
-//     transform="translate(0,-752.36218)"
-//     id="layer1">
-//    <path
-//       d="m 139.90613,72.463142 a 96.722107,96.722107 0 1 1 -193.444216,0 96.722107,96.722107 0 1 1 193.444216,0 z"
-//       transform="matrix(1.5535248,0,0,1.5535248,83.172743,790.03378)"
-//       id="path2985"
-//       style="fill:#000000;fill-opacity:1;stroke:none" />
-//  </g>
-//  <g
-//     id="layer2">
-//    <path
-//       d="m -55.558393,104.53548 95.913655,-1.83769 95.913648,-1.83769 -46.365336,83.98251 -46.365337,83.9825 -49.5483166,-82.14482 z"
-//       transform="matrix(0.92827428,0.00326311,-0.00213854,0.60836285,113.39003,118.97555)"
-//       id="path2990"
-//       style="fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-//    <rect
-//       width="41.921329"
-//       height="138.89598"
-//       x="129.29953"
-//       y="29.319729"
-//       id="rect3762"
-//       style="fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-//  </g>
-//
-
+    padIcon.each( function(d,i) {
+        console.log( this );
+        if (self.shouldSync) {
+            d3.select(this).attr('filter', '');
+        } else {
+            d3.select(this).attr('filter', 'url(#red)');
+        }
+    });
 };
 
 
@@ -1651,32 +1595,36 @@ SimpleGraph.prototype.addCompass = function() {
 
 
 
-SimpleGraph.prototype.addCloseIcon = function() {
-    var self   = this;
-
-    var gW     = 300;
-    var sW     = this.size.width > this.size.height ? this.size.height : this.size.width;
-    var sW10   = sW * 0.025;
-    if ( sW10 < this.options.closeIconMaxSize ) {
-        sW10   = this.options.closeIconMaxSize;
+SimpleGraph.prototype.calcIconPos = function(gW, maxSize, coor, ord) {
+    var sW   = this.size.width > this.size.height ? this.size.height : this.size.width;
+    var sW10 = sW * 0.025;
+    if ( sW10 < maxSize ) {
+        sW10 = maxSize;
     }
 
     var wP   = sW10 / gW;
         sW10 = gW * wP;
-    var xPos = this.size.width - (2*sW10) + this.padding.right;
-    var yPos = 0 - 35;
+    var xPos = this.size.width - ((ord+1)*sW10) + this.padding.right;
+    var yPos = 0 + coor;
 
-    //console.log("cx "+this.size.width+" cy "+this.size.height+" gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP+" xpos "+xPos+" ypos "+yPos);
+    return { 'wP': wP, 'sW10': sW10 };
+};
 
+
+
+
+SimpleGraph.prototype.addCloseIcon = function() {
+    var self   = this;
+    var coords = this.calcIconPos( 300, this.options.closeIconMaxSize, 1 );
 
     var g1 = this.btns
-        .append("g"                                       )
-            .attr("class"    , 'close-icon compass-opaque')
-            //.attr("transform", "translate("+(-32 + (3*sW10))+","+-35+") scale("+wP+")")
-            .attr("transform", "translate(0,0) scale("+wP+")")
+        .append("g"                                                                               )
+            .attr("class"    , 'close-icon compass-opaque'                                        )
+            .attr("transform", "translate(0,0) scale("+coords.wP+")"                              )
+            .attr("id"       , 'close-icon'                                                       )
             .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
             .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); })
-            .on(  "click"    , function(d) { self.close(); }                                      );
+            .on(  "click"    , function(d) { self.close(this); }                                  );
 
     var g2 = g1.append('g')
         .attr('id', 'layer1');
@@ -1699,45 +1647,45 @@ SimpleGraph.prototype.addCloseIcon = function() {
         .attr("style"       , "fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
         .attr("d"           , "M 220.57402,993.62902 79.946368,811.08004");
 
-  //<g>
-  //  <path
-  //     d="m 168.26579,145.95174 a 77.85714,78.571426 0 1 1 -155.714276,0 77.85714,78.571426 0 1 1 155.714276,0 z"
-  //     transform="matrix(1.9082106,0,0,1.9082106,-22.026324,-128.37065)"
-  //     id="path3790"
-  //     style="fill:#000000;fill-opacity:1;stroke:none" />
-  //</g>
-  //<g
-  //   transform="translate(0,-752.36218)"
-  //   id="layer1"
-  //   style="display:inline">
-  //  <path
-  //     d="M 79.946368,993.62902 220.57402,811.08004"
-  //     id="path3763"
-  //     style="fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-  //  <path
-  //     d="M 220.57402,993.62902 79.946368,811.08004"
-  //     id="path3765"
-  //     style="fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    //<g>
+    //  <path
+    //     d="m 168.26579,145.95174 a 77.85714,78.571426 0 1 1 -155.714276,0 77.85714,78.571426 0 1 1 155.714276,0 z"
+    //     transform="matrix(1.9082106,0,0,1.9082106,-22.026324,-128.37065)"
+    //     id="path3790"
+    //     style="fill:#000000;fill-opacity:1;stroke:none" />
+    //</g>
+    //<g
+    //   transform="translate(0,-752.36218)"
+    //   id="layer1"
+    //   style="display:inline">
+    //  <path
+    //     d="M 79.946368,993.62902 220.57402,811.08004"
+    //     id="path3763"
+    //     style="fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    //  <path
+    //     d="M 220.57402,993.62902 79.946368,811.08004"
+    //     id="path3765"
+    //     style="fill:none;stroke:#ffffff;stroke-width:53.64802551;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
 
 
 
 
 
 
-//<svg viewBox="0 0 744.09 1052.4" version="1.1">
-// <g id="layer1">
-//  <path id="path2989" stroke-width="5" stroke="#000" transform="matrix(1.1048 0 0 1.1048 -179.21 -162.53)" d="m814.29 606.65a314.29 314.29 0 1 1 -628.57 0 314.29 314.29 0 1 1 628.57 0z"/>
-//  <g id="g3763" transform="matrix(.91837 0 0 .91837 47.587 10.944)" stroke="#fff" stroke-linecap="round" stroke-width="133.87" fill="none">
-//   <path id="path2991" d="m176.51 362.87 356.13 356.13"/>
-//   <path id="path2993" d="m532.64 362.87-356.13 356.13"/>
-//  </g>
-// </g>
-//</svg>
+    //<svg viewBox="0 0 744.09 1052.4" version="1.1">
+    // <g id="layer1">
+    //  <path id="path2989" stroke-width="5" stroke="#000" transform="matrix(1.1048 0 0 1.1048 -179.21 -162.53)" d="m814.29 606.65a314.29 314.29 0 1 1 -628.57 0 314.29 314.29 0 1 1 628.57 0z"/>
+    //  <g id="g3763" transform="matrix(.91837 0 0 .91837 47.587 10.944)" stroke="#fff" stroke-linecap="round" stroke-width="133.87" fill="none">
+    //   <path id="path2991" d="m176.51 362.87 356.13 356.13"/>
+    //   <path id="path2993" d="m532.64 362.87-356.13 356.13"/>
+    //  </g>
+    // </g>
+    //</svg>
 
-        //.attr("stroke-width", 5     )
-        //.attr("stroke"      , "#000")
-        //.attr("transform"   , "matrix(1.1048 0 0 1.1048 -179.21 -162.53)")
-        //.attr("d"           , "m814.29 606.65a314.29 314.29 0 1 1 -628.57 0 314.29 314.29 0 1 1 628.57 0z");
+    //.attr("stroke-width", 5     )
+    //.attr("stroke"      , "#000")
+    //.attr("transform"   , "matrix(1.1048 0 0 1.1048 -179.21 -162.53)")
+    //.attr("d"           , "m814.29 606.65a314.29 314.29 0 1 1 -628.57 0 314.29 314.29 0 1 1 628.57 0z");
 
     //var g2 = g1.append('g')
     //    .attr("transform"      , "matrix(.91837 0 0 .91837 47.587 10.944)")
@@ -1757,8 +1705,109 @@ SimpleGraph.prototype.addCloseIcon = function() {
 
 
 
-SimpleGraph.prototype.addPadLockIcon = function() {
+SimpleGraph.prototype.addDownloadIcon = function() {
+    var self   = this;
+    var coords = this.calcIconPos( 300, this.options.closeIconMaxSize, 2 );
+
+    var g1     = this.btns
+            .append("g"                            )
+                .attr("class"    , 'download-icon compass-opaque')
+                .attr("transform", "translate("+coords.sW10+","+(coords.sW10/10)+") scale("+coords.wP+")")
+                .attr("id"       , 'download-icon'                                                    )
+                .on(  'click'    , function( ) { self.download(this); }                               )
+                .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
+                .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); });
+
+    g1.append('path')
+        .attr("style"       , "fill:#000000;fill-opacity:1;stroke:none")
+        .attr("transform"   , "matrix(1.5535248,0,0,1.5535248,83.172743,0)")
+        .attr("d"           , "m 139.90613,72.463142 a 96.722107,96.722107 0 1 1 -193.444216,0 96.722107,96.722107 0 1 1 193.444216,0 z");
+
+    var g2 = g1.append('g');
+
+    g2.append('path')
+        .attr("style"       , "fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        .attr("transform"   , "matrix(0.92827428,0.00326311,-0.00213854,0.60836285,113.39003,55.97555)")
+        .attr("d"           , "m -55.558393,104.53548 95.913655,-1.83769 95.913648,-1.83769 -46.365336,83.98251 -46.365337,83.9825 -49.5483166,-82.14482 z");
+
+    g2.append('rect')
+        .attr("style"       , "fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        .attr("width"       , "41.921329")
+        .attr("height"      , "138.89598")
+        .attr("x"           , "129.29953")
+        .attr("y"           , "10.319729");
+
 //<g
+//     transform="translate(0,-752.36218)"
+//     id="layer1">
+//    <path
+//       d="m 139.90613,72.463142 a 96.722107,96.722107 0 1 1 -193.444216,0 96.722107,96.722107 0 1 1 193.444216,0 z"
+//       transform="matrix(1.5535248,0,0,1.5535248,83.172743,790.03378)"
+//       id="path2985"
+//       style="fill:#000000;fill-opacity:1;stroke:none" />
+//  </g>
+//  <g
+//     id="layer2">
+//    <path
+//       d="m -55.558393,104.53548 95.913655,-1.83769 95.913648,-1.83769 -46.365336,83.98251 -46.365337,83.9825 -49.5483166,-82.14482 z"
+//       transform="matrix(0.92827428,0.00326311,-0.00213854,0.60836285,113.39003,118.97555)"
+//       id="path2990"
+//       style="fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//    <rect
+//       width="41.921329"
+//       height="138.89598"
+//       x="129.29953"
+//       y="29.319729"
+//       id="rect3762"
+//       style="fill:#ffffff;fill-opacity:1;stroke:#fffffc;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//  </g>
+//
+
+};
+
+
+
+
+SimpleGraph.prototype.addPadLockIcon = function() {
+    var self   = this;
+    var coords = this.calcIconPos( 300, this.options.padlockIconMaxSize, 3 );
+
+    var g1     = this.btns
+        .append("g"                            )
+            .attr("class"    , 'padlock-icon compass-opaque'                                      )
+            .attr("transform", "translate("+(2*coords.sW10)+",0) scale("+coords.wP+")"            )
+            .attr("id"       , 'padlock-icon'                                                     )
+            .on(  'click'    , function()  { self.toggleLock(this);                              })
+            .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
+            .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); });
+
+    //background
+    g1.append('path')
+        .attr('d'        , "m 244.28571,26.428572 a 210,223.57143 0 1 1 -420,0 210,223.57143 0 1 1 420,0 z")
+        .attr('transform', "matrix(0.66803956,0,0,0.62748765,127.09579,133.4164)")
+        .attr('style'    , "fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        ;
+
+    var g2 = g1.append('g')
+        .attr('transform', "translate(0,0)");
+
+    //ring
+    g2.append('path')
+        .attr('d'        , "m 206.42857,92.14286 a 57.857143,50 0 1 1 -115.714287,0 57.857143,50 0 1 1 115.714287,0 z")
+        .attr('transform', "matrix(0.82629984,0,0,0.93614691,27.235457,34.169319)")
+        .attr('style'    , "fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        ;
+
+    // body
+    g2.append('rect')
+        .attr("style"       , "fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:33.01300049;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none")
+        .attr("width"       , "116.98698")
+        .attr("height"      , "66.986992")
+        .attr("x"           , "91.506516")
+        .attr("y"           , "149.93507")
+        ;
+
+//  <g
 //     id="layer2">
 //    <path
 //       d="m 244.28571,26.428572 a 210,223.57143 0 1 1 -420,0 210,223.57143 0 1 1 420,0 z"
@@ -1769,23 +1818,21 @@ SimpleGraph.prototype.addPadLockIcon = function() {
 //  <g
 //     transform="translate(0,-752.36218)"
 //     id="layer1" />
-//  <g
-//     id="layer4">
-//    <path
-//       d="m 206.42857,92.14286 a 57.857143,50 0 1 1 -115.714287,0 57.857143,50 0 1 1 115.714287,0 z"
-//       transform="matrix(0.82629984,0,0,0.93614691,27.235457,34.169319)"
-//       id="path3759-1"
-//       style="fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-//  </g>
-//  <g
-//     id="layer3">
-//    <rect
-//       width="116.98698"
-//       height="66.986992"
-//       x="91.506516"
-//       y="149.93507"
-//       id="rect3757"
-//       style="fill:#fcffff;fill-opacity:1;stroke:#ffffff;stroke-width:33.01300049;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-//  </g>
+//    <g     id="layer4">
+//      <path
+//         d="m 206.42857,92.14286 a 57.857143,50 0 1 1 -115.714287,0 57.857143,50 0 1 1 115.714287,0 z"
+//         transform="matrix(0.82629984,0,0,0.93614691,27.235457,34.169319)"
+//         id="path3759-1"
+//         style="fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:30;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//    </g>
+//    <g id="layer3">
+//      <rect
+//         width="116.98698"
+//         height="66.986992"
+//         x="91.506516"
+//         y="149.93507"
+//         id="rect3757"
+//         style="fill:#fcffff;fill-opacity:1;stroke:#ffffff;stroke-width:33.01300049;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+//    </g>
 
-}
+};
