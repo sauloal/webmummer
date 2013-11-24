@@ -5,7 +5,7 @@
     <title>One Graph</title>
     <style type="text/css">
         body { font: 13px sans-serif; }
-        body, html{
+        body, html {
             width  : 100%;
             height :  95%;
             padding:   0;
@@ -29,30 +29,36 @@
             padding: 0em .5em;
         }
 
-        .axis {
+		
+		
+        .grid {
             font-size: 1.0em;
         }
 
-        .x-num {
+        .grid-num-x {
 
         }
 
-        .y-num {
+        .grid-num-y {
 
         }
 
+		
+		
         .title {
 
         }
 
-        .xlabel{
+        .xlabel {
 
         }
 
-        .ylabel{
+        .ylabel {
 
         }
 
+		
+		
         .chart {
             background-color: #fff;
             width: 100%;
@@ -60,39 +66,43 @@
         }
 
         .chartfull {
-            background-color: #fff;
             width:  100%;
             height: 100%;
         }
 
         .chartpart {
-            background-color: #fff;
             width: 100%;
             height: 62%;
         }
 
         .chartquart {
-            background-color: #fff;
             width:  50%;
             height: 50%;
 			display: inline-block;
         }
 
+		
+		
         .line {
             fill: #666;
             stroke-width: 5px;
         }
 
-        .points {
-            stroke-width: 5px;
-        }
-
-        .matrix {
+		
+		
+        .graph-background {
             fill: #EEE;
         }
 
-        .grid {
+		
+        .grid-line {
             stroke: #ccc;
+        }
+
+		
+		
+        .points {
+            stroke-width: 5px;
         }
 
         .points-f {
@@ -104,6 +114,8 @@
             stroke: red;
         }
 
+		
+		
         .scaf-highlight {
             /*stroke-width: 10px;*/
         }
@@ -114,28 +126,16 @@
             /*z-index: -1;*/
         }
 
-        .htmlDiv {
-            position: absolute;
-            right: 0;
-            top: 0;
-            float: right;
-            background: #ddd;
-            text-align: right;
-            overflow: hidden;
-            transition: 1s;
-            -webkit-transition: 1s;
-        }
+		.close-icon, .download-icon, .padlock-icon, .compass-g {
+		  opacity: 0.2;
+		}
 
-        .htmlDivShow {
-            width:  50em;
-            height: 10em;
-        }
-
-        .htmlDivHide {
-            width:  2em;
-            height: 1em;
-        }
-
+		.close-icon:hover, .download-icon:hover, .padlock-icon:hover, .compass-g:hover {
+		  opacity: 1.0;
+		}
+		
+		
+		
       /*circle {
         fill: none;
         stroke: steelblue;
@@ -176,6 +176,47 @@
         .padlock-icon-white {
             fill: white;
         }
+
+		
+        .htmlDiv {
+            position: absolute;
+            right: 0;
+            top: 0;
+            float: right;
+            background: #ddd;
+            text-align: right;
+            overflow: hidden;
+			white-space: nowrap;
+            transition: 1s;
+            -webkit-transition: 1s;
+        }
+
+        .htmlDivShow {
+            width:  50em;
+            height: 10em;
+        }
+
+        .htmlDivHide {
+            width:  2em;
+            height: 1em;
+        }
+
+
+		#tipper {
+		  fill     : blue;
+		  font-size: 0.8em;
+		  position: fixed !important;
+		  right: 0;
+		  top: 2em;
+		  float: right;
+		  background: #ddd;
+		  text-align: right;
+		  overflow: hidden;
+		  white-space: nowrap;
+		  background-color: rgba(0,0,255,0.3);
+		}
+		
+		
     </style>
 
 
@@ -210,9 +251,7 @@
     <link rel="stylesheet" type="text/css" href="css/tipsy.css" />
   </head>
   <body>
-    <div id="chart1" class="chart"></div>
-    <div id="scriptholder"></div>
-    <script type="text/javascript" src="js/d3.v3.3.9.js"></script>
+	<script type="text/javascript" src="js/d3.v3.3.9.js"></script>
     <script type="text/javascript" src="js/simple-graph.js"></script>
 
     <script type="text/javascript" src="data/list.js"></script>
@@ -220,5 +259,7 @@
 
     <!--<script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>-->
     <!--<script type="text/javascript" src="js/jquery.tipsy.js"></script>-->
+
+    <div id="scriptholder"></div>
   </body>
 </html>

@@ -9,11 +9,24 @@ var chartName  = 'chart1';
 var scriptHolder = 'scriptholder';
 
 
+var bdy = document.getElementsByTagName('body')[0];
+
+var win = window,
+    doc = document,
+    del = doc.documentElement,
+    bdy = doc.getElementsByTagName('body')[0],
+    wid = win.innerWidth || del.clientWidth || bdy.clientWidth,
+    hei = win.innerHeight|| del.clientHeight|| bdy.clientHeight;
+
+
 function hasStorage() {
     try {
-        return 'localStorage' in window && window['localStorage'] !== null;
+		var res = 'localStorage' in window && window['localStorage'] !== null;
+		console.log(res);
+        return res;
     } catch(e) {
         //alert('no storage');
+		console.log('no storage');
         return false;
     }
 }
@@ -52,8 +65,6 @@ function start() {
     var sels    = document.createElement('span');
         sels.id = 'selectors';
 
-    var bdy = document.getElementsByTagName('body')[0];
-
     var bfc = bdy.firstChild;
     sels = bdy.insertBefore( sels, bfc );
 
@@ -81,7 +92,8 @@ function start() {
         pos.id = 'pos'; // creates position label
     sels.appendChild(pos);
 
-
+	var tip = document.body.appendChild( document.createElement('div') );
+		tip.id             = 'tipper';
 
 
     graphdb = new SyncSimpleGraph( {
@@ -94,7 +106,14 @@ function start() {
 
     createOptions();
 
+	
+	var chartDiv = document.createElement('div');
+	chartDiv.className = 'chart';
+	chartDiv.id        = 'chart1';
+	
+	document.body.appendChild( chartDiv );
 
+	
     if ( false ) {
         // automatically select the last option in all fields
         for ( var optName in opts ) {
@@ -113,8 +132,6 @@ function start() {
 
 
 function createOptions(){
-    var bdy = document.getElementsByTagName('body')[0];
-
     var divH = bdy.appendChild( document.createElement('div') );
     divH.className   = 'htmlDiv htmlDivHide';
     divH.onmouseover = function(e) { divH.className = 'htmlDiv htmlDivShow'; };
@@ -150,7 +167,7 @@ function createSyncs(div) {
     chkS.alt     = 'Synchronize Movement';
     chkS.type    = 'checkbox';
     chkS.onclick = function(e) { console.log('saving'); saveOpt('sync'   , chkS.checked); };
-    chkS.checked = getOpt('sync'   , false) == 'true';
+    chkS.checked = getOpt('sync'   , 'true') == 'true';
 
 
 
@@ -164,7 +181,7 @@ function createSyncs(div) {
     chkX.alt     = 'Resize X'            ;
     chkX.type    = 'checkbox';
     chkX.onclick = function(e) { saveOpt('resizeX', chkX.checked) };
-    chkX.checked = getOpt('resizeX', false) == 'true';
+    chkX.checked = getOpt('resizeX', 'true') == 'true';
 
 
 
@@ -178,26 +195,32 @@ function createSyncs(div) {
     chkY.alt     = 'Resize Y'            ;
     chkY.type    = 'checkbox';
     chkY.onclick = function(e) { saveOpt('resizeY', chkY.checked) };
-    chkY.checked = getOpt('resizeY', false) == 'true';
+    chkY.checked = getOpt('resizeY', 'true') == 'true';
 
 }
 
 
 function saveOpt (k ,v) {
-    console.log('saving k "' + k + '" v "' + v + '"');
     if ( hasstorage ) {
+		console.log('saving k "' + k + '" v "' + v + '"');
         localStorage[k] = v;
     }
 }
 
 
 function getOpt(k, d) {
-    console.log('getting ' + k);
     if ( hasstorage ) {
+		//console.log('getting ' + k);
         try {
             var res = localStorage[k];
-            console.log('getting ' + k + ' val ' + res);
-            return res;
+			//console.log('getting ' + k + ' val "' + res + '"');
+			if ( res === undefined || res === null ) {
+				console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
+				return d;
+			} else {
+				console.log('getting ' + k + ' val "' + res + '"');
+				return res;
+			}
         } catch (e) {
             return d;
         }
@@ -207,7 +230,7 @@ function getOpt(k, d) {
 }
 
 
-function createSize(div){
+function createSize(div) {
     var sizeSel         = div.appendChild(  document.createElement("select") );
         sizeSel.id      = 'size';
         sizeSel.alt     = 'Select Graphic Size';
@@ -399,6 +422,7 @@ function loadGraph( reg ) {
         "padding"   : { 'left': [120, 45] },
         "ylabelDy"  : "-3.3em",
         //"labelId"   : "pos"
+		'tipId'     : "tipper"
     });
 
     delete reg.points;

@@ -281,6 +281,7 @@ SimpleGraph = function (chartHolder, options) {
     this.points                      = options.points              ||  [0 , 0, 0, 0, 0,   0,  0.0];
 
     this.options.labelId             = options.labelId             || null;
+	this.options.tipId               = options.tipId               || null;
 
     this.options.xlabel              = options.xlabel              || 'x';
     this.options.ylabel              = options.ylabel              || 'y';
@@ -324,6 +325,7 @@ SimpleGraph = function (chartHolder, options) {
     this.chartHolder = document.getElementById( chartHolder );
     this.chart       = document.getElementById( this.elemid );
 
+	
     if ( this.chart ) {
         var pa = this.chart.parentElement;
         pa.removeChild( this.chart );
@@ -358,6 +360,7 @@ SimpleGraph = function (chartHolder, options) {
 //
 SimpleGraph.prototype.draw = function() {
     var self = this;
+	
     this.cx  = this.chart.clientWidth;
     this.cy  = this.chart.clientHeight;
 
@@ -392,7 +395,7 @@ SimpleGraph.prototype.draw = function() {
 
 
   // y-scale (inverted domain)
-    this.y     = d3.scale.linear()
+    this.y        = d3.scale.linear()
         .domain([this.options.ymax, this.options.ymin])
         .nice()
         .range([0, this.size.height])
@@ -416,11 +419,24 @@ SimpleGraph.prototype.draw = function() {
         datacount = this.size.width / this.options.split;
 
 
-    this.svg = d3.select(this.chart).append("svg")
+
+
+
+	this.chartd3 = d3.select(this.chart);
+
+    this.chartd3
+        .on("mousemove.drag", self.mousemove())
+        .on("touchmove.drag", self.mousemove())
+        .on("mouseup.drag",   self.mouseup()  )
+        .on("touchend.drag",  self.mouseup()  );
+
+
+
+    this.svg = this.chartd3.append("svg")
         .attr("width"    , this.cx         )
         .attr("height"   , this.cy         )
         .attr("class"    , "svgmain"       )
-        .attr("uid"      , this.uid);
+        .attr("uid"      , this.uid        );
 
 
     this.svg
@@ -431,71 +447,94 @@ SimpleGraph.prototype.draw = function() {
                     .attr('type'       , 'luminanceToAlpha')
     ;
 
-
-    this.vis = this.svg.append("g")
+	
+    this.vis     = this.svg.append("g")
         .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")")
         .attr("class"    , "gvis");
 
 
+    this.compass = this.svg.append("g")
+		.attr("class"    , 'compass-g')
+        .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")")
+    ;
+	
+
+    this.btns   = this.svg.append("g")
+        .attr('class', 'gbtns')
+            //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
+    ;
+
+
+
+
     this.plot = this.vis.append("rect")
-        .attr( "class"          , 'matrix'          )
-        .attr( 'id'             , 'rect_'+this.uid )
-        .attr( "width"          , this.size.width   )
-        .attr( "height"         , this.size.height  )
-        .attr( "pointer-events" , "all"             )
-        .on(   "mousedown.drag" , self.plot_drag()  )
-        .on(   "touchstart.drag", self.plot_drag()  );
+        .attr( "class"          , 'graph-background' )
+        .attr( 'id'             , 'rect_'+this.uid   )
+        .attr( "width"          , this.size.width    )
+        .attr( "height"         , this.size.height   )
+        .attr( "pointer-events" , "all"              )
+        .on(   "mousedown.drag" , self.plot_drag()   )
+        .on(   "touchstart.drag", self.plot_drag()   );
+
+
+
 
     this.zoom  = d3.behavior.zoom();
 
 
-    this.plot.call(this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
+    this.vis.call(this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
+	
 
 
     // add Chart Title
     if (this.options.title) {
         this.vis.append("text")
-            .attr("class", "axis title"        )
-            .attr("x"    , this.size.width/2   )
-            .attr("dy"   , this.options.titleDx)
-            .style("text-anchor","middle"      )
-            .text(this.options.title           );
+            .attr(  "class"      , "axis title"        )
+            .attr(  "x"          , this.size.width/2   )
+            .attr(  "dy"         , this.options.titleDx)
+            .style( "text-anchor", "middle"            )
+            .text(  this.options.title                 );
     }
 
 
     // Add the x-axis label
     if (this.options.xlabel) {
         this.vis.append("text")
-            .attr("class", "axis xlabel"     )
-            .attr("x" , this.size.width/2    )
-            .attr("y" , this.size.height     )
-            .attr("dx", this.options.xlabelDx)
-            .attr("dy", this.options.xlabelDy)
-            .style("text-anchor","middle"    )
-            .text(this.options.xlabel        );
+            .attr(  "class", "axis xlabel"      )
+            .attr(  "x" , this.size.width/2     )
+            .attr(  "y" , this.size.height      )
+            .attr(  "dx", this.options.xlabelDx )
+            .attr(  "dy", this.options.xlabelDy )
+            .style( "text-anchor","middle"      )
+            .text(  this.options.xlabel         );
     }
 
 
     // add y-axis label
     if (this.options.ylabel) {
         this.vis.append("text")
-            .attr("class"       , "axis ylabel"         )
-            .attr("x"           , this.options.ylabelX  )
-            .attr("y"           , this.options.ylabelY  )
-            .attr("dy"          , this.options.ylabelDy )
-            .attr("dx"          , this.options.ylabelDx )
-            .style("text-anchor","middle"               )
-            .attr("transform"   ,"translate(" + -40 + " " + this.size.height/2+") rotate(-90)")
-            .text(this.options.ylabel                   );
+            .attr(  "class"       , "axis ylabel"         )
+            .attr(  "x"           , this.options.ylabelX  )
+            .attr(  "y"           , this.options.ylabelY  )
+            .attr(  "dy"          , this.options.ylabelDy )
+            .attr(  "dx"          , this.options.ylabelDx )
+            .style( "text-anchor","middle"                )
+            .attr(  "transform"   ,"translate(" + -40 + " " + this.size.height/2+") rotate(-90)")
+            .text(  this.options.ylabel                   );
     }
 
-    this.btns = this.svg.append("g")
-        .attr('class', 'gbtns')
-            //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
-    ;
+	
+    this.greenbox         = this.vis
+		.append("g")
+			.attr('class', 'greenbox');
 
-    this.greenbox         = this.vis.append("g").attr('class', 'green');
+	
+    this.grid             = this.vis
+		.append("g")
+			.attr('class' , 'grid' )
+		;
 
+	
     this.lines = this.vis.append("svg")
         .attr("class"  , 'glines'        )
         .attr("width"  , this.size.width )
@@ -504,19 +543,45 @@ SimpleGraph.prototype.draw = function() {
         .attr("left"   , '0'             )
         .attr("viewbox", '0 0 '+this.size.width+' '+this.size.height);
 
-    d3.select(this.chart)
-        .on("mousemove.drag", self.mousemove())
-        .on("touchmove.drag", self.mousemove())
-        .on("mouseup.drag",   self.mouseup()  )
-        .on("touchend.drag",  self.mouseup()  );
+	
 
-    this.tip = this.vis.append('div')
-        .style('position'  , 'absolute')
-        .style('z-index'   , '10'      )
-        .style('visibility', 'hidden'  )
-        .text( 'a simple tooltip'      );
+    
+	//this.tip      = this.chart.appendChild( document.createElement('div') );
+	//var chartRect = this.chart.getBoundingClientRect();
+	//console.log( chartRect );
+	//
+	//var tipProp   = 0.1;
+	//var tipSize   = this.size.width  * tipProp;
+	//var tipX      = chartRect.right  - tipSize;
+	//var tipY      = chartRect.bottom;
+	//
+	//this.tip.setAttribute( 'class'     , 'tip'   );
+	//this.tip.style.width    = tipSize + 'px';
+	//this.tip.style.height   = tipSize + 'px';
+	//this.tip.style.top      = tipY    + 'px';
+	//this.tip.style.left     = tipX    + 'px';
+	//this.tip.style.display  = 'inline';
+	//this.tip.style.position = 'absolute';
 
+	//this.tip.style.visibility = 'hidden';
+//        .attr( "transform" , "translate("+tipX+","+tipY+")"  )
+//		;
 
+//	this.tip.append('rect')
+//        .attr( "class"     , 'tooltip'      )
+//        .attr( "rx"        , tipSize * 0.3  )
+//        .attr( "ry"        , tipSize * 0.3  )
+//        .attr( "x"         , 0              )
+//        .attr( "y"         , 0              )
+//        .attr( "width"     , tipSize + 'px' )
+//        .attr( "height"    , tipSize + 'px' )
+//		;
+
+	this.tip = null;
+	if (this.options.tipId) {
+		this.tip = document.getElementById( this.options.tipId )
+	};
+	
     this.currScale        = 1;
     this.currTranslationX = 0;
     this.currTranslationY = 0;
@@ -524,7 +589,6 @@ SimpleGraph.prototype.draw = function() {
     this.redraw()();
 
     this.addCompass();
-
 
     this.addCloseIcon();
 
@@ -542,7 +606,7 @@ SimpleGraph.prototype.update = function() {
     var self   = this;
     //var coords = [];
 
-    var lines = this.vis.selectAll("svg[uid="+self.uid+"] .points");
+    var lines = this.vis.selectAll(".points");
 
     if ( lines.size() === 0 ) {
         for (var j = 0; j < self.numRegs; j++) {
@@ -562,9 +626,6 @@ SimpleGraph.prototype.update = function() {
                         .attr("j"        , j                                               )
                         .attr("scaf"     , vars.nameNum                                    )
                         .on(  "mouseover", function(d) { self.highlight( this          ); })
-                        //.on(  "mouseout" , function(d) { self.downlight( this          ); })
-                        //.append("svg:desc")
-                            //.text( self.genTip(j)                                  )
                         ;
 
             //coords[ coords.length ] = stVal;
@@ -572,7 +633,7 @@ SimpleGraph.prototype.update = function() {
         }
 
 
-        self.vis.selectAll("svg[uid="+self.uid+"] .points").each( function(d, i){
+        self.vis.selectAll(".points").each( function(d, i){
             //var j    = this.getAttribute('j');
             var d3eventPath = new CustomEvent(
                 "d3createdPath",
@@ -654,29 +715,36 @@ SimpleGraph.prototype.downlight = function( el ) {
     var self = this;
     d3.select(el).classed( "scaf-highlight", false );
     self.greenbox.selectAll('.scaf-square').remove();
-    self.tip.style('visibility', 'hidden');
+    if (self.tip) {
+		self.tip.style.visibility = 'hidden';
+	}
 };
 
 
 
 
 SimpleGraph.prototype.highlight = function( el ) {
-    var self = this;
-    var del  = d3.select(el);
+    var self    = this;
+    var del     = d3.select(el);
+    var nameNum = del.attr('scaf');
+    var gJ      = del.attr('j');
 
-    self.tip.style('visibility', 'visible');
-
-    //console.log( self.greenbox.selectAll('#scaf-square') );
+	
     var sc = 0;
     self.greenbox.selectAll('#scaf-square').each( function(d,i){
-        //console.log(' returning' );
-        sc += 1;
+        var bsnum = d3.select(this).attr('scaf');
+		//console.log('bsnum ' + bsnum + ' vs ' + nameNum)
+		//console.log(' returning' );
+		if (bsnum == nameNum) {
+			sc += 1;
+		} else {
+			self.greenbox.selectAll('#scaf-square').remove();
+		}
     });
     if ( sc > 0 ) { return; };
 
     del.classed( "scaf-highlight", true );
 
-    var nameNum   = del.attr('scaf');
     var minX      = Number.MAX_VALUE;
     var maxX      = 0;
     var minY      = Number.MAX_VALUE;
@@ -702,6 +770,12 @@ SimpleGraph.prototype.highlight = function( el ) {
         maxY = y2 > maxY ? y2 : maxY;
     });
 
+	minX = minX * 0.95;
+	maxX = maxX * 1.05;
+	minY = minY * 0.95;
+	maxY = maxY * 1.05;
+
+	
     var lenX = maxX - minX;
     var lenY = maxY - minY;
 
@@ -717,14 +791,25 @@ SimpleGraph.prototype.highlight = function( el ) {
     //console.log("len X " + lenX + ' Y ' + lenY);
     //console.log("cx " + minX + " cy " + minY + ' width ' + lenX + ' heigth ' + lenY);
 
-    this.greenbox.append("rect")
-        .attr( "id"     , 'scaf-square')
-        .attr( "class"  , 'scaf-square')
-        .attr( "x"      , minX         )
-        .attr( "y"      , minY         )
-        .attr( "width"  , lenX         )
-        .attr( "height" , lenY         )
-        .on(  "mouseout" , function(d) { self.downlight( this          ); });
+	//console.log(el);
+	
+	if (self.tip) {
+		self.tip.style.visibility = 'visible';
+		self.tip.innerHTML        = self.genTip(gJ);
+	}
+	
+	
+    self.greenbox.append("rect")
+        .attr( "id"     , 'scaf-square' )
+        .attr( "class"  , 'scaf-square' )
+        .attr( "scaf"   , nameNum       )
+        .attr( "x"      , minX          )
+        .attr( "y"      , minY          )
+        .attr( "rx"     , lenX * 0.3    )
+        .attr( "ry"     , lenY * 0.3    )
+        .attr( "width"  , lenX          )
+        .attr( "height" , lenY          )
+        .on(   "mouseout" , function(d) { self.downlight( this          ); });
 };
 
 
@@ -846,9 +931,9 @@ SimpleGraph.prototype.mousemove = function() {
 
         if (!isNaN(self.downx)) {
             d3.select('body').style("cursor", "ew-resize");
-            var rupx   = self.x.invert(p[0]),
-                xaxis1 = self.x.domain()[0],
-                xaxis2 = self.x.domain()[1],
+            var rupx    = self.x.invert(p[0]),
+                xaxis1  = self.x.domain()[0],
+                xaxis2  = self.x.domain()[1],
                 xextent = xaxis2 - xaxis1;
 
             if (rupx !== 0) {
@@ -1077,7 +1162,7 @@ SimpleGraph.prototype.applyZoom = function(z, x, y){
     var self = this;
     console.log('applying zoom z: ' + z + ' x: ' + x + ' y: ' + y);
 
-    self.plot.call( self.zoom.scale( z ).translate([ x, y ]) );
+    self.vis.call( self.zoom.scale( z ).translate([ x, y ]) );
 
     self.redraw()();
 };
@@ -1091,6 +1176,8 @@ SimpleGraph.prototype.redraw = function() {
   return function() {
     //console.log( d3.event );
 
+	self.greenbox.selectAll('#scaf-square').remove();
+	
     var tx = function(d) {
       return "translate(" + self.x(d) + ",0)";
     },
@@ -1104,33 +1191,33 @@ SimpleGraph.prototype.redraw = function() {
     fy = self.y.tickFormat(10);
 
     // Regenerate x-ticks...
-    var gx = self.vis.selectAll("g.x")
+    var gx = self.grid.selectAll("g.grid-g-x")
         .data(self.x.ticks(self.options.xTicks), String)
         .attr("transform", tx);
 
     gx.select("text")
         .text(fx);
 
-    var gxe = gx.enter().insert("g", "a")
-        .attr("class"    , "x")
-        .attr("transform", tx );
+    var gxe = gx.enter().insert( "g", "a"   )
+        .attr("class"           , "grid-g grid-g-x"      )
+        .attr("transform"       , tx                     );
 
     gxe.append("line")
-        .attr("class" , 'grid'          )
-        .attr("y1"    , 0               )
-        .attr("y2"    , self.size.height);
+        .attr("class"           , 'grid-line grid-line-x')
+        .attr("y1"              , 0                      )
+        .attr("y2"              , self.size.height       );
 
     gxe.append("text")
-        .attr("class"        , "axis x-num"           )
-        .attr("y"            , self.size.height       )
-        .attr("dy"           , self.options.xNumbersDy)
-        .attr("text-anchor"  , "middle"               )
-        .text(fx                                      )
-        .style("cursor"      , "ew-resize"            )
-        .on("mouseover"      , function(d) { d3.select(this).style("font-weight", "bold"  ); })
-        .on("mouseout"       , function(d) { d3.select(this).style("font-weight", "normal"); })
-        .on("mousedown.drag" , self.xaxis_drag())
-        .on("touchstart.drag", self.xaxis_drag());
+        .attr( "class"          , "grid-num grid-num-x"  )
+        .attr( "y"              , self.size.height       )
+        .attr( "dy"             , self.options.xNumbersDy)
+        .attr( "text-anchor"    , "middle"               )
+        .text( fx                                        )
+        .style("cursor"         , "ew-resize"            )
+        .on(   "mouseover"      , function(d) { d3.select(this).style("font-weight", "bold"  ); })
+        .on(   "mouseout"       , function(d) { d3.select(this).style("font-weight", "normal"); })
+        .on(   "mousedown.drag" , self.xaxis_drag()      )
+        .on(   "touchstart.drag", self.xaxis_drag()      );
 
     gx.exit().remove();
 
@@ -1139,25 +1226,25 @@ SimpleGraph.prototype.redraw = function() {
 
 
     // Regenerate y-ticks...
-    var gy = self.vis.selectAll("g.y")
+    var gy = self.grid.selectAll("g.grid-g-y")
         .data(self.y.ticks(self.options.yTicks), String)
         .attr("transform", ty);
 
     gy.select("text")
         .text(fy);
 
-    var gye = gy.enter().insert("g", "a"  )
-        .attr("class"          , "y"      )
-        .attr("transform"      , ty       );
+    var gye = gy.enter().insert( "g", "a" )
+        .attr("class"          , "grid-g grid-g-y" )
+        .attr("transform"      , ty                );
 
     gye.append("line")
-        .attr("class"          , 'grid'         )
-        .attr("x1"             , 0              )
-        .attr("x2"             , self.size.width);
+        .attr("class"          , 'grid-line grid-line-y')
+        .attr("x1"             , 0                      )
+        .attr("x2"             , self.size.width        );
 
     //".35em"
     gye.append("text")
-        .attr("class"          , "axis y-num"           )
+        .attr("class"          , "grid-num grid-num-y"  )
         .attr("x"              , -3                     )
         .attr("dy"             , self.options.yNumbersDy)
         .attr("text-anchor"    , "end"                  )
@@ -1191,7 +1278,7 @@ SimpleGraph.prototype.redraw = function() {
         }
     }
 
-    self.plot.call( self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
+    self.vis.call( self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
 
     self.update();
   };
@@ -1249,7 +1336,7 @@ SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
             }
         );
 
-        self.plot.each( function (d,i) { this.dispatchEvent( d3eventZoom ); } );
+        self.vis.each( function (d,i) { this.dispatchEvent( d3eventZoom ); } );
     }
 };
 
@@ -1285,10 +1372,10 @@ SimpleGraph.prototype.download = function(obj) {
     var doctype = '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
     var svg     = self.svg;
 
-    svg.selectAll("svg[uid="+self.uid+"] .compass-g"    ).remove();
-    svg.selectAll("svg[uid="+self.uid+"] .close-icon"   ).remove();
-    svg.selectAll("svg[uid="+self.uid+"] .download-icon").remove();
-    svg.selectAll("svg[uid="+self.uid+"] .padlock-icon").remove();
+    svg.selectAll(".compass-g"    ).remove();
+    svg.selectAll(".close-icon"   ).remove();
+    svg.selectAll(".download-icon").remove();
+    svg.selectAll(".padlock-icon" ).remove();
 
     var styles  = self.getStyles();
     styles      = (styles === undefined) ? "" : styles;
@@ -1457,7 +1544,6 @@ SimpleGraph.prototype.toggleLock = function(obj) {
 
 
 SimpleGraph.prototype.addCompass = function() {
-        //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")")
     var gW     = 42;
     var startX = 50;
     var startY = 50;
@@ -1496,15 +1582,12 @@ SimpleGraph.prototype.addCompass = function() {
 
     //console.log("gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP);
 
-    var g = this.vis
-        .append("g"                            )
-            .attr("class"    , 'compass-g compass-opaque')
-            .attr("transform", "translate(0,0) scale("+wP+")")
-            .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
-            .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); });
-
     // big circle
-    g.append("circle")
+	this.compass
+        .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ") scale("+wP+")");
+
+	
+    this.compass.append("circle")
         .attr("class"  , 'compass-bg')
         .attr("cx"     , startX      )
         .attr("cy"     , startY      )
@@ -1514,29 +1597,29 @@ SimpleGraph.prototype.addCompass = function() {
 
 
     // arrows
-    g.append('path')
+    this.compass.append('path')
         .attr('class', 'compass-button'                   )
         .attr('d'    , "M50 10 l12 20 a40,70 0 0,0 -24,0z")
         .on('click'  ,  function() { self.mover('t'); }    ); //t
 
-    g.append('path')
+    this.compass.append('path')
         .attr('class', 'compass-button'                    )
         .attr('d'    , "M90 50 l-20 -12 a70,40 0 0,1 0,24z")
         .on('click'  ,  function() { self.mover('r'); }     ); // r
 
-    g.append('path')
+    this.compass.append('path')
         .attr('class', 'compass-button'                    )
         .attr('d'    , "M50 90 l12 -20 a40,70 0 0,1 -24,0z")
         .on('click'  ,  function() { self.mover('b'); }     ); // b
 
-    g.append('path')
+    this.compass.append('path')
         .attr('class', 'compass-button'                   )
         .attr('d'    , "M10 50 l20 -12 a70,40 0 0,0 0,24z")
         .on('click'  ,  function() { self.mover('l'); }    ); // l
 
 
     //white center
-    g.append('circle')
+    this.compass.append('circle')
         .attr('class', 'compass')
         .attr("cx"   , startX   )
         .attr("cy"   , startY   )
@@ -1545,7 +1628,7 @@ SimpleGraph.prototype.addCompass = function() {
 
     //zoom buttons
     //zoom buttons - minus
-    var gm = g.append('g')
+    var gm = this.compass.append('g')
           .on('click'  , function() { self.mover('-'); } );
 
         gm.append('circle')
@@ -1562,7 +1645,7 @@ SimpleGraph.prototype.addCompass = function() {
           .attr('height', rb/3                );
 
     //zoom buttons - plus
-    var gp = g.append('g')
+    var gp = this.compass.append('g')
           .on('click'  ,  function() { self.mover('+'); } );
 
         gp.append('circle')
@@ -1587,7 +1670,7 @@ SimpleGraph.prototype.addCompass = function() {
           .attr('height', rb                  );
 
     //zoom buttons - zero
-    var gz = g.append('g')
+    var gz = this.compass.append('g')
           .on('click'  ,  function() { self.mover('0'); } );
 
         gz.append('circle')
@@ -1650,13 +1733,11 @@ SimpleGraph.prototype.addCloseIcon = function() {
     var coords = this.calcIconPos( 300, this.options.closeIconMaxSize, 1 );
 
     var g1 = this.btns
-        .append("g"                                                                               )
-            .attr("class"    , 'close-icon compass-opaque'                                        )
-            .attr("transform", "translate(0,0) scale("+coords.wP+")"                              )
-            .attr("id"       , 'close-icon'                                                       )
-            .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
-            .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); })
-            .on(  "click"    , function(d) { self.close(this); }                                  );
+        .append("g"                                                                )
+            .attr("class"    , 'close-icon'                                        )
+            .attr("transform", "translate(0,0) scale("+coords.wP+")"               )
+            .attr("id"       , 'close-icon'                                        )
+            .on(  "click"    , function(d) { self.close(this); }                   );
 
     var g2 = g1.append('g')
         .attr('id', 'layer1');
@@ -1743,12 +1824,10 @@ SimpleGraph.prototype.addDownloadIcon = function() {
 
     var g1     = this.btns
             .append("g"                            )
-                .attr("class"    , 'download-icon compass-opaque')
+                .attr("class"    , 'download-icon'                                                       )
                 .attr("transform", "translate("+coords.sW10+","+(coords.sW10/10)+") scale("+coords.wP+")")
-                .attr("id"       , 'download-icon'                                                    )
-                .on(  'click'    , function( ) { self.download(this); }                               )
-                .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
-                .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); });
+                .attr("id"       , 'download-icon'                                                       )
+                .on(  'click'    , function( ) { self.download(this); }                                  );
 
     g1.append('path')
         .attr("style"       , "fill:#000000;fill-opacity:1;stroke:none")
@@ -1805,13 +1884,11 @@ SimpleGraph.prototype.addPadLockIcon = function() {
     var coords = this.calcIconPos( 300, this.options.padlockIconMaxSize, 3 );
 
     var g1     = this.btns
-        .append("g"                            )
-            .attr("class"    , 'padlock-icon compass-opaque'                                      )
-            .attr("transform", "translate("+(2*coords.sW10)+",0) scale("+coords.wP+")"            )
-            .attr("id"       , 'padlock-icon'                                                     )
-            .on(  'click'    , function()  { self.toggleLock(this);                              })
-            .on(  "mouseover", function(d) { d3.select(this).classed( "compass-opaque", false ); })
-            .on(  "mouseout" , function(d) { d3.select(this).classed( "compass-opaque", true  ); });
+        .append("g"                                                                    )
+            .attr("class"    , 'padlock-icon'                                          )
+            .attr("transform", "translate("+(2*coords.sW10)+",0) scale("+coords.wP+")" )
+            .attr("id"       , 'padlock-icon'                                          )
+            .on(  'click'    , function()  { self.toggleLock(this);                   });
 
     //background
     g1.append('path')
