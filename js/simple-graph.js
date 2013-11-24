@@ -510,6 +510,13 @@ SimpleGraph.prototype.draw = function() {
         .on("mouseup.drag",   self.mouseup()  )
         .on("touchend.drag",  self.mouseup()  );
 
+    this.tip = this.vis.append('div')
+        .style('position'  , 'absolute')
+        .style('z-index'   , '10'      )
+        .style('visibility', 'hidden'  )
+        .text( 'a simple tooltip'      );
+
+
     this.currScale        = 1;
     this.currTranslationX = 0;
     this.currTranslationY = 0;
@@ -556,6 +563,8 @@ SimpleGraph.prototype.update = function() {
                         .attr("scaf"     , vars.nameNum                                    )
                         .on(  "mouseover", function(d) { self.highlight( this          ); })
                         //.on(  "mouseout" , function(d) { self.downlight( this          ); })
+                        //.append("svg:desc")
+                            //.text( self.genTip(j)                                  )
                         ;
 
             //coords[ coords.length ] = stVal;
@@ -645,6 +654,7 @@ SimpleGraph.prototype.downlight = function( el ) {
     var self = this;
     d3.select(el).classed( "scaf-highlight", false );
     self.greenbox.selectAll('.scaf-square').remove();
+    self.tip.style('visibility', 'hidden');
 };
 
 
@@ -654,17 +664,18 @@ SimpleGraph.prototype.highlight = function( el ) {
     var self = this;
     var del  = d3.select(el);
 
-    console.log( self.greenbox.selectAll('#scaf-square') );
+    self.tip.style('visibility', 'visible');
+
+    //console.log( self.greenbox.selectAll('#scaf-square') );
     var sc = 0;
     self.greenbox.selectAll('#scaf-square').each( function(d,i){
-        console.log(' returning' );
+        //console.log(' returning' );
         sc += 1;
     });
     if ( sc > 0 ) { return; };
 
     del.classed( "scaf-highlight", true );
 
-    var self      = this;
     var nameNum   = del.attr('scaf');
     var minX      = Number.MAX_VALUE;
     var maxX      = 0;
