@@ -267,29 +267,12 @@ SyncSimpleGraph.prototype.d3closed = function (e) {
 /////////////////////////////////////
 SimpleGraph = function (chartHolder, options) {
     var self                         = this;
+
     this.uid                         = options.uid                 || 'uid_' + new Date();
 
     this.options                     = options                     || {};
 
-    this.elemid                      = 'div_' + this.uid;
-
-    console.log(' adding '+this.elemid+' to ' + chartHolder );
-
-    this.chartHolder = document.getElementById( chartHolder );
-    this.chart       = document.getElementById( this.elemid );
-
-    if ( this.chart ) {
-        var pa = this.chart.parentElement;
-        pa.removeChild( this.chart );
-    }
-
-	this.options.chartClass          = options.chartClass           || 'chartpart';
-    this.chart                       = document.createElement('div');
-    this.chart.id                    = this.elemid;
-    this.chart.className             = this.options.chartClass;
-    this.chart.tabindex              = -1;
-
-    this.chart                       = this.chartHolder.appendChild( this.chart );
+	this.options.chartClass          = options.chartClass          || 'chartpart';
 
     this.scaffs                      = options.scaffs              || null;
                                                                    //              from scaffs
@@ -324,18 +307,42 @@ SimpleGraph = function (chartHolder, options) {
     this.options.ylabelY             = options.ylabelY             || 0;
     this.options.ylabelDx            = options.ylabelDx            || "0em";
     this.options.ylabelDy            = options.ylabelDy            || "-2.3em";
-    this.options.downloadIconMaxSize = options.downloadIconMaxSize ||  30;
-    this.options.closeIconMaxSize    = options.closeIconMaxSize    ||  30;
-    this.options.padlockIconMaxSize  = options.padlockIconMaxSize  ||  30;
+    this.options.downloadIconMaxSize = options.downloadIconMaxSize ||  20;
+    this.options.closeIconMaxSize    = options.closeIconMaxSize    ||  20;
+    this.options.padlockIconMaxSize  = options.padlockIconMaxSize  ||  20;
     this.options.compassMaxSize      = options.compassMaxSize      ||  75;
     this.options.compassMinSize      = options.compassMinSize      ||  20;
     //this.options.radius         = options.radius         || 5.0;
 
-    this.syncing    = false;
-    this.shouldSync = true;
 
-    this.regSize = 7;
-    this.numRegs = (this.points.length / this.regSize);
+
+
+    this.elemid                      = 'div_' + this.uid;
+
+    console.log(' adding '+this.elemid+' to ' + chartHolder );
+
+    this.chartHolder = document.getElementById( chartHolder );
+    this.chart       = document.getElementById( this.elemid );
+
+    if ( this.chart ) {
+        var pa = this.chart.parentElement;
+        pa.removeChild( this.chart );
+    }
+
+
+    this.chart                       = document.createElement('div');
+    this.chart.id                    = this.elemid;
+    this.chart.className             = this.options.chartClass;
+    this.chart.tabindex              = -1;
+
+    this.chart                       = this.chartHolder.appendChild( this.chart );
+
+    this.syncing                     = false;
+    this.shouldSync                  = true;
+
+    this.regSize                     = 7;
+    this.numRegs                     = (this.points.length / this.regSize);
+
     console.log("num vals " + this.points.length);
     console.log("num regs " + this.numRegs);
 
@@ -487,6 +494,8 @@ SimpleGraph.prototype.draw = function() {
             //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
     ;
 
+    this.greenbox         = this.vis.append("g").attr('class', 'green');
+
     this.lines = this.vis.append("svg")
         .attr("class"  , 'glines'        )
         .attr("width"  , this.size.width )
@@ -546,7 +555,7 @@ SimpleGraph.prototype.update = function() {
                         .attr("j"        , j                                               )
                         .attr("scaf"     , vars.nameNum                                    )
                         .on(  "mouseover", function(d) { self.highlight( this          ); })
-                        .on(  "mouseout" , function(d) { self.downlight( this          ); })
+                        //.on(  "mouseout" , function(d) { self.downlight( this          ); })
                         ;
 
             //coords[ coords.length ] = stVal;
@@ -635,14 +644,24 @@ SimpleGraph.prototype.update = function() {
 SimpleGraph.prototype.downlight = function( el ) {
     var self = this;
     d3.select(el).classed( "scaf-highlight", false );
-    self.vis.selectAll('.scaf-square').remove();
+    self.greenbox.selectAll('.scaf-square').remove();
 };
 
 
 
 
 SimpleGraph.prototype.highlight = function( el ) {
-    var del = d3.select(el);
+    var self = this;
+    var del  = d3.select(el);
+
+    console.log( self.greenbox.selectAll('#scaf-square') );
+    var sc = 0;
+    self.greenbox.selectAll('#scaf-square').each( function(d,i){
+        console.log(' returning' );
+        sc += 1;
+    });
+    if ( sc > 0 ) { return; };
+
     del.classed( "scaf-highlight", true );
 
     var self      = this;
@@ -687,12 +706,14 @@ SimpleGraph.prototype.highlight = function( el ) {
     //console.log("len X " + lenX + ' Y ' + lenY);
     //console.log("cx " + minX + " cy " + minY + ' width ' + lenX + ' heigth ' + lenY);
 
-    this.vis.append("rect")
-      .attr( "class"  , 'scaf-square')
-      .attr( "x"      , minX         )
-      .attr( "y"      , minY         )
-      .attr( "width"  , lenX         )
-      .attr( "height" , lenY         );
+    this.greenbox.append("rect")
+        .attr( "id"     , 'scaf-square')
+        .attr( "class"  , 'scaf-square')
+        .attr( "x"      , minX         )
+        .attr( "y"      , minY         )
+        .attr( "width"  , lenX         )
+        .attr( "height" , lenY         )
+        .on(  "mouseout" , function(d) { self.downlight( this          ); });
 };
 
 
