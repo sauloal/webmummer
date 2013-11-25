@@ -115,7 +115,7 @@ var csss = {
                 'fill': {
                         'type'   : 'color',
                         'value'  : '#EEEEEE',
-                        'alt'    : 'Graphic background'
+                        'alt'    : 'Graphic background color'
                 },
     },
 
@@ -135,7 +135,7 @@ var csss = {
                     'step'   : 0.5,
                     'value'  : 5,
                     'unity'  : 'px',
-                    'alt'    : 'Data line color'
+                    'alt'    : 'Data line width'
                 }
     },
 

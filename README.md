@@ -7,15 +7,18 @@ Conversion
 ------------
 Given a set of .delta files, delta2js.py will convert those to javascript (under data/ folder) and create a list.js file.
 
+
 Opening
 -------
-By opening index.html in a browser (preferably not IE), choose reference, chromosome, target species and status.
+By opening index.html in a browser (not Internet Explorer), choose reference, chromosome, target species and status.
+
 
 Navigation
 -----------
 The dot plot will be shown and can be browsed with either the keyboard or mouse.
 
 Use arrow keys, +/-/0, drag with mouse, [shift] double-click, scroll-wheel or use the compass.
+
 
 Screenshot
 -------------
@@ -26,7 +29,13 @@ Screenshot
 
 Saving
 -------
-On the top right corther there's a button to save the current view to a svg file.
+On the top left corther of each graph there's a button to save the current view to a svg file.
+
+
+Help
+-------
+On the top right corther there's a help message. Hover over it to all configurations and help available.
+
 
 Thanks
 -------
@@ -36,17 +45,19 @@ Thanks
 * Tipsy       - http://onehackoranother.com/projects/jquery/tipsy/
 * Stepheneb   - http://bl.ocks.org/stepheneb/1182434
 * SVG Crowbar - http://nytimes.github.io/svg-crowbar/
+* SMO script  - http://www.shawnolson.net
+
 
 Technical details
 -------------------
 ### js/setup.js
-agnostic of the project, gets all data from list.js, creates the drop-down lists and plots when requested.
+Agnostic of the project, gets all data from list.js, creates the drop-down lists and plots when requested.
 
 ### js/simple-graph.js
-workhorse of the graphics library
+Workhorse of the graphics library
 
 ### index.html
-contains the relevant css for coloring the graph.
+Contains the relevant css for coloring the graph.
 
 ### delta2js.py
 Delta files are parsed and converted to cartesian coordinates by delta2js.py.
@@ -62,6 +73,7 @@ In data/list.js, also list the x/y labels and graphic title.
 deltajs.py MUST be modified to your own project file naming.
 
 data/list.js can also be created manually.
+
 
 #### Run
 ``` bash
@@ -113,16 +125,18 @@ filelist[ 'solanum lycopersicum heinz' ][ '12' ][ 'solanum pennellii' ][ 'Clean 
 TODO
 --------
 ### Priority
-- [ ] allow for multiple plots
 - [ ] better keyboard zoom
+- [ ] allow parallel display
+- [ ] sync resize axis
+- [x] allow for multiple plots
 - [x] highlight same scaffold
-- [ ] clean out-of-graph lines
+- [x] clean out-of-graph lines
 
 ### Optional
-- [ ] use jquery-ui to drop-down lists
-- [ ] allow enablig circles
+~~ - [ ] use jquery-ui to drop-down lists ~~
+~~ - [ ] allow enablig circles ~~
 - [x] replace all jquery selector for d3 selector in simple-graph.js
-- [ ] disable auto load
+- [x] disable auto load
 
 
 IMAGES
