@@ -233,7 +233,7 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
 
 SyncSimpleGraph.prototype.deleteUid = function (uid) {
     if (this.db[uid]) {
-        console.log('has uid '+this.db.uid);
+        //console.log('has uid ' + uid + ' ' + this.db[uid]);
         var el = this.db[uid];
         el.close();
         delete this.db[uid];
@@ -293,12 +293,12 @@ SimpleGraph = function (chartHolder, options) {
     this.options.ylabel              = options.ylabel              || 'y';
     this.options.title               = options.title               || 'no title';
 
-    this.options.xTicks              = options.xTicks              || 10;
-    this.options.yTicks              = options.yTicks              || 10;
+    this.options.xTicks              = options.xTicks              || 5;
+    this.options.yTicks              = options.yTicks              || 5;
     this.options.paddingTop          = options.paddingTop          || 40;
     this.options.paddingRight        = options.paddingRight        || 30;
     this.options.paddingBottom       = options.paddingBottom       || 60;
-    this.options.paddingLeft         = options.paddingLeft         || 70;
+    this.options.paddingLeft         = options.paddingLeft         || 120;
     this.options.titleDy             = options.titleDy             || -0.8;
     this.options.xNumbersDy          = options.xNumbersDy          || 1;
     this.options.yNumbersDy          = options.yNumbersDy          || 0.35;
@@ -307,7 +307,7 @@ SimpleGraph = function (chartHolder, options) {
     this.options.ylabelX             = options.ylabelX             || 0;
     this.options.ylabelY             = options.ylabelY             || 0;
     this.options.ylabelDx            = options.ylabelDx            || 0;
-    this.options.ylabelDy            = options.ylabelDy            || -2.3;
+    this.options.ylabelDy            = options.ylabelDy            || -3.3;
     this.options.downloadIconMaxSize = options.downloadIconMaxSize ||  20;
     this.options.closeIconMaxSize    = options.closeIconMaxSize    ||  20;
     this.options.padlockIconMaxSize  = options.padlockIconMaxSize  ||  20;
@@ -365,10 +365,21 @@ SimpleGraph = function (chartHolder, options) {
     this.shouldSync                  = true;
 
     this.regSize                     = 7;
-    this.numRegs                     = (this.points.length / this.regSize);
 
-    console.log("num vals " + this.points.length);
-    console.log("num regs " + this.numRegs);
+    this.parallel                    = false;
+    if ( Object.prototype.toString.call(this.points[0]) === '[object Array]' ) {
+        this.parallel    = true;
+        this.parallelNum = this.points.length;
+        for ( var p = 0; p < this.parallelNum; p++ ) {
+            this.numRegs.push( this.points[p].length / this.regSize );
+            console.log("num regs #" + p + ": " + this.numRegs[p]);
+        }
+    } else {
+        this.numRegs                     = (this.points.length / this.regSize);
+        console.log("num regs " + this.numRegs);
+    }
+
+
 
     this.draw();
 };
@@ -827,8 +838,8 @@ SimpleGraph.prototype.highlight = function( el ) {
         .attr( "scaf"   , nameNum       )
         .attr( "x"      , minX          )
         .attr( "y"      , minY          )
-        .attr( "rx"     , lenX * 0.3    )
-        .attr( "ry"     , lenY * 0.3    )
+        //.attr( "rx"     , lenX * 0.3    )
+        //.attr( "ry"     , lenY * 0.3    )
         .attr( "width"  , lenX          )
         .attr( "height" , lenY          )
         .on(   "mouseout" , function(d) { self.downlight( this          ); });
@@ -1516,18 +1527,19 @@ SimpleGraph.prototype.getStyles = function() {
 
 SimpleGraph.prototype.close = function(obj) {
     var el = document.getElementById( this.elemid );
+    var self = this;
 
     if ( el ) {
-        console.log('has el');
+        //console.log('has el');
         var pa = el.parentElement;
 
         var d3eventClose = new CustomEvent(
             "d3close",
             {
                 detail: {
-                    message: 'd3 has close',
+                    message: 'd3 has closed',
                     self   : self,
-                    el     : this,
+                    el     : el,
                     time   : new Date()
                 },
                 bubbles   : true,
@@ -1535,11 +1547,11 @@ SimpleGraph.prototype.close = function(obj) {
             }
         );
 
-        console.log('removing child');
+        //console.log('removing child');
         pa.removeChild( el );
-        console.log('dispatching event');
+        //console.log('dispatching event');
         pa.dispatchEvent( d3eventClose );
-        console.log('leaving');
+        //console.log('leaving');
     }
 };
 
@@ -1553,7 +1565,7 @@ SimpleGraph.prototype.toggleLock = function(obj) {
     var padIcon = this.btns.select('#padlock-icon');
 
     padIcon.each( function(d,i) {
-        console.log( this );
+        //console.log( this );
         if (self.shouldSync) {
             d3.select(this).attr('filter', '');
         } else {
@@ -1903,7 +1915,7 @@ SimpleGraph.prototype.addDownloadIcon = function() {
 
 SimpleGraph.prototype.addPadLockIcon = function() {
     var self   = this;
-    var coords = this.calcIconPos( 300, this.options.padlockIconMaxSize, 3 );
+    var coords = this.calcIconPos( 280, this.options.padlockIconMaxSize, 3 );
 
     var g1     = this.btns
         .append("g"                                                                    )

@@ -22,7 +22,6 @@ var win = window,
 function hasStorage() {
     try {
 		var res = 'localStorage' in window && window['localStorage'] !== null;
-		console.log(res);
         return res;
     } catch(e) {
         //alert('no storage');
@@ -93,24 +92,6 @@ var csss = {
                 }
     },
 
-    //'.line': {
-    //            'fill': {
-    //                    'type'   : 'color',
-    //                    'value'  : '#666666',
-    //                    'alt'    : ''
-    //            },
-    //
-    //            'stroke-width': {
-    //                    'type'   : 'range',
-    //                    'min'    : 0,
-    //                    'max'    : 100,
-    //                    'step'   : 0.5,
-    //                    'value'  : 5,
-    //                    'unity'  : 'px',
-    //                    'alt'    : ''
-    //            }
-    //},
-
     '.graph-background': {
                 'fill': {
                         'type'   : 'color',
@@ -178,6 +159,14 @@ var csss = {
                         'step'   : 0.01,
                         'value'  : 0.4,
                         'alt'    : 'Scaffold highligh box opacity'
+                }
+    },
+
+    '#tipper': {
+        'fill': {
+                        'type'   : 'color',
+                        'value'  : '#0000FF',
+                        'alt'    : 'Tooltip color'
                 }
     }
 };
@@ -343,10 +332,27 @@ var positions = {
                     'step'   :   1,
                     'value'  :  20,
                     'alt'    : 'Compass min size'
-    },
+    }
 };
 
 
+var syncFields = {
+    'sync': {
+                'type'   : 'checkbox',
+                'value'  :  true,
+                'alt'    : 'Synchronize Movement'
+    },
+    'resizeX': {
+                'type'   : 'checkbox',
+                'value'  :  true,
+                'alt'    : 'Resize X'
+    },
+    'resizeY': {
+                'type'   : 'checkbox',
+                'value'  :  false,
+                'alt'    : 'Resize Y'
+    }
+};
 
 
 
@@ -361,7 +367,6 @@ function start() {
     /*
      * Creates page elements
      */
-    //$('#chart1').html( 'please select' );
 
     var sels    = document.createElement('span');
         sels.id = 'selectors';
@@ -398,9 +403,13 @@ function start() {
 
 
     graphdb = new SyncSimpleGraph( {
-        sync   : function () { return document.getElementById('sync'   ).checked; },
-        resizeX: function () { return document.getElementById('resizeX').checked; },
-        resizeY: function () { return document.getElementById('resizeY').checked; }
+
+        sync   : function () { return getOpt( 'sync'   , true  ); },
+        resizeX: function () { return getOpt( 'resizeX', true  ); },
+        resizeY: function () { return getOpt( 'resizeY', false ); }
+        //sync   : function () { return document.getElementById('sync'   ).checked; },
+        //resizeX: function () { return document.getElementById('resizeX').checked; },
+        //resizeY: function () { return document.getElementById('resizeY').checked; }
     });
     //graphdb = new SyncSimpleGraph( true );
 
@@ -408,9 +417,9 @@ function start() {
     createOptions();
 
 
-	var chartDiv = document.createElement('div');
+	var chartDiv       = document.createElement('div');
 	chartDiv.className = 'chart';
-	chartDiv.id        = 'chart1';
+	chartDiv.id        = chartName;
 
 	document.body.appendChild( chartDiv );
 
@@ -448,21 +457,30 @@ function addPicker(el, id, cls, nfo, callback) {
 
     var lbl1       = document.createElement('label');
     lbl1.htmlFor   = sel.id;
-    lbl1.innerHTML = sel.id;
+    lbl1.innerHTML = "<b>" + sel.id + "</b>";
 
     if (sel.alt) {
-        lbl1.innerHTML = sel.alt;
+        lbl1.innerHTML = "<b>" + sel.alt + "</b>";
     }
 
     trD1.appendChild(lbl1);
 
+    var unity = sel.unity;
 
     var lbl2       = document.createElement('label');
     lbl2.htmlFor   = sel.id;
     lbl2.id        = sel.id + '_label';
     lbl2.innerHTML = sel.value;
 
+    if (unity) {
+        lbl2.innerHTML = sel.value + unity;
+    }
+
     trD3.appendChild(lbl2);
+
+    if ( sel.type == 'checkbox' ) {
+        sel.checked = nfo.value;
+    }
 
     sel.onchange  = callback;
 }
@@ -473,15 +491,22 @@ function createCsss(el) {
     tbl.className = 'setuptable';
 
     var callback = function(e) {
-        var id   = e.srcElement.id;
-        var obj  = e.srcElement.obj;
-        var prop = e.srcElement.prop;
-        var val  = getFieldValue( id );
+        var id    = e.srcElement.id;
+        var obj   = e.srcElement.obj;
+        var prop  = e.srcElement.prop;
+        var unity = e.srcElement.unity;
+        var val   = getFieldValue( id );
+
         console.log('changing obj ' + obj + ' property ' + prop + ' value ' + val);
         saveOpt( id, val );
         changecss(obj, prop, val);
+
         var lbl = document.getElementById( id + '_label' );
         if (lbl) {
+            if (unity) {
+                val += unity;
+            }
+
             lbl.innerHTML = val;
         }
     };
@@ -496,20 +521,24 @@ function createCsss(el) {
         propsKeys.sort();
 
         for ( var propN = 0; propN < propsKeys.length; propN++ ) {
-            var tr    = tbl .appendChild( document.createElement('tr'   ) );
-
-            var prop  = propsKeys[ propN ];
-            var nfo   = props[ prop ];
-            var id    = obj + prop;
-                id    = id.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+            var tr       = tbl .appendChild( document.createElement('tr'   ) );
+            var prop     = propsKeys[ propN ];
+            var nfo      = props[ prop ];
+            var id       = obj + prop;
+                id       = id.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+            var valueDfl = nfo.value;
 
             nfo.obj      = obj;
             nfo.prop     = prop;
-            var valueDfl = nfo.value;
-            nfo.value   = getOpt( id, nfo.value );
+            nfo.value    = getOpt( id, nfo.value );
 
             if ( nfo.value !== valueDfl ) {
-                changecss(obj, prop, nfo.value);
+                var val   = nfo.value;
+                var unity = nfo.unity;
+                if (unity) {
+                    val += unity;
+                }
+                changecss(obj, prop, val);
             }
 
             addPicker(tr, id, 'csss', nfo, callback);
@@ -568,8 +597,7 @@ function createOptions(){
     var syncs             = createSyncs(divH);
     divH.appendChild( document.createElement('br') );
 
-    var sizeSel           = createSize(divH);
-    divH.appendChild( document.createElement('br') );
+
 
     var tbl          = divH.appendChild( document.createElement('table') );
     tbl.className    = 'setuptable';
@@ -596,86 +624,54 @@ function createOptions(){
 }
 
 
-function createSyncs(div) {
-    var span = div.appendChild( document.createElement('span') );
+function createSyncs(el) {
+    var span = el.appendChild( document.createElement('span') );
     span.style.display = "inline-block";
 
 
+    var tbl       = el  .appendChild( document.createElement('table') );
+    tbl.className = 'setuptable';
 
-    var lblS  = document.createElement('label');
-    lblS.innerHTML = '<b>Synchronize</b> ';
-    span.appendChild( lblS );
+    var callback = function(e) {
+        var id  = e.srcElement.id;
+        var val = getFieldValue( id );
 
-    var chkS = span.appendChild(document.createElement('input'));
-    chkS.id      = 'sync'   ;
-    chkS.alt     = 'Synchronize Movement';
-    chkS.type    = 'checkbox';
-    chkS.onclick = function(e) { console.log('saving'); saveOpt('sync'   , chkS.checked); };
-    chkS.checked = getOpt('sync'   , 'true') == 'true';
+        console.log('changing property ' + id + ' value ' + val);
 
+        saveOpt( id, val );
 
-
-
-    var lblX  = document.createElement('label');
-    lblX.innerHTML = '<b>Resize X</b> ';
-    span.appendChild( lblX );
-
-    var chkX     = span.appendChild( document.createElement('input') );
-    chkX.id      = 'resizeX';
-    chkX.alt     = 'Resize X'            ;
-    chkX.type    = 'checkbox';
-    chkX.onclick = function(e) { saveOpt('resizeX', chkX.checked) };
-    chkX.checked = getOpt('resizeX', 'true') == 'true';
-
-
-
-
-    var lblY  = document.createElement('label');
-    lblY.innerHTML = '<b>Resize Y</b> ';
-    span.appendChild( lblY );
-
-    var chkY     = span.appendChild( document.createElement('input') );
-    chkY.id      = 'resizeY';
-    chkY.alt     = 'Resize Y'            ;
-    chkY.type    = 'checkbox';
-    chkY.onclick = function(e) { saveOpt('resizeY', chkY.checked) };
-    chkY.checked = getOpt('resizeY', 'true') == 'true';
-
-}
-
-
-function saveOpt (k ,v) {
-    if ( hasstorage ) {
-		console.log('saving k "' + k + '" v "' + v + '"');
-        localStorage[k] = v;
-    }
-}
-
-
-function getOpt(k, d) {
-    if ( hasstorage ) {
-		//console.log('getting ' + k);
-        try {
-            var res = localStorage[k];
-			//console.log('getting ' + k + ' val "' + res + '"');
-			if ( res === undefined || res === null ) {
-				console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
-				return d;
-			} else {
-				console.log('getting ' + k + ' val "' + res + '"');
-				return res;
-			}
-        } catch (e) {
-            return d;
+        var lbl = document.getElementById( id + '_label' );
+        if (lbl) {
+            lbl.innerHTML = val;
         }
-    } else {
-        return d;
+    };
+
+
+
+    var posK = Object.keys( syncFields );
+    posK.sort()
+    var tr    = tbl .appendChild( document.createElement('tr'   ) );
+
+    for (var idN = 0; idN < posK.length; idN++ ) {
+        var id    = posK[idN];
+        var nfo   = syncFields[id];
+
+        nfo.value = getOpt( id, nfo.value );
+
+        addPicker(tr, id, 'positions', nfo, callback);
     }
-}
 
 
-function createSize(div) {
-    var sizeSel         = div.appendChild(  document.createElement("select") );
+
+
+
+
+    var sizeTd          = tr.appendChild(  document.createElement("td") );
+
+    var sizeLbl         = sizeTd.appendChild( document.createElement('label') );
+    sizeLbl.innerHTML   = '<b>Graphic size</b>';
+
+    var sizeSel         = sizeTd.appendChild(  document.createElement("select") );
         sizeSel.id      = 'size';
         sizeSel.alt     = 'Select Graphic Size';
 
@@ -697,13 +693,6 @@ function createSize(div) {
     }
 
     sizeSel.onchange  = function(e) { saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) ); };
-}
-
-
-function clearPics(){
-	console.log('cleaning');
-	console.log(graphdb);
-	graphdb.clear();
 }
 
 
@@ -790,6 +779,11 @@ function genSelectors(sels){
 }
 
 
+
+
+
+
+
 function loadScript( reg ){
     /*
      * Adds a <script> tag to load the database
@@ -848,29 +842,40 @@ function loadGraph( reg ) {
 
     //document.body.addEventListener('d3createdPath', addTipsy, false);
 
-    graphdb.add(chartName, {
-        "uid"       : uid,
-		"chartClass": reg.size,
-        "xmin"      : reg.xmin,
-        "xmax"      : reg.xmax,
-        "ymin"      : reg.ymin,
-        "ymax"      : reg.ymax,
-        "xlabel"    : reg.xlabel,
-        "ylabel"    : reg.ylabel,
-        "title"     : reg.title,
-        "points"    : reg.points,
-        "scaffs"    : reg.scaffs,
-        "xTicks"    : 5,
-        "yTicks"    : 5,
-        "paddingLeft": 120,
-        "ylabelDy"  : -3.3,
-        //"labelId"   : "pos"
-		"tipId"     : "tipper"
-    });
+    graphdb.add(chartName, reg);
 
     delete reg.points;
     delete reg.scaffs;
 }
+
+
+function selclick(){
+    var vals = getVals();
+    if (!vals) {
+        console.log('no vals');
+        return;
+    }
+
+    //console.log( vals );
+
+    var regs  = getRegister( vals );
+    if ( regs.length == 0 ) {
+        console.log('no reg');
+        return;
+    }
+
+	var count = 0;
+	regs.map( function(reg) {
+		var file = reg[ 'filename' ];
+		if (!file) {
+			console.log('no filename');
+		} else {
+			setTimeout( function() { loadScript( reg ); }, (Math.pow(1.5, count) * 100));
+			count += 1;
+		}
+	});
+}
+
 
 
 //function addTipsy( e ) {
@@ -897,6 +902,18 @@ function loadGraph( reg ) {
 //}
 
 
+
+
+
+
+
+function clearPics(){
+	console.log('cleaning');
+	console.log(graphdb);
+	graphdb.clear();
+}
+
+
 function getFieldValue(fieldId) {
 	var field = document.getElementById( fieldId );
     var val   = null;
@@ -904,7 +921,11 @@ function getFieldValue(fieldId) {
     if ( field.localName == 'select' ) {
         val = field.options[ field.selectedIndex ].value;
     } else {
-        val = field.value;
+        if ( field.type == 'checkbox' ) {
+            val = field.checked;
+        } else {
+            val = field.value;
+        }
     }
 
     if (val=='null') {
@@ -1001,6 +1022,29 @@ function getRegister( gvals ){
 
 	var regs = [];
 
+
+//    {
+//        "uid"       : uid,
+//		"chartClass": reg.size,
+//        "xmin"      : reg.xmin,
+//        "xmax"      : reg.xmax,
+//        "ymin"      : reg.ymin,
+//        "ymax"      : reg.ymax,
+//        "xlabel"    : reg.xlabel,
+//        "ylabel"    : reg.ylabel,
+//        "title"     : reg.title,
+//        "points"    : reg.points,
+//        "scaffs"    : reg.scaffs,
+//        "xTicks"    : 5,
+//        "yTicks"    : 5,
+//        "paddingLeft": 120,
+//        "ylabelDy"  : -3.3,
+//        //"labelId"   : "pos"
+//		"tipId"     : "tipper"
+//    })
+
+    var horizontal = getOpt( 'horizontal', false );
+
 	evals.map( function(vals) {
 		try {
 			var reg = filelist[ vals.ref ][ vals.chrom ][ vals.spp ][ vals.status ];
@@ -1009,15 +1053,34 @@ function getRegister( gvals ){
 			var uid = vals.ref + vals.chrom + vals.spp + vals.status;
 				uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
-			reg['uid'     ] = uid;
-			reg['filepath'] = datafolder + reg.filename;
-			reg['scriptid'] = 'script_'  + reg.uid;
-            reg['ref'     ] = vals.ref;
-            reg['chrom'   ] = vals.chrom;
-            reg['spp'     ] = vals.spp;
-            reg['status'  ] = vals.status;
-            reg['size'    ] = getFieldValue('size');
-			regs.push( reg );
+			reg['uid'       ] = uid;
+            reg['chartClass'] = getFieldValue('size');
+
+            reg['filepath'  ] = datafolder + reg.filename;
+			reg['scriptid'  ] = 'script_'  + reg.uid;
+            reg['ref'       ] = vals.ref;
+            reg['chrom'     ] = vals.chrom;
+            reg['spp'       ] = vals.spp;
+            reg['status'    ] = vals.status;
+
+            var posK = Object.keys( positions );
+                posK.sort()
+
+                for (var idN = 0; idN < posK.length; idN++ ) {
+                    var id    = posK[idN];
+                    var nfo   = positions[id];
+                    var dfl   = nfo.value;
+                    var curr  = getOpt( id, nfo.value );
+
+                    if ( dfl != curr ) {
+                        //console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
+                        //if nfo.
+                        reg[id] = curr;
+                    }
+                }
+
+
+            regs.push( reg );
 		}
 		catch(err) {
 			console.error('combination does not exists for:')
@@ -1039,31 +1102,33 @@ function obj2str(obj) {
 }
 
 
-function selclick(){
-    var vals = getVals();
-    if (!vals) {
-        console.log('no vals');
-        return;
+function saveOpt (k ,v) {
+    if ( hasstorage ) {
+		console.log('saving k "' + k + '" v "' + v + '"');
+        localStorage[k] = JSON.stringify( v );
     }
+};
 
-    //console.log( vals );
 
-    var regs  = getRegister( vals );
-    if ( regs.length == 0 ) {
-        console.log('no reg');
-        return;
+function getOpt(k, d) {
+    if ( hasstorage ) {
+		//console.log('getting ' + k);
+        try {
+            var res = localStorage[k];
+			//console.log('getting ' + k + ' val "' + res + '"');
+			if ( res === undefined || res === null ) {
+				console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
+				return d;
+			} else {
+				console.log('getting ' + k + ' val "' + res + '"');
+				return JSON.parse( res );
+			}
+        } catch (e) {
+            return d;
+        }
+    } else {
+        return d;
     }
-
-	var count = 0;
-	regs.map( function(reg) {
-		var file = reg[ 'filename' ];
-		if (!file) {
-			console.log('no filename');
-		} else {
-			setTimeout( function() { loadScript( reg ); }, (Math.pow(1.5, count) * 100));
-			count += 1;
-		}
-	});
 }
 
 

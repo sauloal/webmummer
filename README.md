@@ -128,19 +128,22 @@ TODO
 - [ ] better keyboard zoom
 - [ ] allow parallel display
 - [ ] sync resize axis
+- [ ] calculate maxX and maxY
+- [x] apply sizes configuration
 - [x] allow for multiple plots
 - [x] highlight same scaffold
 - [x] clean out-of-graph lines
 
 ### Optional
-~~ - [ ] use jquery-ui to drop-down lists ~~
-~~ - [ ] allow enablig circles ~~
 - [x] replace all jquery selector for d3 selector in simple-graph.js
 - [x] disable auto load
+~~ use jquery-ui to drop-down lists ~~
+~~ allow enablig circles ~~
 
 
 IMAGES
 --------------
+``` bash
 git checkout --orphan gh-pages
 rm -rf css/ data/ js/ delta2js.* index.html LICENSE.md
 rm .gitignore
@@ -150,3 +153,4 @@ git add solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean-
 git commit -am 'my first page'
 push origin gh-pages
 git checkout master
+```
