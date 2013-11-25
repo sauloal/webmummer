@@ -54,6 +54,307 @@ var sizes = {
     };
 
 
+var csss = {
+    '.chart' :  {
+                    'background-color': {
+                        'type'   : 'color',
+                        'value'  : '#FFFFFF',
+                        'alt'    : 'Chart\'s background color'
+                    }
+                },
+
+    '.grid': {
+                'font-size': {
+                        'type'   : 'range',
+                        'min'    : 0,
+                        'max'    : 100,
+                        'step'   : 0.5,
+                        'value'  : 1,
+                        'unity'  : 'em',
+                        'alt'    : 'Axis numbers font size'
+                    }
+    },
+
+    'body': {
+                'font-family': {
+                        'type'   : 'text',
+                        'value'  : 'sans-serif',
+                        'alt'    : 'Global font family'
+                },
+
+                'font-size': {
+                        'type'   : 'range',
+                        'min'    : 0,
+                        'max'    : 100,
+                        'step'   : 0.5,
+                        'value'  : 13,
+                        'unity'  : 'px',
+                        'alt'    : 'Global font size'
+                }
+    },
+
+    //'.line': {
+    //            'fill': {
+    //                    'type'   : 'color',
+    //                    'value'  : '#666666',
+    //                    'alt'    : ''
+    //            },
+    //
+    //            'stroke-width': {
+    //                    'type'   : 'range',
+    //                    'min'    : 0,
+    //                    'max'    : 100,
+    //                    'step'   : 0.5,
+    //                    'value'  : 5,
+    //                    'unity'  : 'px',
+    //                    'alt'    : ''
+    //            }
+    //},
+
+    '.graph-background': {
+                'fill': {
+                        'type'   : 'color',
+                        'value'  : '#EEEEEE',
+                        'alt'    : 'Graphic background'
+                },
+    },
+
+    '.grid-line': {
+                'stroke': {
+                        'type'   : 'color',
+                        'value'  : '#CCCCCC',
+                        'alt'    : 'Grid line color'
+                },
+    },
+
+    '.points': {
+                'stroke-width': {
+                    'type'   : 'range',
+                    'min'    : 0,
+                    'max'    : 100,
+                    'step'   : 0.5,
+                    'value'  : 5,
+                    'unity'  : 'px',
+                    'alt'    : 'Data line color'
+                }
+    },
+
+    '.points-f': {
+        //'fill': {
+        //                'type'   : 'color',
+        //                'value'  : '#0000FF',
+        //                'alt'    : 'Forward line color'
+        //        },
+        'stroke': {
+                        'type'   : 'color',
+                        'value'  : '#0000FF',
+                        'alt'    : 'Forward line color'
+                },
+    },
+
+    '.points-r': {
+        //'fill': {
+        //                'type'   : 'color',
+        //                'value'  : '#FF3300',
+        //                'alt'    : ''
+        //        },
+        'stroke': {
+                        'type'   : 'color',
+                        'value'  : '#FF3300',
+                        'alt'    : 'Reverse line color'
+                },
+    },
+
+    '.scaf-square': {
+        'fill': {
+                        'type'   : 'color',
+                        'value'  : '#33cc33',
+                        'alt'    : 'Scaffold highligh box color'
+                },
+        'opacity': {
+                        'type'   : 'range',
+                        'min'    : 0,
+                        'max'    : 1,
+                        'step'   : 0.01,
+                        'value'  : 0.4,
+                        'alt'    : 'Scaffold highligh box opacity'
+                }
+    }
+};
+
+
+var positions = {
+    'xTicks'              : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  10,
+                    'alt'    : 'Number of X ticks'
+    },
+    'yTicks'              : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  10,
+                    'alt'    : 'Number of Y ticks'
+    },
+    'paddingTop'          : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  40,
+                    'alt'    : 'Padding top'
+    },
+    'paddingRight'        : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  30,
+                    'alt'    : 'Padding right'
+    },
+    'paddingBottom'       : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  60,
+                    'alt'    : 'Padding bottom'
+    },
+    'paddingLeft'         : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  70,
+                    'alt'    : 'Padding left'
+    },
+    'titleDy'             : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 0.75,
+                    'alt'    : 'Title vertical offset'
+    },
+    'xNumbersDy'          : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 1,
+                    'alt'    : 'X axis numbers vertical offset'
+    },
+    'yNumbersDy'          : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 0.25,
+                    'alt'    : 'Y axis numbers vertical offset'
+    },
+    'xlabelDx'            : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 0,
+                    'alt'    : 'X axis label horizontal offset'
+    },
+    'xlabelDy'            : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 2.3,
+                    'alt'    : 'X axis label vertical offset'
+    },
+    'ylabelX'             : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 0,
+                    'alt'    : 'Y axis label horizontal position'
+    },
+    'ylabelY'             : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 0,
+                    'alt'    : 'Y axis label vertical position'
+    },
+    'ylabelDx'            : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : 0,
+                    'alt'    : 'Y axis label horizontal offset'
+    },
+    'ylabelDy'            : {
+                    'type'   : 'range',
+                    'min'    : -10,
+                    'max'    :  10,
+                    'step'   : 0.10,
+                    'value'  : -2.3,
+                    'alt'    : 'Y axis label vertical position'
+    },
+    'downloadIconMaxSize' : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  20,
+                    'alt'    : 'Download icon max size'
+    },
+    'closeIconMaxSize'    : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  20,
+                    'alt'    : 'Close icon max size'
+    },
+    'padlockIconMaxSize'  : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  20,
+                    'alt'    : 'Padlock icon max size'
+    },
+    'compassMaxSize'      : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  75,
+                    'alt'    : 'Compass max size'
+    },
+    'compassMinSize'      : {
+                    'type'   : 'range',
+                    'min'    :   0,
+                    'max'    : 100,
+                    'step'   :   1,
+                    'value'  :  20,
+                    'alt'    : 'Compass min size'
+    },
+};
+
+
+
+
+
+
+
+
+
+
 
 
 function start() {
@@ -106,14 +407,14 @@ function start() {
 
     createOptions();
 
-	
+
 	var chartDiv = document.createElement('div');
 	chartDiv.className = 'chart';
 	chartDiv.id        = 'chart1';
-	
+
 	document.body.appendChild( chartDiv );
 
-	
+
     if ( false ) {
         // automatically select the last option in all fields
         for ( var optName in opts ) {
@@ -127,6 +428,126 @@ function start() {
         }
 
         okb.onclick();
+    }
+};
+
+
+function addPicker(el, id, cls, nfo, callback) {
+    var trD1       = el  .appendChild( document.createElement('td'   ) );
+    var trD2       = el  .appendChild( document.createElement('td'   ) );
+    var trD3       = el  .appendChild( document.createElement('td'   ) );
+
+    var sel        = trD2.appendChild( document.createElement('input') );
+
+
+    for ( var opt in nfo ) {
+        sel[opt] = nfo[opt];
+    }
+
+    sel.id        = id;
+
+    var lbl1       = document.createElement('label');
+    lbl1.htmlFor   = sel.id;
+    lbl1.innerHTML = sel.id;
+
+    if (sel.alt) {
+        lbl1.innerHTML = sel.alt;
+    }
+
+    trD1.appendChild(lbl1);
+
+
+    var lbl2       = document.createElement('label');
+    lbl2.htmlFor   = sel.id;
+    lbl2.id        = sel.id + '_label';
+    lbl2.innerHTML = sel.value;
+
+    trD3.appendChild(lbl2);
+
+    sel.onchange  = callback;
+}
+
+
+function createCsss(el) {
+    var tbl       = el  .appendChild( document.createElement('table') );
+    tbl.className = 'setuptable';
+
+    var callback = function(e) {
+        var id   = e.srcElement.id;
+        var obj  = e.srcElement.obj;
+        var prop = e.srcElement.prop;
+        var val  = getFieldValue( id );
+        console.log('changing obj ' + obj + ' property ' + prop + ' value ' + val);
+        saveOpt( id, val );
+        changecss(obj, prop, val);
+        var lbl = document.getElementById( id + '_label' );
+        if (lbl) {
+            lbl.innerHTML = val;
+        }
+    };
+
+    var csssKeys = Object.keys(csss);
+    csssKeys.sort();
+
+    for ( var objN = 0; objN < csssKeys.length; objN++ ) {
+        var obj       = csssKeys[ objN ];
+        var props     = csss[ obj ];
+        var propsKeys = Object.keys( props );
+        propsKeys.sort();
+
+        for ( var propN = 0; propN < propsKeys.length; propN++ ) {
+            var tr    = tbl .appendChild( document.createElement('tr'   ) );
+
+            var prop  = propsKeys[ propN ];
+            var nfo   = props[ prop ];
+            var id    = obj + prop;
+                id    = id.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+
+            nfo.obj      = obj;
+            nfo.prop     = prop;
+            var valueDfl = nfo.value;
+            nfo.value   = getOpt( id, nfo.value );
+
+            if ( nfo.value !== valueDfl ) {
+                changecss(obj, prop, nfo.value);
+            }
+
+            addPicker(tr, id, 'csss', nfo, callback);
+        }
+    }
+};
+
+
+function createPositions(el) {
+    var tbl       = el  .appendChild( document.createElement('table') );
+    tbl.className = 'setuptable';
+
+    var callback = function(e) {
+        var id  = e.srcElement.id;
+        var val = getFieldValue( id );
+
+        console.log('changing property ' + id + ' value ' + val);
+
+        saveOpt( id, val );
+
+        var lbl = document.getElementById( id + '_label' );
+        if (lbl) {
+            lbl.innerHTML = val;
+        }
+    };
+
+    var posK = Object.keys( positions );
+    posK.sort()
+
+    for (var idN = 0; idN < posK.length; idN++ ) {
+        var tr    = tbl .appendChild( document.createElement('tr'   ) );
+
+        var id    = posK[idN];
+        var nfo   = positions[id];
+
+        nfo.value = getOpt( id, nfo.value );
+
+        addPicker(tr, id, 'positions', nfo, callback);
     }
 };
 
@@ -149,6 +570,29 @@ function createOptions(){
 
     var sizeSel           = createSize(divH);
     divH.appendChild( document.createElement('br') );
+
+    var tbl          = divH.appendChild( document.createElement('table') );
+    tbl.className    = 'setuptable';
+
+    var th           = tbl .appendChild( document.createElement('tr'   ) );
+    var thD11        = th  .appendChild( document.createElement('th'   ) );
+    var thD12        = th  .appendChild( document.createElement('th'   ) );
+    thD11.innerHTML  = 'Positions';
+    thD12.innerHTML  = 'CSS';
+
+    var tr           = tbl .appendChild( document.createElement('tr'   ) );
+    var trD21        = tr  .appendChild( document.createElement('td'   ) );
+    var trD22        = tr  .appendChild( document.createElement('td'   ) );
+
+    var posSel       = createPositions(trD21);
+
+    var cssSel       = createCsss(trD22);
+
+    var clsBtn       = document.createElement('button')
+    clsBtn.onclick   = function(e) { if (hasStorage) { localStorage.clear(); alert('cleaning all preferences'); location.reload() }; };
+    clsBtn.innerHTML = 'Clear';
+
+    divH.appendChild( clsBtn );
 }
 
 
@@ -407,7 +851,6 @@ function loadGraph( reg ) {
     graphdb.add(chartName, {
         "uid"       : uid,
 		"chartClass": reg.size,
-		//"chartClass": 'chartpart',
         "xmin"      : reg.xmin,
         "xmax"      : reg.xmax,
         "ymin"      : reg.ymin,
@@ -419,10 +862,10 @@ function loadGraph( reg ) {
         "scaffs"    : reg.scaffs,
         "xTicks"    : 5,
         "yTicks"    : 5,
-        "padding"   : { 'left': [120, 45] },
-        "ylabelDy"  : "-3.3em",
+        "paddingLeft": 120,
+        "ylabelDy"  : -3.3,
         //"labelId"   : "pos"
-		'tipId'     : "tipper"
+		"tipId"     : "tipper"
     });
 
     delete reg.points;
@@ -430,28 +873,28 @@ function loadGraph( reg ) {
 }
 
 
-function addTipsy( e ) {
-    $(e.detail.el).tipsy({
-            gravity: 'w',
-            html   : true,
-            title  : function() {
-                var j   = this.getAttribute('j');
-                var tip = e.detail.self.genTip( j );
-                //console.log("tip "+tip);
-                return tip;
-            }
-        });
-
-    //$('svg circle').tipsy({
-    //    gravity: 'w',
-    //    html   : true,
-    //    title  : function() {
-    //        var j   = this.getAttribute('j');
-    //        var res = genTip(self.points[j]);
-    //        return res;
-    //    }
-    //});
-}
+//function addTipsy( e ) {
+//    $(e.detail.el).tipsy({
+//            gravity: 'w',
+//            html   : true,
+//            title  : function() {
+//                var j   = this.getAttribute('j');
+//                var tip = e.detail.self.genTip( j );
+//                //console.log("tip "+tip);
+//                return tip;
+//            }
+//        });
+//
+//    //$('svg circle').tipsy({
+//    //    gravity: 'w',
+//    //    html   : true,
+//    //    title  : function() {
+//    //        var j   = this.getAttribute('j');
+//    //        var res = genTip(self.points[j]);
+//    //        return res;
+//    //    }
+//    //});
+//}
 
 
 function getFieldValue(fieldId) {
@@ -624,9 +1067,9 @@ function selclick(){
 }
 
 
-function basename(path) {
-    return path.replace(/\\/g,'/').replace( /.*\//, '' );
-}
+//function basename(path) {
+//    return path.replace(/\\/g,'/').replace( /.*\//, '' );
+//}
 
 
 
@@ -661,21 +1104,19 @@ document.addEventListener('DOMContentLoaded', start )
   options.points         ||  [ [0 ,0, 0, 0, 0,   0,  0.0] ];
   options.xTicks         || 10;
   options.yTicks         || 10;
-  options.split          || 30;
-  options.padding        || {};
-  options.padding.top    || [40, 20];
-  options.padding.right  || [30, 30];
-  options.padding.bottom || [60, 10];
-  options.padding.left   || [70, 45];
-  options.titleDx        || "-0.8em";
-  options.xNumbersDy     || "1em";
-  options.yNumbersDy     || "0.35em";
-  options.xlabelDx       || "0em";
-  options.xlabelDy       || "+2.3em";
-  options.ylabelX        || 0;
-  options.ylabelY        || 0;
-  options.ylabelDx       || "0em";
-  options.ylabelDy       || "-2.3em";
+  options.paddingTop     || 20;
+  options.paddingRight   || 30;
+  options.paddingBottom  || 10;
+  options.paddingLeft    || 45;
+  options.titleDy             || -0.8;
+  options.xNumbersDy          || 1;
+  options.yNumbersDy          || 0.35;
+  options.xlabelDx            || 0;
+  options.xlabelDy            || +2.3;
+  options.ylabelX             || 0;
+  options.ylabelY             || 0;
+  options.ylabelDx            || 0;
+  options.ylabelDy            || -2.3;
   options.downloadIconMaxSize ||  10;
   options.closeIconMaxSize    ||  30;
   options.padlockIconMaxSize  ||  30;

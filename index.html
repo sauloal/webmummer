@@ -4,7 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <title>One Graph</title>
     <style type="text/css">
-        body { font: 13px sans-serif; }
+        body {
+            font-family: sans-serif;
+            font-size: 13px;
+            /*font: 13px sans-serif;*/
+        }
         body, html {
             width  : 100%;
             height :  95%;
@@ -12,9 +16,9 @@
             margin :   0;
         }
 
-        rect {
-            fill: #fff;
-        }
+        /*rect {*/
+        /*    fill: #fff;*/
+        /*}*/
 
         ul {
             list-style-type: none;
@@ -29,8 +33,8 @@
             padding: 0em .5em;
         }
 
-		
-		
+
+
         .grid {
             font-size: 1.0em;
         }
@@ -43,8 +47,8 @@
 
         }
 
-		
-		
+
+
         .title {
 
         }
@@ -57,10 +61,10 @@
 
         }
 
-		
-		
+
+
         .chart {
-            background-color: #fff;
+            background-color: #FFFFFF;
             width: 100%;
             height: 100%;
         }
@@ -81,41 +85,35 @@
 			display: inline-block;
         }
 
-		
-		
-        .line {
-            fill: #666;
-            stroke-width: 5px;
-        }
 
-		
-		
+
         .graph-background {
-            fill: #EEE;
+            fill: #EEEEEE;
         }
 
-		
+
         .grid-line {
-            stroke: #ccc;
+            stroke: #CCCCCC;
         }
 
-		
-		
+
+
         .points {
             stroke-width: 5px;
         }
 
         .points-f {
-            fill: blue;
-            stroke: blue;
-        }
-        .points-r {
-            fill: red;
-            stroke: red;
+            fill: #0000FF;
+            stroke: #0000FF;
         }
 
-		
-		
+        .points-r {
+            fill: #FF3300;
+            stroke: #FF3300;
+        }
+
+
+
         .scaf-highlight {
             /*stroke-width: 10px;*/
         }
@@ -133,57 +131,56 @@
 		.close-icon:hover, .download-icon:hover, .padlock-icon:hover, .compass-g:hover {
 		  opacity: 1.0;
 		}
-		
-		
-		
-      /*circle {
-        fill: none;
-        stroke: steelblue;
-        stroke-width: 5px; }
 
-      circle {
-        fill: white;
-        fill-opacity: 0.2;
-        cursor: move; }
 
-      circle.selected {
-          fill: #ff7f0e;
-          stroke: #ff7f0e; }
+        /*
+        circle {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 5px; }
 
-      circle:hover {
-          fill: #ff7f0e;
-          stroke: #707f0e; }
+        circle {
+            fill: white;
+            fill-opacity: 0.2;
+            cursor: move; }
 
-      circle.selected:hover {
-          fill: #ff7f0e;
-          stroke: #ff7f0e; }*/
-    </style>
+        circle.selected {
+            fill: #ff7f0e;
+            stroke: #ff7f0e; }
 
-    <style>
+        circle:hover {
+            fill: #ff7f0e;
+            stroke: #707f0e; }
+
+        circle.selected:hover {
+            fill: #ff7f0e;
+            stroke: #ff7f0e; }
+        */
+
         .download {
-            background: #333;
-            color: #FFF;
+            background: #333333;
+            color: #FFFFFF;
             font-weight: 900;
             border: 2px solid #B10000;
             padding: 4px;
-            margin:4px;
+            margin:  4px;
         }
 
         .padlock-icon-red {
-            fill: red;
+            fill: #FF3300;
         }
 
         .padlock-icon-white {
-            fill: white;
+            fill: #FFFFFF;
         }
 
-		
+
         .htmlDiv {
             position: absolute;
             right: 0;
             top: 0;
             float: right;
-            background: #ddd;
+            background: #DDDDDD;
             text-align: right;
             overflow: hidden;
 			white-space: nowrap;
@@ -192,8 +189,8 @@
         }
 
         .htmlDivShow {
-            width:  50em;
-            height: 10em;
+            width:   50%;
+            height: 100%;
         }
 
         .htmlDivHide {
@@ -215,15 +212,18 @@
 		  white-space: nowrap;
 		  background-color: rgba(0,0,255,0.3);
 		}
-		
-		
+
+        .setuptable, .setuptable tr {
+            vertical-align: top;
+        }
+
     </style>
 
 
     <style>
         .compass{
-          fill: #fff;
-          stroke: #000;
+          fill: #FFFFFF;
+          stroke: #000000;
           stroke-width: 1.5;
         }
 
@@ -239,7 +239,7 @@
         }
 
         .compass-plus-minus{
-          fill: #fff;
+          fill: #FFFFFF;
           pointer-events: none;
         }
 
@@ -253,6 +253,7 @@
   <body>
 	<script type="text/javascript" src="js/d3.v3.3.9.js"></script>
     <script type="text/javascript" src="js/simple-graph.js"></script>
+    <script type="text/javascript" src="js/public_smo_scripts.js"></script>
 
     <script type="text/javascript" src="data/list.js"></script>
     <script type="text/javascript" src="js/setup.js"></script>
