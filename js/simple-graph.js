@@ -307,6 +307,7 @@ SimpleGraph = function (chartHolder, options) {
 
     this.options.xTicks              = options.xTicks              || 5;
     this.options.yTicks              = options.yTicks              || 5;
+    this.options.yTicksLabels        = options.yTicksLabels        || null;
     this.options.paddingTop          = options.paddingTop          || 40;
     this.options.paddingRight        = options.paddingRight        || 30;
     this.options.paddingBottom       = options.paddingBottom       || 60;
@@ -327,7 +328,6 @@ SimpleGraph = function (chartHolder, options) {
     this.options.compassMinSize      = options.compassMinSize      ||  20;
     //this.options.radius         = options.radius         || 5.0;
 
-    console.log(options);
 
     if (!this.scaffs) {
 		console.log('no scaffs');
@@ -388,18 +388,26 @@ SimpleGraph = function (chartHolder, options) {
 
     this.parallel                    = false;
 
+    this.numRegs                     = [];
+
+
     if ( Object.prototype.toString.call(this.points[0]) === '[object Array]' ) {
-        this.parallel    = true;
-        this.parallelNum = this.points.length;
-        for ( var p = 0; p < this.parallelNum; p++ ) {
-            this.numRegs.push( this.points[p].length / this.regSize );
-            console.log("num regs #" + p + ": " + this.numRegs[p]);
-        }
+        this.parallel     = true;
+
+        this.options.ymin   = 0;
+        this.options.ymax   = this.points.length + 1;
+        this.options.yTicks = this.points.length + 1;
     } else {
-        this.numRegs                     = (this.points.length / this.regSize);
-        console.log("num regs " + this.numRegs);
+        this.numRegs      = [ (this.points.length / this.regSize) ];
+        this.scaffs       = [ this.scaffs ];
+        this.points       = [ this.points ];
     }
 
+
+    for ( var p = 0; p < this.points.length; p++ ) {
+        this.numRegs.push( this.points[p].length / this.regSize );
+        console.log("num regs #" + p + ": " + this.numRegs[p]);
+    }
 
 
     this.draw();
@@ -535,8 +543,11 @@ SimpleGraph.prototype.draw = function() {
 
     this.zoom  = d3.behavior.zoom();
 
-
-    this.vis.call(this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
+    if (this.parallel) {
+        this.vis.call(this.zoom.x(this.x).on("zoom", this.redraw()));
+    } else {
+        this.vis.call(this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
+    }
 
 
 
@@ -618,18 +629,18 @@ SimpleGraph.prototype.draw = function() {
 	//this.tip.style.position = 'absolute';
 
 	//this.tip.style.visibility = 'hidden';
-//        .attr( "transform" , "translate("+tipX+","+tipY+")"  )
-//		;
+    //        .attr( "transform" , "translate("+tipX+","+tipY+")"  )
+    //		;
 
-//	this.tip.append('rect')
-//        .attr( "class"     , 'tooltip'      )
-//        .attr( "rx"        , tipSize * 0.3  )
-//        .attr( "ry"        , tipSize * 0.3  )
-//        .attr( "x"         , 0              )
-//        .attr( "y"         , 0              )
-//        .attr( "width"     , tipSize + 'px' )
-//        .attr( "height"    , tipSize + 'px' )
-//		;
+    //	this.tip.append('rect')
+    //        .attr( "class"     , 'tooltip'      )
+    //        .attr( "rx"        , tipSize * 0.3  )
+    //        .attr( "ry"        , tipSize * 0.3  )
+    //        .attr( "x"         , 0              )
+    //        .attr( "y"         , 0              )
+    //        .attr( "width"     , tipSize + 'px' )
+    //        .attr( "height"    , tipSize + 'px' )
+    //		;
 
 	this.tip = null;
 	if (this.options.tipId) {
@@ -658,20 +669,22 @@ SimpleGraph.prototype.draw = function() {
 
 
 
-
-SimpleGraph.prototype.update = function() {
+SimpleGraph.prototype.updateWorker = function( linenum ) {
     var self   = this;
-    //var coords = [];
-
-    var lines = this.vis.selectAll(".points");
+    var lines  = this.vis.selectAll(".points[k='"+linenum+"']");
 
     if ( lines.size() === 0 ) {
-        for (var j = 0; j < self.numRegs; j++) {
-            var vars       = self.parsepoint( j );
+        for (var j = 0; j < self.numRegs[linenum]; j++) {
+            var vars       = self.parsepoint( linenum, j );
 
-            var sense      =      vars.sense;
-            var stVal      = { x: vars.x1, y: vars.y1, j: j, s: sense};
-            var ndVal      = { x: vars.x2, y: vars.y2, j: j, s: sense};
+            var sense      = vars.sense;
+            var stVal      = { x: vars.x1, y: vars.y1 };
+            var ndVal      = { x: vars.x2, y: vars.y2 };
+
+            if ( self.parallel ) {
+                stVal.y = linenum + 1;
+                ndVal.y = linenum + 1;
+            }
 
             var line       = self.line( [ stVal, ndVal ] );
 
@@ -680,6 +693,7 @@ SimpleGraph.prototype.update = function() {
             self.lines.append( "path" )
                         .attr("class"    , "points " + senseclass                          )
                         .attr("d"        , line                                            )
+                        .attr("k"        , linenum                                         )
                         .attr("j"        , j                                               )
                         .attr("scaf"     , vars.nameNum                                    )
                         .on(  "mouseover", function(d) { self.highlight( this          ); })
@@ -690,7 +704,7 @@ SimpleGraph.prototype.update = function() {
         }
 
 
-        self.vis.selectAll(".points").each( function(d, i){
+        self.vis.selectAll(".points[k='"+linenum+"']").each( function(d, i){
             //var j    = this.getAttribute('j');
             var d3eventPath = new CustomEvent(
                 "d3createdPath",
@@ -712,17 +726,35 @@ SimpleGraph.prototype.update = function() {
         lines.each( function(d, i){
             var point      = this;
             var j          = point.getAttribute('j');
-            var vars       = self.parsepoint( j );
+            var vars       = self.parsepoint( linenum, j );
 
             var stVal      = { x: vars.x1, y: vars.y1 };
             var ndVal      = { x: vars.x2, y: vars.y2 };
+
+            if ( self.parallel ) {
+                stVal.y = linenum + 1;
+                ndVal.y = linenum + 1;
+            }
 
             var line       = self.line( [ stVal, ndVal ] );
 
             point.setAttribute('d', line);
         });
     }
+};
 
+
+
+
+SimpleGraph.prototype.update = function() {
+    var self   = this;
+    //var coords = [];
+
+
+    for ( var p = 0; p < this.points.length; p++ ) {
+        console.log('updating reg #' + p + ": " + this.numRegs[p]);
+        this.updateWorker( p );
+    }
 
 
 
@@ -784,7 +816,8 @@ SimpleGraph.prototype.highlight = function( el ) {
     var self    = this;
     var del     = d3.select(el);
     var nameNum = del.attr('scaf');
-    var gJ      = del.attr('j');
+    var gK      = del.attr('k'   );
+    var gJ      = del.attr('j'   );
 
 
     var sc = 0;
@@ -806,15 +839,21 @@ SimpleGraph.prototype.highlight = function( el ) {
     var maxX      = 0;
     var minY      = Number.MAX_VALUE;
     var maxY      = 0;
-    var scafLines = self.vis.selectAll(".points[scaf='"+nameNum+"']");
+    var scafLines = self.vis.selectAll(".points[scaf='"+nameNum+"'][k='"+gK+"']");//.selectAll("");
 
     scafLines.each( function(d, i){
-        var j    = this.getAttribute('j');
-        var vars = self.parsepoint( j );
+        var k    = JSON.parse(this.getAttribute('k'));
+        var j    = JSON.parse(this.getAttribute('j'));
+        var vars = self.parsepoint( k, j );
         var x1   = self.x( vars.x1 );
         var x2   = self.x( vars.x2 );
         var y1   = self.y( vars.y1 );
         var y2   = self.y( vars.y2 );
+
+        if ( self.parallel ) {
+            y1 = self.y( k + 1 + 0.5 );
+            y2 = self.y( k + 1 - 0.5 );
+        }
 
         minX = x1 < minX ? x1 : minX;
         minX = x2 < minX ? x2 : minX;
@@ -827,11 +866,11 @@ SimpleGraph.prototype.highlight = function( el ) {
         maxY = y2 > maxY ? y2 : maxY;
     });
 
-	minX = minX * 0.95;
-	maxX = maxX * 1.05;
-	minY = minY * 0.95;
-	maxY = maxY * 1.05;
 
+	minX = minX * 0.995;
+	maxX = maxX * 1.005;
+	minY = minY * 0.995;
+	maxY = maxY * 1.005;
 
     var lenX = maxX - minX;
     var lenY = maxY - minY;
@@ -852,13 +891,12 @@ SimpleGraph.prototype.highlight = function( el ) {
 
 	if (self.tip) {
 		self.tip.style.visibility = 'visible';
-		self.tip.innerHTML        = self.genTip(gJ);
+		self.tip.innerHTML        = self.genTip(gK, gJ);
 	} else {
 		console.log('no tip');
 	}
 
-
-    self.greenbox.append("rect")
+    var r = self.greenbox.append("rect")
         .attr( "id"     , 'scaf-square' )
         .attr( "class"  , 'scaf-square' )
         .attr( "scaf"   , nameNum       )
@@ -874,9 +912,9 @@ SimpleGraph.prototype.highlight = function( el ) {
 
 
 
-SimpleGraph.prototype.getSppName = function(k){
+SimpleGraph.prototype.getSppName = function(k, j){
     if (this.scaffs) {
-        return this.scaffs[ k ];
+        return this.scaffs[ k ][ j ];
     }
     else {
         return 'NaN';
@@ -886,9 +924,10 @@ SimpleGraph.prototype.getSppName = function(k){
 
 
 
-SimpleGraph.prototype.parsepoint = function(j) {
+SimpleGraph.prototype.parsepoint = function(k, j) {
     var startPos = j * this.regSize;
-    var point    = this.points.slice( startPos, startPos+this.regSize );
+    var reg      = this.points[k];
+    var point    = reg.slice( startPos, startPos+this.regSize );
 
     var res     = {
         x1      :       point[0],
@@ -896,7 +935,7 @@ SimpleGraph.prototype.parsepoint = function(j) {
         x2      :       point[2],
         y2      :       point[3],
         nameNum :       point[4],
-        name    : this.getSppName( point[4] ),
+        name    : this.getSppName( k , point[4] ),
         sense   :       point[5],
         senseStr:       point[5] === 0 ? 'fwd' : 'rev',
         qual    :       point[6]
@@ -908,8 +947,8 @@ SimpleGraph.prototype.parsepoint = function(j) {
 
 
 
-SimpleGraph.prototype.genTip = function (j) {
-    var vars  = this.parsepoint( j );
+SimpleGraph.prototype.genTip = function (k,j) {
+    var vars  = this.parsepoint( k,j );
     var res   = '<b>Scaf:</b> '         + vars.name     +
                 '<br><b>Sense:</b> '    + vars.senseStr +
                 '<br><b>Ref Pos:</b> '  + vars.x1       + '-' + vars.x2 +
@@ -1068,10 +1107,11 @@ SimpleGraph.prototype.keydown = function() {
       switch (keyPressed) {
         case  8: // backspace
         case 46: // delete
-          var i = self.points.indexOf(self.selected);
-          self.points.splice(i, 1);
-          self.selected = self.points.length ? self.points[i > 0 ? i - 1 : 0] : null;
-          self.update();
+            //NOT WORKING
+            //var i = self.points.indexOf(self.selected);
+            //self.points.splice(i, 1);
+            //self.selected = self.points.length ? self.points[i > 0 ? i - 1 : 0] : null;
+            //self.update();
           break;
       }
     } else { // nothing selected. global movement
@@ -1284,12 +1324,22 @@ SimpleGraph.prototype.redraw = function() {
 
 
 
+    if ( self.parallel ) {
+        if  (self.options.yTicksLabels) {
+            fy = function (d) {
+                if ( d > 0 && d <= self.options.yTicksLabels.length ) {
+                    return self.options.yTicksLabels[d-1];
+                }
+            };
+        }
+    }
+
     // Regenerate y-ticks...
     var gy = self.grid.selectAll("g.grid-g-y")
         .data(self.y.ticks(self.options.yTicks), String)
         .attr("transform", ty);
 
-    gy.select("text")
+    var txts = gy.select("text")
         .text(fy);
 
     var gye = gy.enter().insert( "g", "a" )
@@ -1301,8 +1351,8 @@ SimpleGraph.prototype.redraw = function() {
         .attr("x1"             , 0                      )
         .attr("x2"             , self.size.width        );
 
-    //".35em"
-    gye.append("text")
+
+    txts = gye.append("text")
         .attr("class"          , "grid-num grid-num-y"          )
         .attr("x"              , -3                             )
         .attr("dy"             , self.options.yNumbersDy + "em" )
@@ -1313,6 +1363,7 @@ SimpleGraph.prototype.redraw = function() {
         .on("mouseout"         , function(d) { d3.select(this).style("font-weight", "normal");})
         .on("mousedown.drag"   , self.yaxis_drag()              )
         .on("touchstart.drag"  , self.yaxis_drag()              );
+
 
     gy.exit().remove();
 
@@ -1337,7 +1388,29 @@ SimpleGraph.prototype.redraw = function() {
         }
     }
 
-    self.vis.call( self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
+
+    if (self.parallel) {
+        self.vis.selectAll('.grid-num-y').each( function(d,i) {
+            //console.log(this);
+            //console.log(d3.select(this).text());
+            var txt = d3.select(this);
+            var t   = txt.text();
+            var w   = t.split(" ");
+            txt.text('');
+            for ( var y=0; y < w.length; y++ ) {
+                txt
+                    .append('tspan')
+                        .text( w[y]   )
+                        .attr( 'x' , 0         )
+                        .attr( 'dx', 0  + 'em' )
+                        .attr( 'dy', (y == 0 ? (((w.length/2)-1)*-1) : 1) + 'em' );
+            }
+        });
+
+        self.vis.call( self.zoom.x(self.x).on("zoom", self.redraw()) );
+    } else {
+        self.vis.call( self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
+    }
 
     self.update();
   };
@@ -1941,7 +2014,7 @@ SimpleGraph.prototype.addDownloadIcon = function() {
 
 SimpleGraph.prototype.addPadLockIcon = function() {
     var self   = this;
-    var coords = this.calcIconPos( 280, this.options.padlockIconMaxSize, 3 );
+    var coords = this.calcIconPos( 260, this.options.padlockIconMaxSize, 3 );
 
     var g1     = this.btns
         .append("g"                                                                    )

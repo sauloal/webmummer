@@ -438,9 +438,9 @@ function start() {
                 //console.log('not select');
             }
         }
-
-        okb.onclick();
     }
+
+    okb.onclick();
 };
 
 
@@ -829,6 +829,92 @@ function loadScript( reg, callback ){
 }
 
 
+function mergeregs( regs ) {
+    huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+
+    var hreg         = { };
+    var yTicksLabels = [];
+
+    for ( var r = 0; r < regs.length; r++ ) {
+        var reg         = regs[r];
+        yTicksLabels[r] = [];
+
+        for ( var v in reg ) {
+            if (!hreg[v]) {
+                hreg[v] = [];
+            }
+            hreg[v].push( regs[r][v] );
+        }
+    }
+
+
+
+    for ( var v in hreg ) {
+        var vals = hreg[v];
+        var uniqueArray = vals.filter(function(elem, pos) {
+            return vals.indexOf(elem) == pos;
+        });
+
+        if (uniqueArray.length == 1) {
+            hreg[v] = vals[0];
+        } else {
+            if (['spp', 'status'].indexOf(v) != -1) {
+                console.log('MORE '+v);
+                for ( var h = 0; h < hreg[v].length; h++) {
+                    yTicksLabels[h].push( hreg[v][h] );
+                }
+            }
+        }
+    };
+
+    for ( var r = 0; r < yTicksLabels.length; r++ ) {
+        yTicksLabels[r] = yTicksLabels[r].join('+');
+    }
+
+    console.log(yTicksLabels);
+
+
+    hreg.xmax   = Math.max.apply(null, hreg.xmax);
+    hreg.ymax   = Math.max.apply(null, hreg.ymax);
+    hreg.xmin   = Math.min.apply(null, hreg.xmin);
+    hreg.ymin   = Math.min.apply(null, hreg.ymin);
+
+    var spps    = hreg.spp;
+    var sts     = hreg.status;
+    var ylabel  = hreg.ylabel;
+
+
+
+    try {
+        spps    = '(' + hreg.spp.join('+') + ')';
+    } catch (e) {
+        //
+    }
+
+    try {
+        sts     = '(' + hreg.status.join('+') + ')';
+    } catch (e) {
+        //
+    }
+
+    try {
+        ylabel  = '(' + hreg.ylabel('+') + ')';
+    } catch (e) {
+        //
+    }
+
+    hreg.title        = hreg.ref + ' - chromosome ' + hreg.chrom + ' vs ' + spps  + ' - Status ' + sts;
+    hreg.ylabel       = ylabel;
+    hreg.yTicksLabels = yTicksLabels;
+
+    hreg.uid          = huid;
+	huid              = '';
+
+
+    return hreg;
+};
+
+
 function loadGraph( regs ) {
     /*
      * Deletes the <script> tag to release the memory in the DOM.
@@ -844,72 +930,29 @@ function loadGraph( regs ) {
 
 
 	if (horizontal) {
-		huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+        var hreg = mergeregs( regs );
 
-		var hreg        = { };
-
-		for ( var v in regs[0] ) {
-			hreg[v] = [];
-		}
-
-
-
-        for ( var r = 0; r < regs.length; r++ ) {
-            var reg = regs[r];
-
-			for ( var v in reg ) {
-				hreg[v].push( regs[r][v] );
-			}
-
-			var script = document.getElementById( reg.scriptid );
-
-			if ( script ) {
-				holder.removeChild( script );
-			}
-		}
-
-
-		for ( var v in hreg ) {
-			var vals = hreg[v];
-			var uniqueArray = vals.filter(function(elem, pos) {
-				return vals.indexOf(elem) == pos;
-			});
-			if (uniqueArray.length == 1) {
-				hreg[v] = vals[0];
-			}
-		};
-
-
-		hreg.uid        = huid;
-
-
-        console.log( hreg );
 		graphdb.add(chartName, hreg);
-        console.log( hreg );
-        return;
-
-		regs.map( function(reg) {
-			delete reg.points;
-			delete reg.scaffs;
-		});
-
-		huid = '';
 	} else {
 		regs.map( function(reg) {
-			var files  = reg.filename;
-
-			var script = document.getElementById( reg.scriptid );
-
-			if ( script ) {
-				holder.removeChild( script );
-			}
-
 			graphdb.add(chartName, reg);
-
-			delete reg.points;
-			delete reg.scaffs;
 		});
 	}
+
+
+    // clean up
+    for ( var r = 0; r < regs.length; r++ ) {
+        var reg = regs[r];
+
+        var script = document.getElementById( reg.scriptid );
+
+        if ( script ) {
+            holder.removeChild( script );
+        }
+
+        delete reg.points;
+		delete reg.scaffs;
+    }
 };
 
 
