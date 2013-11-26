@@ -316,25 +316,31 @@ SimpleGraph = function (chartHolder, options) {
     //this.options.radius         = options.radius         || 5.0;
 
     if (!this.scaffs) {
+		console.log('no scaffs');
         return;
     }
     if (!this.points) {
+		console.log('no points');
         return;
     }
 
     if (!this.options.xmax) {
+		console.log('no xmax');
         return;
     }
 
     if (!this.options.xmin) {
+		console.log('no xmin');
         return;
     }
 
     if (!this.options.ymax) {
+		console.log('no ymax');
         return;
     }
 
     if (!this.options.ymin) {
+		console.log('no ymin');
         return;
     }
 
@@ -367,6 +373,7 @@ SimpleGraph = function (chartHolder, options) {
     this.regSize                     = 7;
 
     this.parallel                    = false;
+	
     if ( Object.prototype.toString.call(this.points[0]) === '[object Array]' ) {
         this.parallel    = true;
         this.parallelNum = this.points.length;
@@ -612,7 +619,10 @@ SimpleGraph.prototype.draw = function() {
 
 	this.tip = null;
 	if (this.options.tipId) {
+		//console.log( 'adding tip' );
 		this.tip = document.getElementById( this.options.tipId )
+	} else {
+		console.log('no tip id given');
 	};
 
     this.currScale        = 1;
@@ -829,6 +839,8 @@ SimpleGraph.prototype.highlight = function( el ) {
 	if (self.tip) {
 		self.tip.style.visibility = 'visible';
 		self.tip.innerHTML        = self.genTip(gJ);
+	} else {
+		console.log('no tip');
 	}
 
 

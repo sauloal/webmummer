@@ -18,6 +18,7 @@ var win = window,
     wid = win.innerWidth || del.clientWidth || bdy.clientWidth,
     hei = win.innerHeight|| del.clientHeight|| bdy.clientHeight;
 
+var huid = '';
 
 function hasStorage() {
     try {
@@ -351,6 +352,11 @@ var syncFields = {
                 'type'   : 'checkbox',
                 'value'  :  false,
                 'alt'    : 'Resize Y'
+    },
+    'horizontal': {
+                'type'   : 'checkbox',
+                'value'  :  false,
+                'alt'    : 'Horizontal visualization'
     }
 };
 
@@ -407,9 +413,6 @@ function start() {
         sync   : function () { return getOpt( 'sync'   , true  ); },
         resizeX: function () { return getOpt( 'resizeX', true  ); },
         resizeY: function () { return getOpt( 'resizeY', false ); }
-        //sync   : function () { return document.getElementById('sync'   ).checked; },
-        //resizeX: function () { return document.getElementById('resizeX').checked; },
-        //resizeY: function () { return document.getElementById('resizeY').checked; }
     });
     //graphdb = new SyncSimpleGraph( true );
 
@@ -439,6 +442,13 @@ function start() {
         okb.onclick();
     }
 };
+
+
+
+
+
+
+
 
 
 function addPicker(el, id, cls, nfo, callback) {
@@ -583,13 +593,11 @@ function createPositions(el) {
 
 function createOptions(){
     var divH = bdy.appendChild( document.createElement('div') );
-    divH.className   = 'htmlDiv htmlDivHide';
-    divH.onmouseover = function(e) { divH.className = 'htmlDiv htmlDivShow'; };
-    divH.onmouseout  = function(e) { divH.className = 'htmlDiv htmlDivHide'; };
+    divH.className   = 'htmlDiv';
 
 
     var hlp = document.createElement('label');
-        hlp.innerHTML = '<b>Help</b><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
+        hlp.innerHTML = '<b>Setup</b><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
 
     divH.appendChild( hlp     );
     divH.appendChild( document.createElement('br') );
@@ -675,7 +683,7 @@ function createSyncs(el) {
         sizeSel.id      = 'size';
         sizeSel.alt     = 'Select Graphic Size';
 
-    var val = getOpt('size', null);
+    var val = getOpt('size', Object.keys( sizes )[0]);
 
     for ( var size in sizes ){
         var opf       = document.createElement("option");
@@ -784,7 +792,7 @@ function genSelectors(sels){
 
 
 
-function loadScript( reg ){
+function loadScript( reg, callback ){
     /*
      * Adds a <script> tag to load the database
      * This is needed to circunvent the security measures which forbids
@@ -799,10 +807,7 @@ function loadScript( reg ){
     var scriptId = reg[ 'scriptid' ];
     var holder   = document.getElementById( scriptHolder );
 
-
     // Adding the script tag to the head as suggested before
-    var callback  = function() { loadGraph(reg) };
-
     //var head     = document.getElementsByTagName('head')[0];
     var script    = document.createElement('script');
     script.type   = 'text/javascript';
@@ -812,7 +817,7 @@ function loadScript( reg ){
     // Then bind the event to the callback function.
     // There are several events for cross browser compatibility.
     //script.onreadystatechange = callback;
-    script.onload = callback;
+    script.onload = function() { callback( reg ) };
 
     // Fire the loading
     //var holder = document.getElementById('scriptholder');
@@ -824,7 +829,7 @@ function loadScript( reg ){
 }
 
 
-function loadGraph( reg ) {
+function loadGraph( regs ) {
     /*
      * Deletes the <script> tag to release the memory in the DOM.
      * Clears chart
@@ -832,25 +837,128 @@ function loadGraph( reg ) {
      * Initialize SimpleGraph
      * Deletes from register
      */
-    var uid    = reg[ 'uid'   ];
 
-    var holder = document.getElementById( scriptHolder );
-    var script = document.getElementById( reg.scriptid );
+	 
+    var horizontal = getOpt( 'horizontal', false );
+	var holder     = document.getElementById( scriptHolder );
+	
+	if (horizontal) {
+		huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+
+		var hreg        = { };
+
+		for ( var v in regs[0] ) {
+			hreg[v] = [];
+		}
+		
+		
+		regs.map( function(reg) {
+			for ( var v in reg ) {
+				hreg[v].push( reg[v] );
+			}
+
+			var script = document.getElementById( reg.scriptid );
+		
+			if ( script ) {
+				holder.removeChild( script );
+			}
+		});
 
 
-    holder.removeChild( script );
+		for ( var v in hreg ) {
+			var vals = hreg[v];
+			var uniqueArray = vals.filter(function(elem, pos) {
+				return vals.indexOf(elem) == pos;
+			});
+			if (uniqueArray.length == 1) {
+				hreg[v] = vals[0];
+			}
+		};
 
-    //document.body.addEventListener('d3createdPath', addTipsy, false);
 
-    graphdb.add(chartName, reg);
+		hreg.uid        = huid;
+		
+		graphdb.add(chartName, hreg);
 
-    delete reg.points;
-    delete reg.scaffs;
+		regs.map( function(reg) {
+			delete reg.points;
+			delete reg.scaffs;
+		});
+		
+		huid = '';
+	} else {
+		regs.map( function(reg) {
+			var files  = reg.filename;
+	
+			var script = document.getElementById( reg.scriptid );
+		
+			if ( script ) {
+				holder.removeChild( script );
+			}	
+		
+			graphdb.add(chartName, reg);
+		
+			delete reg.points;
+			delete reg.scaffs;
+		});
+	}
+};
+
+
+syncLoadScript = function( regs, callback ) {
+	var self          = this;
+	this.regs         = regs;
+	this.callback     = callback;
+	this.size         = 0;
+	this.received     = 0;
+	this.receivedData = [];
+	
+	this.regs.map( function(reg) {
+		var files  = reg.filename;
+		if (files) {
+			self.size += 1;
+		}
+	});
+	
+	
+	if (this.size === 0) {
+		console.log('nothing to plot');
+		return;
+	}
+	
+	var count = 0;
+	regs.map( function(reg) {
+		var files  = reg.filename;
+		var func   = function(sregv) { loadScript( sregv, self.receive() ); };
+
+		if (files) {
+			console.log( 'sending ' + files );
+			setTimeout( func(reg), (count * 1000));
+			count += 1;
+		}
+	});
+};
+
+
+syncLoadScript.prototype.receive = function( ) {
+	var self = this;
+	
+	return function( reg ) {
+		self.received += 1;
+		
+		self.receivedData.push( reg );
+		console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.filename );
+		
+		if ( self.received == self.size) {
+			self.callback( self.receivedData );
+		}
+	}
 }
 
 
 function selclick(){
     var vals = getVals();
+	
     if (!vals) {
         console.log('no vals');
         return;
@@ -859,57 +967,23 @@ function selclick(){
     //console.log( vals );
 
     var regs  = getRegister( vals );
+	if ( !regs ) {
+		return;
+	}
     if ( regs.length == 0 ) {
         console.log('no reg');
         return;
     }
 
-	var count = 0;
-	regs.map( function(reg) {
-		var file = reg[ 'filename' ];
-		if (!file) {
-			console.log('no filename');
-		} else {
-			setTimeout( function() { loadScript( reg ); }, (Math.pow(1.5, count) * 100));
-			count += 1;
-		}
-	});
-}
-
-
-
-//function addTipsy( e ) {
-//    $(e.detail.el).tipsy({
-//            gravity: 'w',
-//            html   : true,
-//            title  : function() {
-//                var j   = this.getAttribute('j');
-//                var tip = e.detail.self.genTip( j );
-//                //console.log("tip "+tip);
-//                return tip;
-//            }
-//        });
-//
-//    //$('svg circle').tipsy({
-//    //    gravity: 'w',
-//    //    html   : true,
-//    //    title  : function() {
-//    //        var j   = this.getAttribute('j');
-//    //        var res = genTip(self.points[j]);
-//    //        return res;
-//    //    }
-//    //});
-//}
-
-
-
-
-
+	var count      = 0;
+	var horizontal = getOpt( 'horizontal', false );
+	var syncer     = new syncLoadScript( regs, loadGraph );
+};
 
 
 function clearPics(){
 	console.log('cleaning');
-	console.log(graphdb);
+	//console.log(graphdb);
 	graphdb.clear();
 }
 
@@ -919,7 +993,9 @@ function getFieldValue(fieldId) {
     var val   = null;
 
     if ( field.localName == 'select' ) {
-        val = field.options[ field.selectedIndex ].value;
+		var sel = field.selectedIndex;
+		var fio = field.options[ sel ];
+        val     = fio.value;
     } else {
         if ( field.type == 'checkbox' ) {
             val = field.checked;
@@ -928,15 +1004,15 @@ function getFieldValue(fieldId) {
         }
     }
 
-    if (val=='null') {
+    if (val == 'null') {
         val = null;
     }
 
     return val;
-}
+};
 
 
-function getVals(){
+function getVals() {
     var vals = {};
 
     var uid  = '';
@@ -962,11 +1038,12 @@ function getVals(){
 
 
 function getRegister( gvals ){
-	var evals    = new Array();
-	var refs     = new Array();
-	var chroms   = new Array();
-	var spps     = new Array();
-	var statuses = new Array();
+	var evals    = [];
+	var refs     = [];
+	var chroms   = [];
+	var spps     = [];
+	var statuses = [];
+
 
 	if (gvals.ref == '*all*') {
 		opts.ref[0].map( function(ref) {
@@ -1000,7 +1077,28 @@ function getRegister( gvals ){
 		statuses.push( gvals.status );
 	}
 
+	
 
+    var horizontal = getOpt( 'horizontal', false );
+	
+	if (horizontal) {
+		huid = 'horiz_';
+		for ( var k in gvals ) {
+			huid += gvals[k];
+		}
+
+		if ( refs.length != 1 ) {
+			alert( 'more than one reference while using horizontal graph ' + refs.length + ' ' + refs );
+			return;
+		}
+		
+		if ( chroms.length != 1 ) {
+			alert( 'more than one chromosome while using horizontal graph ' + chroms.length + ' ' + chroms);
+			return;
+		}
+	}
+
+	
 	refs.map( function(ref) {
 		chroms.map( function(chrom) {
 			spps.map( function(spp) {
@@ -1018,79 +1116,71 @@ function getRegister( gvals ){
 		});
 	});
 
-	//console.log( evals );
 
-	var regs = [];
+	var regs       = [];
+	
 
-
-//    {
-//        "uid"       : uid,
-//		"chartClass": reg.size,
-//        "xmin"      : reg.xmin,
-//        "xmax"      : reg.xmax,
-//        "ymin"      : reg.ymin,
-//        "ymax"      : reg.ymax,
-//        "xlabel"    : reg.xlabel,
-//        "ylabel"    : reg.ylabel,
-//        "title"     : reg.title,
-//        "points"    : reg.points,
-//        "scaffs"    : reg.scaffs,
-//        "xTicks"    : 5,
-//        "yTicks"    : 5,
-//        "paddingLeft": 120,
-//        "ylabelDy"  : -3.3,
-//        //"labelId"   : "pos"
-//		"tipId"     : "tipper"
-//    })
-
-    var horizontal = getOpt( 'horizontal', false );
-
-	evals.map( function(vals) {
+	for ( var e = 0; e < evals.length; e++ ) {
+		var vals = evals[e];
+		var reg  = null;
+		
 		try {
-			var reg = filelist[ vals.ref ][ vals.chrom ][ vals.spp ][ vals.status ];
-			//console.log( reg );
-
-			var uid = vals.ref + vals.chrom + vals.spp + vals.status;
-				uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
-
-			reg['uid'       ] = uid;
-            reg['chartClass'] = getFieldValue('size');
-
-            reg['filepath'  ] = datafolder + reg.filename;
-			reg['scriptid'  ] = 'script_'  + reg.uid;
-            reg['ref'       ] = vals.ref;
-            reg['chrom'     ] = vals.chrom;
-            reg['spp'       ] = vals.spp;
-            reg['status'    ] = vals.status;
-
-            var posK = Object.keys( positions );
-                posK.sort()
-
-                for (var idN = 0; idN < posK.length; idN++ ) {
-                    var id    = posK[idN];
-                    var nfo   = positions[id];
-                    var dfl   = nfo.value;
-                    var curr  = getOpt( id, nfo.value );
-
-                    if ( dfl != curr ) {
-                        //console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
-                        //if nfo.
-                        reg[id] = curr;
-                    }
-                }
-
-
-            regs.push( reg );
+			reg = filelist[ vals.ref ][ vals.chrom ][ vals.spp ][ vals.status ];
 		}
 		catch(err) {
-			console.error('combination does not exists for:')
+			console.error('combination does not exists for:');
 			console.error( vals );
-			//return;
+			continue;
 		}
-	});
+		
+		var uid = vals.ref + vals.chrom + vals.spp + vals.status;
+			uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
+		reg.uid        = uid;
+		reg.chartClass = getOpt('size', Object.keys( sizes )[0]);
+		reg.tipId      = 'tipper';
+
+		reg.filepath   = datafolder + reg.filename;
+		reg.scriptid   = 'script_'  + reg.uid;
+		reg.ref        = vals.ref;
+		reg.chrom      = vals.chrom;
+		reg.spp        = vals.spp;
+		reg.status     = vals.status;
+
+		var posK = Object.keys( positions );
+			posK.sort();
+
+			for (var idN = 0; idN < posK.length; idN++ ) {
+				var id    = posK[idN];
+				var nfo   = positions[id];
+				var dfl   = nfo.value;
+				var curr  = getOpt( id, nfo.value );
+
+				if ( dfl != curr ) {
+					console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
+					reg[id] = curr;
+				} else {
+					if (reg[id]) {
+						delete reg[id];
+					}
+				}
+			}
+		regs.push( reg );
+	}
+
+	
+	if (regs.length == 0) {
+		return;
+	}
+	
 	return regs;
 }
+
+
+
+
+
+
 
 
 function obj2str(obj) {
@@ -1117,11 +1207,12 @@ function getOpt(k, d) {
             var res = localStorage[k];
 			//console.log('getting ' + k + ' val "' + res + '"');
 			if ( res === undefined || res === null ) {
-				console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
+				//console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
 				return d;
 			} else {
-				console.log('getting ' + k + ' val "' + res + '"');
-				return JSON.parse( res );
+				res = JSON.parse( res );
+				//console.log('getting ' + k + ' val "' + res + '"');
+				return res;
 			}
         } catch (e) {
             return d;
@@ -1189,3 +1280,30 @@ document.addEventListener('DOMContentLoaded', start )
   options.compassMinSize      || 100;
 
 */
+
+
+
+
+//function addTipsy( e ) {
+//    $(e.detail.el).tipsy({
+//            gravity: 'w',
+//            html   : true,
+//            title  : function() {
+//                var j   = this.getAttribute('j');
+//                var tip = e.detail.self.genTip( j );
+//                //console.log("tip "+tip);
+//                return tip;
+//            }
+//        });
+//
+//    //$('svg circle').tipsy({
+//    //    gravity: 'w',
+//    //    html   : true,
+//    //    title  : function() {
+//    //        var j   = this.getAttribute('j');
+//    //        var res = genTip(self.points[j]);
+//    //        return res;
+//    //    }
+//    //});
+//}
+
