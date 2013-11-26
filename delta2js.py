@@ -448,7 +448,7 @@ def parseFN(infile):
             #print 'parsing %s label %s val %s' % ( infile, label, str(val) )
 
             if bfr is not None:
-                val = aft( bfr )
+                val = bfr( val )
                 #print 'parsing %s label %s val %s b' % ( infile, label, str(val) )
 
             val = val.replace('_', ' ')
@@ -489,7 +489,7 @@ def main():
 
 
 
-    for infile in sys.argv[1:]:
+    for infile in sys.argv[2:]:
         print "INFILE : %s" % infile
 
         hasC = False

@@ -4,6 +4,7 @@ compulsory extension of files
 """
 
 forbidden  = ['.invertions.delta.q.delta', '.invertions.delta.q.delta.coords', '.fasta.delta', '.fasta.delta.coords']
+forbidden  = ['.invertions.delta.q.delta', '.invertions.delta.q.delta.coords', '.fasta.delta.coords']
 """
 forbidden extension of files
 """
