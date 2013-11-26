@@ -838,10 +838,11 @@ function loadGraph( regs ) {
      * Deletes from register
      */
 
-	 
+
     var horizontal = getOpt( 'horizontal', false );
 	var holder     = document.getElementById( scriptHolder );
-	
+
+
 	if (horizontal) {
 		huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
@@ -850,19 +851,22 @@ function loadGraph( regs ) {
 		for ( var v in regs[0] ) {
 			hreg[v] = [];
 		}
-		
-		
-		regs.map( function(reg) {
+
+
+
+        for ( var r = 0; r < regs.length; r++ ) {
+            var reg = regs[r];
+
 			for ( var v in reg ) {
-				hreg[v].push( reg[v] );
+				hreg[v].push( regs[r][v] );
 			}
 
 			var script = document.getElementById( reg.scriptid );
-		
+
 			if ( script ) {
 				holder.removeChild( script );
 			}
-		});
+		}
 
 
 		for ( var v in hreg ) {
@@ -877,27 +881,31 @@ function loadGraph( regs ) {
 
 
 		hreg.uid        = huid;
-		
+
+
+        console.log( hreg );
 		graphdb.add(chartName, hreg);
+        console.log( hreg );
+        return;
 
 		regs.map( function(reg) {
 			delete reg.points;
 			delete reg.scaffs;
 		});
-		
+
 		huid = '';
 	} else {
 		regs.map( function(reg) {
 			var files  = reg.filename;
-	
+
 			var script = document.getElementById( reg.scriptid );
-		
+
 			if ( script ) {
 				holder.removeChild( script );
-			}	
-		
+			}
+
 			graphdb.add(chartName, reg);
-		
+
 			delete reg.points;
 			delete reg.scaffs;
 		});
@@ -912,20 +920,20 @@ syncLoadScript = function( regs, callback ) {
 	this.size         = 0;
 	this.received     = 0;
 	this.receivedData = [];
-	
+
 	this.regs.map( function(reg) {
 		var files  = reg.filename;
 		if (files) {
 			self.size += 1;
 		}
 	});
-	
-	
+
+
 	if (this.size === 0) {
 		console.log('nothing to plot');
 		return;
 	}
-	
+
 	var count = 0;
 	regs.map( function(reg) {
 		var files  = reg.filename;
@@ -942,13 +950,13 @@ syncLoadScript = function( regs, callback ) {
 
 syncLoadScript.prototype.receive = function( ) {
 	var self = this;
-	
+
 	return function( reg ) {
 		self.received += 1;
-		
+
 		self.receivedData.push( reg );
 		console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.filename );
-		
+
 		if ( self.received == self.size) {
 			self.callback( self.receivedData );
 		}
@@ -958,7 +966,7 @@ syncLoadScript.prototype.receive = function( ) {
 
 function selclick(){
     var vals = getVals();
-	
+
     if (!vals) {
         console.log('no vals');
         return;
@@ -1077,10 +1085,10 @@ function getRegister( gvals ){
 		statuses.push( gvals.status );
 	}
 
-	
+
 
     var horizontal = getOpt( 'horizontal', false );
-	
+
 	if (horizontal) {
 		huid = 'horiz_';
 		for ( var k in gvals ) {
@@ -1091,14 +1099,14 @@ function getRegister( gvals ){
 			alert( 'more than one reference while using horizontal graph ' + refs.length + ' ' + refs );
 			return;
 		}
-		
+
 		if ( chroms.length != 1 ) {
 			alert( 'more than one chromosome while using horizontal graph ' + chroms.length + ' ' + chroms);
 			return;
 		}
 	}
 
-	
+
 	refs.map( function(ref) {
 		chroms.map( function(chrom) {
 			spps.map( function(spp) {
@@ -1118,12 +1126,12 @@ function getRegister( gvals ){
 
 
 	var regs       = [];
-	
+
 
 	for ( var e = 0; e < evals.length; e++ ) {
 		var vals = evals[e];
 		var reg  = null;
-		
+
 		try {
 			reg = filelist[ vals.ref ][ vals.chrom ][ vals.spp ][ vals.status ];
 		}
@@ -1132,7 +1140,7 @@ function getRegister( gvals ){
 			console.error( vals );
 			continue;
 		}
-		
+
 		var uid = vals.ref + vals.chrom + vals.spp + vals.status;
 			uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
@@ -1168,11 +1176,11 @@ function getRegister( gvals ){
 		regs.push( reg );
 	}
 
-	
+
 	if (regs.length == 0) {
 		return;
 	}
-	
+
 	return regs;
 }
 
@@ -1306,4 +1314,3 @@ document.addEventListener('DOMContentLoaded', start )
 //    //    }
 //    //});
 //}
-

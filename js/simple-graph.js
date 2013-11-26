@@ -58,7 +58,9 @@ registerKeyboardHandler = function(callback) {
 
 d3.selection.prototype.size = function(){
     var n = 0;
-    this.each( function() { ++n; } );
+    this.each( function() {
+        n++;
+    } );
     return n;
 };
 
@@ -136,15 +138,14 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
     this.props.maxX = this.props.maxX < options.xmax ? options.xmax : this.props.maxX;
     this.props.maxY = this.props.maxY < options.ymax ? options.ymax : this.props.maxY;
 
-    options.xmin = this.props.minX;
+    //options.xmin = this.props.minX;
+    //options.xmax = this.props.maxX;
     //options.ymin = this.props.minY;
-    options.xmax = this.props.maxX;
     //options.ymax = this.props.maxY;
 
     console.log( 'creating ' + uid );
 
     this.deleteUid(uid);
-
 
     console.log( 'calling  ' + uid );
 
@@ -152,25 +153,36 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
     if ( this.getVar( this.sync ) ) {
         console.log( 'syncing ' + uid );
 
-        if ( Object.keys(this.db).length > 1 ) {
+        if ( Object.keys(this.db).length > 0 ) {
             for ( var dbuid in self.db ) {
-                if (uid == dbuid) { continue; }
+                //if (uid == dbuid) { continue; }
                 var obj2 = self.db[dbuid];
 
                 if ( obj2.shouldSync ) {
+                    console.log('should sync');
                     if ( this.getVar( this.resizeX ) ) {
+                        console.log('resize X');
                         obj2.options.xmin = self.props.minX;
                         obj2.options.xmax = self.props.maxX;
+                    } else {
+                        console.log('NOT resize X');
                     }
 
                     if ( this.getVar( this.resizeY ) ) {
+                        console.log('resize Y');
                         obj2.options.ymin = self.props.minY;
                         obj2.options.ymax = self.props.maxY;
+                    } else {
+                        console.log('NOT resize Y');
                     }
+                } else {
+                    console.log('should NOT sync');
                 }
 
                 obj2.draw();
             }
+        } else {
+            console.log('there\'s only one register');
         }
     }
 
@@ -270,15 +282,15 @@ SimpleGraph = function (chartHolder, options) {
 
     this.uid                         = options.uid                 || 'uid_' + new Date();
 
-    this.options                     = options                     || {};
-
-	this.options.chartClass          = options.chartClass          || 'chartpart';
+    this.options                     = {};
 
     this.scaffs                      = options.scaffs              || null;
                                                                    //              from scaffs
                                                                    //                   f/r
                                                                    //  x1   y1 x2 y2 scaf 0/1 q
     this.points                      = options.points              || null; //[0 , 0, 0, 0, 0,   0,  0.0];
+
+	this.options.chartClass          = options.chartClass          || 'chartpart';
 
     this.options.xmax                = options.xmax                || null;
     this.options.xmin                = options.xmin                || null;
@@ -314,6 +326,8 @@ SimpleGraph = function (chartHolder, options) {
     this.options.compassMaxSize      = options.compassMaxSize      ||  75;
     this.options.compassMinSize      = options.compassMinSize      ||  20;
     //this.options.radius         = options.radius         || 5.0;
+
+    console.log(options);
 
     if (!this.scaffs) {
 		console.log('no scaffs');
@@ -373,7 +387,7 @@ SimpleGraph = function (chartHolder, options) {
     this.regSize                     = 7;
 
     this.parallel                    = false;
-	
+
     if ( Object.prototype.toString.call(this.points[0]) === '[object Array]' ) {
         this.parallel    = true;
         this.parallelNum = this.points.length;
