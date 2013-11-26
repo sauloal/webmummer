@@ -8,20 +8,24 @@ forbidden  = ['.invertions.delta.q.delta', '.invertions.delta.q.delta.coords', '
 forbidden extension of files
 """
 
+def retAll(l):
+    return 'all scaffolds'
+
 labelFields = {
-    'refName'    : ['(\S+?)_SL2.40ch\d+'                       , os.path.basename],
-    'chromNumber': ['SL2.40ch(\d+)'                            , None            ],
-    'spp'        : ['_\._(\S+)_scaffold_final\.assembly\.fasta', None            ],
-    'status'     : ['\.fasta(\S+)'                             , None            ]
+    'refName' : ['(\S+?)_SL2.40ch\d+'                       , os.path.basename],
+    'refChrom': ['SL2.40ch(\d+)'                            , None            ],
+    'tgtName' : ['_\._(\S+)_scaffold_final\.assembly\.fasta', None            ],
+    'tgtChrom': ['(.)'                                      , retAll          ],
+    'status'  : ['\.fasta(\S+)'                             , None            ]
 }
 """
 Regular expression to extract information from filenames
 """
 
 
-titleFmt  = '%(refName)s vs %(spp)s - Chromosome %(chromNumber)s - %(status)s'
-xlabelFmt = '%(refName)s Chromosome %(chromNumber)s'
-ylabelFmt = '%(spp)s'
+titleFmt  = '%(refName)s vs %(tgtChrom)s - Chromosome %(refChrom)s - %(status)s'
+xlabelFmt = '%(refName)s Chromosome %(refChrom)s'
+ylabelFmt = '%(tgtName)s'
 """
 output format for title, xlabel and ylabel using the information extracted from file name
 """
@@ -40,4 +44,3 @@ statusMatch  = {
 """
 mapping from extension to stage of processing of file
 """
-
