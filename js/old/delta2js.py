@@ -25,7 +25,7 @@ License: GPL 2.0
 
 __author__  = "Saulo Aflitos"
 __date__    = "Nov 2013"
-__version__ = "201311261713"
+__version__ = "201311181249"
 __credits__ = "mummer, WUR, PRI, CBSG"
 
 import sys, os
@@ -40,54 +40,53 @@ from pprint import pprint as pp
 #rm ../webmummer.tar.xz; tar --exclude .git -ahcvf ../webmummer.tar.xz .
 
 
-if len(sys.argv) < 3:
-    print "not enought arguments"
-    sys.exit( 1 )
+compulsory = ['.delta', '.delta.coords']
+"""
+compulsory extension of files
+"""
 
-config = sys.argv[ 1 ]
+forbidden  = ['.invertions.delta.q.delta', '.invertions.delta.q.delta.coords', '.fasta.delta', '.fasta.delta.coords']
+"""
+forbidden extension of files
+"""
 
-if not os.path.exists( config ):
-    print "config file %s does not exists" % config
-    sys.exit( 1 )
-
-if not config.endswith( '.py' ):
-    print "config file %s not a python script" % config
-    sys.exit( 1 )
-
-
-dry_run     = None
-compulsory  = None
-forbidden   = None
-labelFields = None
-titleFmt    = None
-xlabelFmt   = None
-ylabelFmt   = None
-statusMatch = None
+labelFields = {
+    'refName'    : ['(\S+?)_SL2.40ch\d+'                       , os.path.basename],
+    'chromNumber': ['SL2.40ch(\d+)'                            , None],
+    'spp'        : ['_\._(\S+)_scaffold_final\.assembly\.fasta', None],
+    'status'     : ['\.fasta(\S+)'                             , None]
+}
+"""
+Regular expression to extract information from filenames
+"""
 
 
-execfile( config )
-
-
-
-for name, var in [
-        ['dry_run'    , dry_run    ],
-        ['compulsory' , compulsory ],
-        ['forbidden'  , forbidden  ],
-        ['labelFields', labelFields],
-        ['titleFmt'   , titleFmt   ],
-        ['xlabelFmt'  , xlabelFmt  ],
-        ['ylabelFmt'  , ylabelFmt  ],
-        ['statusMatch', statusMatch]
-    ]:
-    if var is None:
-        print "variable %s not defined in config %s" % ( name, config )
-
+titleFmt  = '%(refName)s vs %(spp)s - Chromosome %(chromNumber)s - %(status)s'
+xlabelFmt = '%(refName)s Chromosome %(chromNumber)s'
+ylabelFmt = '%(spp)s'
+"""
+output format for title, xlabel and ylabel using the information extracted from file name
+"""
 
 
 for k in labelFields:
     labelFields[k][0] = re.compile( labelFields[k][0] )
 """
 pre-compiles RE, replacing the original string
+"""
+
+statusMatch  = {
+    '.delta'                                       : 'Raw Dot Plot',
+    '.delta.coords'                                : 'Raw Dot Plot',
+    '.delta.q.delta'                               : 'Clean Dot Plot',
+    '.delta.q.delta.coords'                        : 'Clean Dot Plot',
+    '.delta.q.delta.filter'                        : 'Clean & Filtered Dot Plot',
+    '.delta.q.delta.filter.coords'                 : 'Clean & Filtered Dot Plot',
+    '.delta.q.delta.filter.invertions.delta'       : 'Clean & Filtered Dot Plot. Only Inversions',
+    '.delta.q.delta.filter.invertions.delta.coords': 'Clean & Filtered Dot Plot. Only Inversions',
+}
+"""
+mapping from extension to stage of processing of file
 """
 
 
@@ -101,23 +100,16 @@ def statusMatcher( status ):
         print "status %s does not have a name" % status
         sys.exit(1)
 
-
-
-
-
 labelFields['status'][1]= statusMatcher
 """
 Adds statusMatcher as a function to be called uppon parsing of file name.
 """
 
-
-
-
 #pointFmt = "[{x:%d,y:%d},{x:%d,y:%d},{n:%d,s:%d,q:%.2f}]," # db format 1.0
 #pointFmt = "[%d,%d,%d,%d,%d,%d,%.2f],"                     # db format 2.0
 pointFmt = "%d,%d,%d,%d,%d,%d,%.2f,"                        # db format 3.0
 """
-All numbers (x1, x2, y1, y2, ref name, tgt name, quality) are printed in a single array.
+All numbers (x1, x2, y1, y2, ref name, qry name, quality) are printed in a single array.
 By knowing the array size (7), each register can be recovered by simple arithmetics (k * 7).
 """
 
@@ -138,7 +130,7 @@ class exp(object):
     Exporter Class: exports database headers (title, axis labels and limits) and, uppon
     receiving each coordinates, append it to the array.
     """
-    def __init__(self, outfile, refName, refChrom, tgtName, tgtChrom, status, title="title", xlabel="xlabel", ylabel="ylabel"):
+    def __init__(self, outfile, refName, chromNumber, spp, status, title="title", xlabel="xlabel", ylabel="ylabel"):
         """
         Accepts output file, title and axis labels.
         Initialize limits.
@@ -154,11 +146,11 @@ class exp(object):
         self.minY    = sys.maxint
         self.maxY    = 0
 
-        self.tgts    = {}
+        self.scaffs  = {}
 
         self.fhd     = open(outfile, 'w')
 
-        self.dbreg   = "_filelist[ '%s' ][ '%s' ][ '%s' ][ '%s' ][ '%s' ]" % ( refName, refChrom, tgtName, tgtChrom, status )
+        self.dbreg   = "filelist[ '%s' ][ '%s' ][ '%s' ][ '%s' ]" % ( refName, chromNumber, spp, status )
 
         #outfiles[ refName ][ chromNumber ][ spp ][ status ]
         self.fhd.write("""\
@@ -179,10 +171,10 @@ class exp(object):
 
         Updates min and max positions;
         """
-        if name not in self.tgts:
-            self.tgts[name] = len(self.tgts)
+        if name not in self.scaffs:
+            self.scaffs[name] = len(self.scaffs)
 
-        name  = self.tgts[name]
+        name  = self.scaffs[name]
 
         sense = 0 if sense == 'fwd' else 1
 
@@ -212,6 +204,16 @@ class exp(object):
 
         self.append( refStart, targetStart, refEnd, targetEnd, tgtName, sense, idd )
 
+    def addOld(self, sense, reg):
+        #print "SENSE ", sense, " REG ", reg
+        x1   = int(   reg[0][0] )
+        y1   = int(   reg[0][1] )
+        x2   = int(   reg[1][0] )
+        y2   = int(   reg[1][1] )
+        q    = float( reg[0][2] )
+
+        self.append( x1, y1, x2, y2, '', sense, q)
+
     def close(self):
         """
         Exports min/max;
@@ -226,10 +228,11 @@ class exp(object):
 
 %(dbreg)s[ 'ymin'   ]  = %(minY)12d;
 %(dbreg)s[ 'ymax'   ]  = %(maxY)12d;
-%(dbreg)s[ 'tgts'   ]  = [\
+%(dbreg)s[ 'scaffs' ]  = [\
 """ % { 'dbreg': self.dbreg, 'minX': self.minX, 'maxX': self.maxX, 'minY': self.minY, 'maxY': self.maxY }
 
-        for scaf in sorted(self.tgts, key=lambda p: self.tgts[p]):
+        for scaf in sorted(self.scaffs, key=lambda p: self.scaffs[p]):
+            #print "spp %s p %d" % (spp, self.spps[spp])
             line += "'%s'," % scaf
 
         line += '];'
@@ -287,7 +290,6 @@ def parseDelta(delta):
 
         if len(line) == 0  : continue
         if lineCount < 5   : continue
-        if line[0] == '='  : continue
 
         cols = line.split("\t")
         #print cols
@@ -437,22 +439,17 @@ def parseFN(infile):
     res = {}
 
     for label in sorted( labelFields ):
-        #print 'parsing %s label %s' % ( infile, label )
         fmt = labelFields[label][0]
         fun = labelFields[label][1]
-        #print 'parsing %s label %s fmt %s' % ( infile, label, fmt.pattern )
         try:
             val = fmt.search(infile).group(1)
-            #print 'parsing %s label %s val %s' % ( infile, label, str(val) )
 
             val = val.replace('_', ' ')
-            #print 'parsing %s label %s val %s u' % ( infile, label, str(val) )
 
             if fun is not None:
                 val = fun( val )
-                #print 'parsing %s label %s val %s f' % ( infile, label, str(val) )
 
-            #print 'parsing %s label %s val %s GOT' % ( infile, label, str(val) )
+            print '%s = "%s"' % ( label, val )
 
             res[label] = val
         except:
@@ -467,20 +464,17 @@ def main():
     """
     Parse all input files names, exports them to databases and creates index of all files.
     """
-    outfiles   = {}
+    outfiles = {}
 
-    refsNames  = {}
-    refsChroms = {}
-    tgtsNames  = {}
-    tgtsChroms = {}
-    statuses   = {}
+    refs     = {}
+    chroms   = {}
+    spps     = {}
+    statuses = {}
 
     if len(sys.argv) == 1:
         print "Usage:"
         print sys.argv[0], ' [input delta files +]'
         sys.exit(0)
-
-
 
 
     for infile in sys.argv[1:]:
@@ -511,137 +505,103 @@ def main():
         labels = parseFN( infile )
 
 
-        refName  = labels['refName' ]
-        refChrom = labels['refChrom']
-
-        tgtName  = labels['tgtName' ]
-        tgtChrom = labels['tgtChrom']
-
-        status   = labels['status'  ]
+        #'.delta'               : 'Raw Dot Plot',
+        #'.delta.q.delta'       : 'Clean Dot Plot',
+        #'.delta.q.delta.filter': 'Clean & Filtered Dot Plot',
+        #'.delta.q.delta.filter.invertions.delta': 'Clean & Filtered Dot Plot. Only Inversions',
 
 
+        #'refName'    : ['(\S+?)_SL2.40ch\d+'                       , os.path.basename],
+        #'chromNumber': ['SL2.40ch(\d+)'                            , None],
+        #'spp'        : ['_\._(\S+)_scaffold_final\.assembly\.fasta', None],
+        #'status'     : ['\.fasta(\S+)'                             , None]
 
-        refsNames  [ refName  ] = 1
-        refsChroms [ refChrom ] = 1
+        status      = labels['status'     ]
+        spp         = labels['spp'        ]
+        chromNumber = labels['chromNumber']
+        refName     = labels['refName'    ]
 
-        tgtsNames  [ tgtName  ] = 1
-        tgtsChroms [ tgtChrom ] = 1
-
-        statuses   [ status   ] = 1
-
-
+        statuses[ status      ] = 1
+        spps    [ spp         ] = 1
+        chroms  [ chromNumber ] = 1
+        refs    [ refName     ] = 1
 
         title  = titleFmt  % labels
         xlabel = xlabelFmt % labels
         ylabel = ylabelFmt % labels
 
-        print labels
-
-        if not dry_run:
-            if not os.path.exists( outfile ):
-                print "parsing delta"
-                scafOrder, scafLens = parseDelta(infile)
+        if not os.path.exists( outfile ):
+            print "parsing delta"
+            scafOrder, scafLens = parseDelta(infile)
 
 
-                print "parsing coords"
-                exporter = exp(outfile, refName, refChrom, tgtName, tgtChrom, status, title=title, xlabel=xlabel, ylabel=ylabel)
-                genCoords(exporter, scafOrder, scafLens)
-                exporter.close()
-
-
+            print "parsing coords"
+            exporter = exp(outfile, refName, chromNumber, spp, status, title=title, xlabel=xlabel, ylabel=ylabel)
+            genCoords(exporter, scafOrder, scafLens)
+            exporter.close()
 
         if refName not in outfiles:
             outfiles[ refName ] = {}
 
-        if refChrom not in outfiles[ refName ]:
-            outfiles[ refName ][ refChrom ] = {}
+        if chromNumber not in outfiles[ refName ]:
+            outfiles[ refName ][ chromNumber ] = {}
 
-        if tgtName not in outfiles[ refName ][ refChrom ]:
-            outfiles[ refName ][ refChrom ][ tgtName ] = {}
+        if spp not in outfiles[ refName ][ chromNumber ]:
+            outfiles[ refName ][ chromNumber ][ spp ] = {}
 
-        if tgtChrom not in outfiles[ refName ][ refChrom ][ tgtName ]:
-            outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ] = {}
-
-        if status not in outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ]:
-            outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ][ status ] = [
+        if status not in outfiles[ refName ][ chromNumber ][ spp ]:
+            outfiles[ refName ][ chromNumber ][ spp ][ status ] = [
                 [os.path.abspath(infile ), os.path.basename(infile )],
                 [os.path.abspath(outfile), os.path.basename(outfile)],
             ]
         else:
             print "data read twice"
-            print "ref %s ref chrom %s tgt %s tgt chrom %s status %s" % ( refName, refChrom, tgtName, tgtChrom, status )
+            print "ref %s chrom %s spp %s status %s" % ( refName, chromNumber, spp, status )
             sys.exit( 1 )
 
-        #break
 
-    print
-    print "RESUME"
-    print " refs"
-    pp(refsNames )
-
-    print " refs chroms"
-    pp(refsChroms)
-
-    print " tgts"
-    pp(tgtsNames )
-
-    print " tgts chroms"
-    pp(tgtsChroms)
-
-    print " statuses"
-    pp(statuses  )
-
-
-    if dry_run:
-        return
 
 
     with open( 'list.js', 'w' ) as fhd:
         """
         Creates a list of all available status, query species, chromosomes and references for quick listing.
         Creates a database of the available combitations and the .js files containing the data.
-        outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ][ status ] = <javascript database base name>
+        outfiles[ refName ][ chromNumber ][ spp ][ status ] = <javascript database base name>
         """
 
-        refStr       = ', '.join( [ "'%s'" % x for x in sorted(refsNames ) ] )
-        fhd.write( 'var _refsNames  = [%s];\n' % refStr);
+        statusStr = ', '.join( [ "'%s'" % x for x in sorted(statuses) ] )
+        fhd.write( 'var statuses = [%s];\n' % statusStr);
 
-        refChromStr  = ', '.join( [ "'%s'" % x for x in sorted(refsChroms) ] )
-        fhd.write( 'var _refsChroms = [%s];\n' % refChromStr);
+        sppStr    = ', '.join( [ "'%s'" % x for x in sorted(spps    ) ] )
+        fhd.write( 'var spps     = [%s];\n' % sppStr);
 
-        tgtStr       = ', '.join( [ "'%s'" % x for x in sorted(tgtsNames ) ] )
-        fhd.write( 'var _tgtsNames  = [%s];\n' % tgtStr);
+        chromStr  = ', '.join( [ "'%s'" % x for x in sorted(chroms  ) ] )
+        fhd.write( 'var chroms   = [%s];\n' % chromStr);
 
-        tgtChromStr  = ', '.join( [ "'%s'" % x for x in sorted(tgtsChroms) ] )
-        fhd.write( 'var _tgtsChroms = [%s];\n' % tgtChromStr);
+        refStr    = ', '.join( [ "'%s'" % x for x in sorted(refs    ) ] )
+        fhd.write( 'var refs     = [%s];\n' % refStr);
 
-        statusStr    = ', '.join( [ "'%s'" % x for x in sorted(statuses  ) ] )
-        fhd.write( 'var _statuses   = [%s];\n' % statusStr);
-
-        fhd.write( 'var _filelist = {\n');
+        fhd.write( 'var filelist = {\n');
 
 
         for refName in sorted(outfiles):
             fhd.write("  '%s': {\n" % refName )
 
-            for refChrom in sorted(outfiles[ refName ]):
-                fhd.write("    '%s': {\n" % refChrom )
+            for chromNumber in sorted(outfiles[ refName ]):
+                fhd.write("    '%s': {\n" % chromNumber )
 
-                for tgtName in sorted(outfiles[ refName ][ refChrom ]):
-                    fhd.write("      '%s': {\n" % tgtName )
+                for spp in sorted(outfiles[ refName ][ chromNumber ]):
+                    fhd.write("      '%s': {\n" % spp )
 
-                    for tgtChrom in sorted(outfiles[ refName ][ refChrom ][ tgtName ]):
-                        fhd.write("        '%s': {\n" % tgtChrom )
-
-                        for status in sorted(outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ]):
-                            filedata = outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ][ status ]
-                            fhd.write('        "%s": {\n' % status)
-                            fhd.write('          "filename": "%s"\n' % ( filedata[1][1] ) )
-                            fhd.write('          },\n')
+                    for status in sorted(outfiles[ refName ][ chromNumber ][ spp ]):
+                        filedata = outfiles[ refName ][ chromNumber ][ spp ][ status ]
+                        fhd.write('        "%s": {\n' % status)
+                        fhd.write('          "filename": "%s"\n' % ( filedata[1][1] ) )
                         fhd.write('        },\n')
                     fhd.write('      },\n')
                 fhd.write('    },\n')
             fhd.write('  },\n')
+
         fhd.write('};\n')
 
     print "done"

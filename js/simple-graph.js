@@ -284,8 +284,8 @@ SimpleGraph = function (chartHolder, options) {
 
     this.options                     = {};
 
-    this.scaffs                      = options.scaffs              || null;
-                                                                   //              from scaffs
+    this.tgts                        = options.tgts              || null;
+                                                                   //              from tgts
                                                                    //                   f/r
                                                                    //  x1   y1 x2 y2 scaf 0/1 q
     this.points                      = options.points              || null; //[0 , 0, 0, 0, 0,   0,  0.0];
@@ -329,8 +329,8 @@ SimpleGraph = function (chartHolder, options) {
     //this.options.radius         = options.radius         || 5.0;
 
 
-    if (!this.scaffs) {
-		console.log('no scaffs');
+    if (!this.tgts) {
+		console.log('no tgts');
         return;
     }
     if (!this.points) {
@@ -399,7 +399,7 @@ SimpleGraph = function (chartHolder, options) {
         this.options.yTicks = this.points.length + 1;
     } else {
         this.numRegs      = [ (this.points.length / this.regSize) ];
-        this.scaffs       = [ this.scaffs ];
+        this.tgts         = [ this.tgts   ];
         this.points       = [ this.points ];
     }
 
@@ -913,8 +913,8 @@ SimpleGraph.prototype.highlight = function( el ) {
 
 
 SimpleGraph.prototype.getSppName = function(k, j){
-    if (this.scaffs) {
-        return this.scaffs[ k ][ j ];
+    if (this.tgts) {
+        return this.tgts[ k ][ j ];
     }
     else {
         return 'NaN';

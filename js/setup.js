@@ -40,10 +40,11 @@ var hasstorage = hasStorage();
  * Used to create drop-down boxes
  */
 var opts   = {
-    'ref'   : [ refs    , 'Select Reference'  ],
-    'chrom' : [ chroms  , 'Select Chromosome' ],
-    'spp'   : [ spps    , 'Select Species'    ],
-    'status': [ statuses, 'Select Status'     ],
+    'refName' : [ _refsNames , 'Select Reference'            ],
+    'refChrom': [ _refsChroms, 'Select Reference Chromosome' ],
+    'tgtName' : [ _tgtsNames , 'Select Target'               ],
+    'tgtChrom': [ _tgtsChroms, 'Select Target Chromosome'    ],
+    'status'  : [ _statuses  , 'Select Status'               ],
 };
 
 
@@ -657,7 +658,7 @@ function createSyncs(el) {
 
 
     var posK = Object.keys( syncFields );
-    posK.sort()
+    posK.sort();
     var tr    = tbl .appendChild( document.createElement('tr'   ) );
 
     for (var idN = 0; idN < posK.length; idN++ ) {
@@ -733,8 +734,8 @@ function genSelectors(sels){
      * If only one option available, adds a label field, otherwise, adds a drop-down menu.
      */
     //var statuses = ['Clean & Filtered Dot Plot. Only Inversions', 'Clean Dot Plot'];
-    //var spps     = ['solanum arcanum', 'solanum habrochaites', 'solanum lycopersicum heinz denovo', 'solanum pennellii'];
-    //var chroms   = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+    //var tgts     = ['solanum arcanum', 'solanum habrochaites', 'solanum lycopersicum heinz denovo', 'solanum pennellii'];
+    //var refChrom   = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
     //var refs     = ['solanum lycopersicum heinz'];
     //var filelist = {
 
@@ -803,8 +804,8 @@ function loadScript( reg, callback ){
      * loadgraph as callback to its "onload".
      */
 
-    var filename = reg[ 'filepath' ];
-    var scriptId = reg[ 'scriptid' ];
+    var filename = reg.filepath;
+    var scriptId = reg.scriptid;
     var holder   = document.getElementById( scriptHolder );
 
     // Adding the script tag to the head as suggested before
@@ -817,7 +818,7 @@ function loadScript( reg, callback ){
     // Then bind the event to the callback function.
     // There are several events for cross browser compatibility.
     //script.onreadystatechange = callback;
-    script.onload = function() { callback( reg ) };
+    script.onload = function() { callback( reg ); };
 
     // Fire the loading
     //var holder = document.getElementById('scriptholder');
@@ -858,7 +859,7 @@ function mergeregs( regs ) {
         if (uniqueArray.length == 1) {
             hreg[v] = vals[0];
         } else {
-            if (['spp', 'status'].indexOf(v) != -1) {
+            if (['tgtName', 'status'].indexOf(v) != -1) {
                 console.log('MORE '+v);
                 for ( var h = 0; h < hreg[v].length; h++) {
                     yTicksLabels[h].push( hreg[v][h] );
@@ -871,7 +872,6 @@ function mergeregs( regs ) {
         yTicksLabels[r] = yTicksLabels[r].join('+');
     }
 
-    console.log(yTicksLabels);
 
 
     hreg.xmax   = Math.max.apply(null, hreg.xmax);
@@ -879,14 +879,14 @@ function mergeregs( regs ) {
     hreg.xmin   = Math.min.apply(null, hreg.xmin);
     hreg.ymin   = Math.min.apply(null, hreg.ymin);
 
-    var spps    = hreg.spp;
+    var tgts    = hreg.tgtName;
     var sts     = hreg.status;
     var ylabel  = hreg.ylabel;
 
 
 
     try {
-        spps    = '(' + hreg.spp.join('+') + ')';
+        tgts    = '(' + hreg.tgtName.join('+') + ')';
     } catch (e) {
         //
     }
@@ -903,7 +903,7 @@ function mergeregs( regs ) {
         //
     }
 
-    hreg.title        = hreg.ref + ' - chromosome ' + hreg.chrom + ' vs ' + spps  + ' - Status ' + sts;
+    hreg.title        = hreg.refName + ' - chromosome ' + hreg.refChrom + ' vs ' + tgts  + ' - Status ' + sts;
     hreg.ylabel       = ylabel;
     hreg.yTicksLabels = yTicksLabels;
 
@@ -935,24 +935,25 @@ function loadGraph( regs ) {
 		graphdb.add(chartName, hreg);
 	} else {
 		regs.map( function(reg) {
+            console.log( reg );
 			graphdb.add(chartName, reg);
 		});
 	}
 
 
     // clean up
-    for ( var r = 0; r < regs.length; r++ ) {
-        var reg = regs[r];
-
-        var script = document.getElementById( reg.scriptid );
-
-        if ( script ) {
-            holder.removeChild( script );
-        }
-
-        delete reg.points;
-		delete reg.scaffs;
-    }
+//    for ( var r = 0; r < regs.length; r++ ) {
+//        var reg = regs[r];
+//
+//        var script = document.getElementById( reg.scriptid );
+//
+//        if ( script ) {
+//            holder.removeChild( script );
+//        }
+//
+//        delete reg.points;
+//		delete reg.scaffs;
+//    }
 };
 
 
@@ -1003,8 +1004,8 @@ syncLoadScript.prototype.receive = function( ) {
 		if ( self.received == self.size) {
 			self.callback( self.receivedData );
 		}
-	}
-}
+	};
+};
 
 
 function selclick(){
@@ -1089,35 +1090,44 @@ function getVals() {
 
 
 function getRegister( gvals ){
-	var evals    = [];
-	var refs     = [];
-	var chroms   = [];
-	var spps     = [];
-	var statuses = [];
+	var evals     = [];
+	var refNames  = [];
+	var refChroms = [];
+	var tgtNames  = [];
+	var tgtChroms = [];
+	var statuses  = [];
 
 
-	if (gvals.ref == '*all*') {
-		opts.ref[0].map( function(ref) {
-			refs.push( ref );
+	if (gvals.refName == '*all*') {
+		opts.refName[0].map( function(refName) {
+			refNames.push( refName );
 		});
 	} else {
-		refs.push( gvals.ref );
+		refNames.push( gvals.refName );
 	}
 
-	if (gvals.chrom == '*all*') {
-		opts.chrom[0].map( function(chrom) {
-			chroms.push( chrom );
+	if (gvals.refChrom == '*all*') {
+		opts.refChrom[0].map( function(refChrom) {
+			refChroms.push( refChrom );
 		});
 	} else {
-		chroms.push( gvals.chrom );
+		refChroms.push( gvals.refChrom );
 	}
 
-	if (gvals.spp == '*all*') {
-		opts.spp[0].map( function(spp) {
-			spps.push( spp );
+	if (gvals.tgtName == '*all*') {
+		opts.tgtName[0].map( function(tgtName) {
+			tgtNames.push( tgtName );
 		});
 	} else {
-		spps.push( gvals.spp );
+		tgtNames.push( gvals.tgtName );
+	}
+
+	if (gvals.tgtChrom == '*all*') {
+		opts.tgtChrom[0].map( function(tgtChrom) {
+			tgtChroms.push( tgtChrom );
+		});
+	} else {
+		tgtChroms.push( gvals.tgtChrom );
 	}
 
 	if (gvals.status == '*all*') {
@@ -1138,31 +1148,34 @@ function getRegister( gvals ){
 			huid += gvals[k];
 		}
 
-		if ( refs.length != 1 ) {
-			alert( 'more than one reference while using horizontal graph ' + refs.length + ' ' + refs );
+		if ( refNames.length != 1 ) {
+			alert( 'more than one reference while using horizontal graph ' + refNames.length + ' ' + refNames );
 			return;
 		}
 
-		if ( chroms.length != 1 ) {
-			alert( 'more than one chromosome while using horizontal graph ' + chroms.length + ' ' + chroms);
+		if ( refChroms.length != 1 ) {
+			alert( 'more than one chromosome while using horizontal graph ' + refChroms.length + ' ' + refChroms);
 			return;
 		}
 	}
 
 
-	refs.map( function(ref) {
-		chroms.map( function(chrom) {
-			spps.map( function(spp) {
-				statuses.map( function(status) {
-					//console.log(ref + ' ' + chrom + ' ' + spp + ' ' + status);
-					var reg = {
-						ref   : ref,
-						chrom : chrom,
-						spp   : spp,
-						status: status
-					};
-					evals.push( reg );
-				});
+	refNames.map( function(refName) {
+		refChroms.map( function(refChrom) {
+			tgtNames.map( function(tgtName) {
+                tgtChroms.map( function(tgtChrom) {
+                    statuses.map( function(status) {
+                        //console.log(ref + ' ' + refChrom + ' ' + tgtName + ' ' + status);
+                        var reg = {
+                            refName  : refName,
+                            refChrom : refChrom,
+                            tgtName  : tgtName,
+                            tgtChrom : tgtChrom,
+                            status   : status
+                        };
+                        evals.push( reg );
+                    });
+                });
 			});
 		});
 	});
@@ -1176,7 +1189,7 @@ function getRegister( gvals ){
 		var reg  = null;
 
 		try {
-			reg = filelist[ vals.ref ][ vals.chrom ][ vals.spp ][ vals.status ];
+			reg = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
 		}
 		catch(err) {
 			console.error('combination does not exists for:');
@@ -1184,7 +1197,7 @@ function getRegister( gvals ){
 			continue;
 		}
 
-		var uid = vals.ref + vals.chrom + vals.spp + vals.status;
+		var uid = vals.ref + vals.refChrom + vals.tgtName + vals.tgtChrom + vals.status;
 			uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
 		reg.uid        = uid;
@@ -1193,9 +1206,10 @@ function getRegister( gvals ){
 
 		reg.filepath   = datafolder + reg.filename;
 		reg.scriptid   = 'script_'  + reg.uid;
-		reg.ref        = vals.ref;
-		reg.chrom      = vals.chrom;
-		reg.spp        = vals.spp;
+		reg.refName    = vals.refName;
+		reg.refChrom   = vals.refChrom;
+		reg.tgtName    = vals.tgtName;
+		reg.tgtChrom   = vals.tgtChrom;
 		reg.status     = vals.status;
 
 		var posK = Object.keys( positions );
