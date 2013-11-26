@@ -40,21 +40,6 @@ from pprint import pprint as pp
 #rm ../webmummer.tar.xz; tar --exclude .git -ahcvf ../webmummer.tar.xz .
 
 
-if len(sys.argv) < 3:
-    print "not enought arguments"
-    sys.exit( 1 )
-
-config = sys.argv[ 1 ]
-
-if not os.path.exists( config ):
-    print "config file %s does not exists" % config
-    sys.exit( 1 )
-
-if not config.endswith( '.py' ):
-    print "config file %s not a python script" % config
-    sys.exit( 1 )
-
-
 dry_run     = None
 compulsory  = None
 forbidden   = None
@@ -64,51 +49,67 @@ xlabelFmt   = None
 ylabelFmt   = None
 statusMatch = None
 
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print "not enought arguments"
+        sys.exit( 1 )
 
-execfile( config )
+    config = sys.argv[ 1 ]
 
+    if not os.path.exists( config ):
+        print "config file %s does not exists" % config
+        sys.exit( 1 )
 
-
-for name, var in [
-        ['dry_run'    , dry_run    ],
-        ['compulsory' , compulsory ],
-        ['forbidden'  , forbidden  ],
-        ['labelFields', labelFields],
-        ['titleFmt'   , titleFmt   ],
-        ['xlabelFmt'  , xlabelFmt  ],
-        ['ylabelFmt'  , ylabelFmt  ],
-        ['statusMatch', statusMatch]
-    ]:
-    if var is None:
-        print "variable %s not defined in config %s" % ( name, config )
+    if not config.endswith( '.py' ):
+        print "config file %s not a python script" % config
+        sys.exit( 1 )
 
 
 
-for k in labelFields:
-    labelFields[k][0] = re.compile( labelFields[k][0] )
-"""
-pre-compiles RE, replacing the original string
-"""
+    execfile( config )
 
 
-def statusMatcher( status ):
+
+    for name, var in [
+            ['dry_run'    , dry_run    ],
+            ['compulsory' , compulsory ],
+            ['forbidden'  , forbidden  ],
+            ['labelFields', labelFields],
+            ['titleFmt'   , titleFmt   ],
+            ['xlabelFmt'  , xlabelFmt  ],
+            ['ylabelFmt'  , ylabelFmt  ],
+            ['statusMatch', statusMatch]
+        ]:
+        if var is None:
+            print "variable %s not defined in config %s" % ( name, config )
+
+
+
+    for k in labelFields:
+        labelFields[k][0] = re.compile( labelFields[k][0] )
     """
-    Given the extension of the file, return a verbose string describing it to be used in title.
+    pre-compiles RE, replacing the original string
     """
-    try:
-        return statusMatch[ status ]
-    except:
-        print "status %s does not have a name" % status
-        sys.exit(1)
+
+
+    def statusMatcher( status ):
+        """
+        Given the extension of the file, return a verbose string describing it to be used in title.
+        """
+        try:
+            return statusMatch[ status ]
+        except:
+            print "status %s does not have a name" % status
+            sys.exit(1)
 
 
 
 
 
-labelFields['status'][1]= statusMatcher
-"""
-Adds statusMatcher as a function to be called uppon parsing of file name.
-"""
+    labelFields['status'][2]= statusMatcher
+    """
+    Adds statusMatcher as a function to be called uppon parsing of file name.
+    """
 
 
 
@@ -439,18 +440,23 @@ def parseFN(infile):
     for label in sorted( labelFields ):
         #print 'parsing %s label %s' % ( infile, label )
         fmt = labelFields[label][0]
-        fun = labelFields[label][1]
+        bfr = labelFields[label][1]
+        aft = labelFields[label][2]
         #print 'parsing %s label %s fmt %s' % ( infile, label, fmt.pattern )
         try:
             val = fmt.search(infile).group(1)
             #print 'parsing %s label %s val %s' % ( infile, label, str(val) )
 
+            if bfr is not None:
+                val = aft( bfr )
+                #print 'parsing %s label %s val %s b' % ( infile, label, str(val) )
+
             val = val.replace('_', ' ')
             #print 'parsing %s label %s val %s u' % ( infile, label, str(val) )
 
-            if fun is not None:
-                val = fun( val )
-                #print 'parsing %s label %s val %s f' % ( infile, label, str(val) )
+            if aft is not None:
+                val = aft( val )
+                #print 'parsing %s label %s val %s a' % ( infile, label, str(val) )
 
             #print 'parsing %s label %s val %s GOT' % ( infile, label, str(val) )
 

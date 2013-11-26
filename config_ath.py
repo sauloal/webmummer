@@ -10,12 +10,15 @@ forbidden  = ['.invertions.delta.q.delta', '.invertions.delta.q.delta.coords', '
 forbidden extension of files
 """
 
+def fmtN(v):
+    return "%02d" % int(v)
+
 labelFields = {
-    'refName' : ['(\S{3})\d+_\S{3}\d+'   , None],
-    'refChrom': ['\S{3}(\d+)_\S{3}\d+'   , None],
-    'tgtName' : ['\S{3}\d+_(\S{3})\d+'   , None],
-    'tgtChrom': ['\S{3}\d+_\S{3}(\d+)'   , None],
-    'status'  : ['\S{3}\d+_\S{3}\d+(\S+)', None]
+    'refName' : [r'(\S{3})\d+_\S{3}\d+'   , None, None],
+    'refChrom': [r'\S{3}(\d+)_\S{3}\d+'   , None, fmtN],
+    'tgtName' : [r'\S{3}\d+_(\S{3})\d+'   , None, None],
+    'tgtChrom': [r'\S{3}\d+_\S{3}(\d+)'   , None, fmtN],
+    'status'  : [r'\S{3}\d+_\S{3}\d+(\S+)', None, None]
 }
 """
 Regular expression to extract information from filenames

@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>delta2js</strong></big></big> (version 201311181249, Nov 2013)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>delta2js</strong></big></big> (version 201311261713, Nov 2013)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/assembly/nobackup/mummer/MUMmer3.23/1502/viewer/line/delta2js.py">/home/assembly/nobackup/mummer/MUMmer3.23/1502/viewer/line/delta2js.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/assembly/nobackup/mummer/MUMmer3.23/hans/viewer/delta2js.py">/home/assembly/nobackup/mummer/MUMmer3.23/hans/viewer/delta2js.py</a></font></td></tr></table>
     <p><tt>delta2js.py<br>
 &nbsp;<br>
 Converts&nbsp;mummer&nbsp;.delta&nbsp;files&nbsp;to&nbsp;javascript&nbsp;database&nbsp;for&nbsp;webmummer.<br>
@@ -25,6 +25,9 @@ To&nbsp;Run:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;rm&nbsp;&lt;delta&nbsp;folder&gt;/*.js<br>
 &nbsp;&nbsp;&nbsp;&nbsp;delta2js.py&nbsp;&lt;delta&nbsp;folder&gt;/*.delta<br>
 &nbsp;&nbsp;&nbsp;&nbsp;cp&nbsp;&lt;delta&nbsp;folder&gt;/*.js&nbsp;.<br>
+&nbsp;<br>
+Documentation&nbsp;generated&nbsp;by:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pydoc&nbsp;-w&nbsp;delta2js<br>
 &nbsp;<br>
 License:&nbsp;GPL&nbsp;2.0</tt></p>
 <p>
@@ -64,16 +67,14 @@ License:&nbsp;GPL&nbsp;2.0</tt></p>
 receiving&nbsp;each&nbsp;coordinates,&nbsp;append&nbsp;it&nbsp;to&nbsp;the&nbsp;array.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="exp-__init__"><strong>__init__</strong></a>(self, outfile, refName, chromNumber, spp, status, title<font color="#909090">='title'</font>, xlabel<font color="#909090">='xlabel'</font>, ylabel<font color="#909090">='ylabel'</font>)</dt><dd><tt>Accepts&nbsp;output&nbsp;file,&nbsp;title&nbsp;and&nbsp;axis&nbsp;labels.<br>
+<dl><dt><a name="exp-__init__"><strong>__init__</strong></a>(self, outfile, refName, refChrom, tgtName, tgtChrom, status, title<font color="#909090">='title'</font>, xlabel<font color="#909090">='xlabel'</font>, ylabel<font color="#909090">='ylabel'</font>)</dt><dd><tt>Accepts&nbsp;output&nbsp;file,&nbsp;title&nbsp;and&nbsp;axis&nbsp;labels.<br>
 Initialize&nbsp;limits.</tt></dd></dl>
 
 <dl><dt><a name="exp-add"><strong>add</strong></a>(self, sense, reg)</dt><dd><tt>Filters&nbsp;from&nbsp;register&nbsp;only&nbsp;the&nbsp;necessary&nbsp;information.<br>
 Calls&nbsp;self.<strong>append</strong>;</tt></dd></dl>
 
-<dl><dt><a name="exp-addOld"><strong>addOld</strong></a>(self, sense, reg)</dt></dl>
-
 <dl><dt><a name="exp-append"><strong>append</strong></a>(self, x1, y1, x2, y2, name, sense, q)</dt><dd><tt>Adds&nbsp;query&nbsp;name&nbsp;to&nbsp;database&nbsp;of&nbsp;names&nbsp;(a&nbsp;list&nbsp;of&nbsp;all&nbsp;names).<br>
-Exports&nbsp;only&nbsp;species&nbsp;ID&nbsp;(index&nbsp;of&nbsp;the&nbsp;species&nbsp;name&nbsp;in&nbsp;the&nbsp;database&nbsp;of&nbsp;names);<br>
+Exports&nbsp;only&nbsp;species&nbsp;ID&nbsp;(index&nbsp;of&nbsp;the&nbsp;scaffold&nbsp;name&nbsp;in&nbsp;the&nbsp;database&nbsp;of&nbsp;names);<br>
 &nbsp;<br>
 Replaces&nbsp;sense&nbsp;for&nbsp;0/1;<br>
 &nbsp;<br>
@@ -104,7 +105,6 @@ to&nbsp;create&nbsp;a&nbsp;single&nbsp;Y&nbsp;axis.</tt></dd></dl>
  <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>Parse&nbsp;all&nbsp;input&nbsp;files&nbsp;names,&nbsp;exports&nbsp;them&nbsp;to&nbsp;databases&nbsp;and&nbsp;creates&nbsp;index&nbsp;of&nbsp;all&nbsp;files.</tt></dd></dl>
  <dl><dt><a name="-parseDelta"><strong>parseDelta</strong></a>(delta)</dt><dd><tt>Converts&nbsp;.delta&nbsp;to&nbsp;.coords&nbsp;(if&nbsp;needed)&nbsp;and&nbsp;parses&nbsp;.coords&nbsp;file.</tt></dd></dl>
  <dl><dt><a name="-parseFN"><strong>parseFN</strong></a>(infile)</dt><dd><tt>Parses&nbsp;file&nbsp;name&nbsp;to&nbsp;extract&nbsp;species&nbsp;information</tt></dd></dl>
- <dl><dt><a name="-statusMatcher"><strong>statusMatcher</strong></a>(status)</dt><dd><tt>Given&nbsp;the&nbsp;extension&nbsp;of&nbsp;the&nbsp;file,&nbsp;return&nbsp;a&nbsp;verbose&nbsp;string&nbsp;describing&nbsp;it&nbsp;to&nbsp;be&nbsp;used&nbsp;in&nbsp;title.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -115,16 +115,16 @@ to&nbsp;create&nbsp;a&nbsp;single&nbsp;Y&nbsp;axis.</tt></dd></dl>
 <td width="100%"><strong>__author__</strong> = 'Saulo Aflitos'<br>
 <strong>__credits__</strong> = 'mummer, WUR, PRI, CBSG'<br>
 <strong>__date__</strong> = 'Nov 2013'<br>
-<strong>__version__</strong> = '201311181249'<br>
-<strong>compulsory</strong> = ['.delta', '.delta.coords']<br>
-<strong>forbidden</strong> = ['.invertions.delta.q.delta', '.invertions.delta.q.delta.coords', '.fasta.delta', '.fasta.delta.coords']<br>
-<strong>k</strong> = 'chromNumber'<br>
-<strong>labelFields</strong> = {'chromNumber': [&lt;_sre.SRE_Pattern object&gt;, None], 'refName': [&lt;_sre.SRE_Pattern object&gt;, &lt;function basename&gt;], 'spp': [&lt;_sre.SRE_Pattern object&gt;, None], 'status': [&lt;_sre.SRE_Pattern object&gt;, &lt;function statusMatcher&gt;]}<br>
+<strong>__version__</strong> = '201311261713'<br>
+<strong>compulsory</strong> = None<br>
+<strong>dry_run</strong> = None<br>
+<strong>forbidden</strong> = None<br>
+<strong>labelFields</strong> = None<br>
 <strong>pointFmt</strong> = '%d,%d,%d,%d,%d,%d,%.2f,'<br>
-<strong>statusMatch</strong> = {'.delta': 'Raw Dot Plot', '.delta.coords': 'Raw Dot Plot', '.delta.q.delta': 'Clean Dot Plot', '.delta.q.delta.coords': 'Clean Dot Plot', '.delta.q.delta.filter': 'Clean &amp; Filtered Dot Plot', '.delta.q.delta.filter.coords': 'Clean &amp; Filtered Dot Plot', '.delta.q.delta.filter.invertions.delta': 'Clean &amp; Filtered Dot Plot. Only Inversions', '.delta.q.delta.filter.invertions.delta.coords': 'Clean &amp; Filtered Dot Plot. Only Inversions'}<br>
-<strong>titleFmt</strong> = '%(refName)s vs %(spp)s - Chromosome %(chromNumber)s - %(status)s'<br>
-<strong>xlabelFmt</strong> = '%(refName)s Chromosome %(chromNumber)s'<br>
-<strong>ylabelFmt</strong> = '%(spp)s'</td></tr></table><p>
+<strong>statusMatch</strong> = None<br>
+<strong>titleFmt</strong> = None<br>
+<strong>xlabelFmt</strong> = None<br>
+<strong>ylabelFmt</strong> = None</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

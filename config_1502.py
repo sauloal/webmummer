@@ -12,11 +12,11 @@ def retAll(l):
     return 'all scaffolds'
 
 labelFields = {
-    'refName' : ['(\S+?)_SL2.40ch\d+'                       , os.path.basename],
-    'refChrom': ['SL2.40ch(\d+)'                            , None            ],
-    'tgtName' : ['_\._(\S+)_scaffold_final\.assembly\.fasta', None            ],
-    'tgtChrom': ['(.)'                                      , retAll          ],
-    'status'  : ['\.fasta(\S+)'                             , None            ]
+    'refName' : [r'(\S+?)_SL2.40ch\d+'                       , os.path.basename, None            ],
+    'refChrom': [r'SL2.40ch(\d+)'                            , None            , None            ],
+    'tgtName' : [r'_\._(\S+)_scaffold_final\.assembly\.fasta', None            , None            ],
+    'tgtChrom': [r'(.)'                                      , None            , retAll          ],
+    'status'  : [r'\.fasta(\S+)'                             , None            , None            ]
 }
 """
 Regular expression to extract information from filenames
