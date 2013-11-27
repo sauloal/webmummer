@@ -22,8 +22,8 @@ var huid = '';
 
 function hasStorage() {
     try {
-        //var res = 'localStorage' in window && window['localStorage'] !== null;
-        var res = windowhasOwnProperty('localStorage') && window.localStorage !== null;
+        var res = 'localStorage' in window && window.localStorage !== null;
+        //var res = windowhasOwnProperty('localStorage') && window.localStorage !== null;
 
         return res;
     } catch(e) {
@@ -384,6 +384,9 @@ function start() {
     sels = bdy.insertBefore( sels, bfc );
 
 
+    getQueryString();
+
+    setQueryString()
 
     genSelectors(sels); // generate selectors based on "opts" variable
 
@@ -452,6 +455,66 @@ function start() {
 
 
 
+function getQueryString () {
+    if ( hasstorage ) {
+        var parsed = parseUri(document.URL);
+        var anchor = parsed.anchor;
+
+        if (anchor !== '') {
+            console.log('has anchor');
+            var data64 = null;
+            try {
+                data64 = base64.decode(anchor);
+            } catch(e) {
+                console.log('invalid 64');
+                console.log(anchor      );
+                return null;
+            }
+
+            var data = null;
+            try {
+                data   = JSON.parse( data64 );
+            } catch(e) {
+                console.log('invalid JSON');
+                console.log(data64        );
+                return null;
+            }
+
+            localStorage.clear();
+
+            for (var k in data) {
+                localStorage[k] = data[k];
+            }
+        }
+    }
+}
+
+
+function setQueryString () {
+    if ( hasstorage ) {
+        var parsed = parseUri(document.URL);
+        var anchor = parsed.anchor;
+
+        if ( localStorage.length === 0 ) {
+            console.log('nothing to save');
+            return null;
+        }
+
+        var data   = JSON.stringify(localStorage);
+        var data64 = base64.encode( data );
+
+        if ( anchor != data64) {
+            console.log( 'current url and current config differ');
+            console.log(anchor);
+            console.log(data64);
+            window.location.hash = data64;
+            console.log(data64.length);
+        } else {
+            console.log( 'current url and current config are equal');
+            console.log(anchor.length);
+        }
+    }
+}
 
 
 function addPicker(el, id, cls, nfo, callback) {
@@ -628,7 +691,7 @@ function createOptions(){
     createCsss(trD22);
 
     var clsBtn       = document.createElement('button');
-    clsBtn.onclick   = function(e) { if (hasStorage) { localStorage.clear(); alert('cleaning all preferences'); location.reload(); } };
+    clsBtn.onclick   = function(e) { if (hasStorage) { alert('cleaning all preferences'); localStorage.clear(); location.reload(); } };
     clsBtn.innerHTML = 'Clear';
 
     divH.appendChild( clsBtn );
@@ -703,7 +766,9 @@ function createSyncs(el) {
         sizeSel.appendChild( opf );
     }
 
-    sizeSel.onchange  = function(e) { saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) ); };
+    sizeSel.onchange  = function(e) {
+            saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) );
+        };
 }
 
 
@@ -814,7 +879,7 @@ function loadScript( reg, callback ){
     //var head     = document.getElementsByTagName('head')[0];
     var script    = document.createElement('script');
     script.type   = 'text/javascript';
-    script.src    = filename;
+    script.src    = filename + '?' + _db_version;
     script.id     = scriptId;
 
     // Then bind the event to the callback function.
@@ -838,6 +903,9 @@ function mergeregs( regs ) {
     var hreg         = { };
     var yTicksLabels = [];
 
+    console.log(regs);
+
+
     for ( var r = 0; r < regs.length; r++ ) {
         var reg         = regs[r];
         yTicksLabels[r] = [];
@@ -850,7 +918,7 @@ function mergeregs( regs ) {
         }
     }
 
-
+    console.log(hreg);
 
     for ( var v in hreg ) {
         var vals = hreg[v];
@@ -870,16 +938,22 @@ function mergeregs( regs ) {
         }
     }
 
+    console.log(hreg);
+
     for ( var r = 0; r < yTicksLabels.length; r++ ) {
         yTicksLabels[r] = yTicksLabels[r].join('+');
     }
 
+    console.log(hreg);
 
+    try {
+        hreg.xmax   = Math.max.apply(null, hreg.xmax);
+        hreg.ymax   = Math.max.apply(null, hreg.ymax);
+        hreg.xmin   = Math.min.apply(null, hreg.xmin);
+        hreg.ymin   = Math.min.apply(null, hreg.ymin);
+    } catch (e) {
 
-    hreg.xmax   = Math.max.apply(null, hreg.xmax);
-    hreg.ymax   = Math.max.apply(null, hreg.ymax);
-    hreg.xmin   = Math.min.apply(null, hreg.xmin);
-    hreg.ymin   = Math.min.apply(null, hreg.ymin);
+    }
 
     var tgts    = hreg.tgtName;
     var sts     = hreg.status;
@@ -1042,25 +1116,30 @@ function clearPics(){
 
 function getFieldValue(fieldId) {
     var field = document.getElementById( fieldId );
-    var val   = null;
 
-    if ( field.localName == 'select' ) {
-        var sel = field.selectedIndex;
-        var fio = field.options[ sel ];
-        val     = fio.value;
-    } else {
-        if ( field.type == 'checkbox' ) {
-            val = field.checked;
+    if (field) {
+        var val   = null;
+
+        if ( field.localName == 'select' ) {
+            var sel = field.selectedIndex;
+            var fio = field.options[ sel ];
+            val     = fio.value;
         } else {
-            val = field.value;
+            if ( field.type == 'checkbox' ) {
+                val = field.checked;
+            } else {
+                val = field.value;
+            }
         }
-    }
 
-    if (val == 'null') {
-        val = null;
-    }
+        if (val == 'null') {
+            val = null;
+        }
 
-    return val;
+        return val;
+    } else {
+        return null;
+    }
 };
 
 
@@ -1070,7 +1149,7 @@ function getVals() {
     var uid  = '';
 
     for ( var optName in opts ) {
-        var val      = getFieldValue( optName );
+        var val      = getOpt( optName, null );
 
         if ( val === null ) {
             return null;
@@ -1257,6 +1336,7 @@ function saveOpt (k ,v) {
     if ( hasstorage ) {
         console.log('saving k "' + k + '" v "' + v + '"');
         localStorage[k] = JSON.stringify( v );
+        setQueryString();
     }
 };
 
@@ -1279,7 +1359,12 @@ function getOpt(k, d) {
             return d;
         }
     } else {
-        return d;
+        var val = getFieldValue(k);
+        if (val === null) {
+            return d;
+        } else {
+            return val;
+        }
     }
 }
 

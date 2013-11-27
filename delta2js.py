@@ -25,12 +25,14 @@ License: GPL 2.0
 
 __author__  = "Saulo Aflitos"
 __date__    = "Nov 2013"
-__version__ = "201311261713"
+__version__ = "2013_11_27_14_06"
 __credits__ = "mummer, WUR, PRI, CBSG"
 
 import sys, os
 import subprocess
 import re
+import time
+import datetime
 from pprint import pprint as pp
 
 #cd data
@@ -110,7 +112,6 @@ if __name__ == '__main__':
     """
     Adds statusMatcher as a function to be called uppon parsing of file name.
     """
-
 
 
 
@@ -196,7 +197,7 @@ class exp(object):
 
         if self.linec != 1:
             line = ',' + line
-    
+
         self.fhd.write( line )
 
         if x1 > self.maxX: self.maxX = x1
@@ -475,9 +476,11 @@ def main():
 
 
 
-
+    filecount = 0
+    numfiles  = len(sys.argv[2:])
     for infile in sys.argv[2:]:
-        print "INFILE : %s" % infile
+        filecount += 1
+        print "INFILE : %s [%3d/%3d]" % ( infile, filecount, numfiles )
 
         hasC = False
         for compul in compulsory:
@@ -586,7 +589,8 @@ def main():
 
 
     if dry_run:
-        return
+        #return
+        pass
 
 
     with open( 'list.js', 'w' ) as fhd:
@@ -596,22 +600,26 @@ def main():
         outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ][ status ] = <javascript database base name>
         """
 
+        datestr = datetime.datetime.fromtimestamp( time.time() ).strftime('%Y_%m_%d_%H_%M_%S')
+
+        fhd.write( 'var _db_version  = "%s";\n' % datestr);
+
         refStr       = ', '.join( [ "'%s'" % x for x in sorted(refsNames ) ] )
-        fhd.write( 'var _refsNames  = [%s];\n' % refStr);
+        fhd.write( 'var _refsNames   = [%s];\n' % refStr);
 
         refChromStr  = ', '.join( [ "'%s'" % x for x in sorted(refsChroms) ] )
-        fhd.write( 'var _refsChroms = [%s];\n' % refChromStr);
+        fhd.write( 'var _refsChroms  = [%s];\n' % refChromStr);
 
         tgtStr       = ', '.join( [ "'%s'" % x for x in sorted(tgtsNames ) ] )
-        fhd.write( 'var _tgtsNames  = [%s];\n' % tgtStr);
+        fhd.write( 'var _tgtsNames   = [%s];\n' % tgtStr);
 
         tgtChromStr  = ', '.join( [ "'%s'" % x for x in sorted(tgtsChroms) ] )
-        fhd.write( 'var _tgtsChroms = [%s];\n' % tgtChromStr);
+        fhd.write( 'var _tgtsChroms  = [%s];\n' % tgtChromStr);
 
         statusStr    = ', '.join( [ "'%s'" % x for x in sorted(statuses  ) ] )
-        fhd.write( 'var _statuses   = [%s];\n' % statusStr);
+        fhd.write( 'var _statuses    = [%s];\n' % statusStr);
 
-        fhd.write( 'var _filelist = {\n');
+        fhd.write( 'var _filelist    = {\n');
 
 
         refNames = sorted(outfiles)
@@ -635,16 +643,15 @@ def main():
                             filedata = outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ][ status ]
                             fhd.write("          '%s': {\n" % status)
                             fhd.write("                  'filename': '%s'\n" % ( filedata[1][1] ) )
-
                             fhd.write('          }')
                             if z < len(statuses)-1:
                                 fhd.write(',')
                             fhd.write('\n')
 
-                    fhd.write('        }')
-                    if y < len(tgtChroms)-1:
-                        fhd.write(',')
-                    fhd.write('\n')
+                        fhd.write('        }')
+                        if y < len(tgtChroms)-1:
+                            fhd.write(',')
+                        fhd.write('\n')
 
                     fhd.write('      }')
                     if x < len(tgtNames)-1:
