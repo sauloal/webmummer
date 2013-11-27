@@ -151,10 +151,15 @@ var csss = {
     },
 
     '.scaf-square': {
-        'fill': {
+        //'fill': {
+        //                'type'   : 'color',
+        //                'value'  : '#33cc33',
+        //                'alt'    : 'Scaffold highligh box color'
+        //        },
+        'stroke': {
                         'type'   : 'color',
                         'value'  : '#33cc33',
-                        'alt'    : 'Scaffold highligh box color'
+                        'alt'    : 'Scaffold highligh line color'
                 },
         'opacity': {
                         'type'   : 'range',
@@ -170,7 +175,12 @@ var csss = {
         'fill': {
                         'type'   : 'color',
                         'value'  : '#0000FF',
-                        'alt'    : 'Tooltip color'
+                        'alt'    : 'Tooltip background color'
+                },
+        'color': {
+                        'type'   : 'color',
+                        'value'  : '#FFFFFF',
+                        'alt'    : 'Tooltip text color'
                 }
     }
 };
