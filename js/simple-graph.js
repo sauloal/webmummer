@@ -1,5 +1,5 @@
 //http://bl.ocks.org/stepheneb/1182434
-function toFixed(value, precision) {
+function toFixed (value, precision) {
     //http://stackoverflow.com/questions/2221167/javascript-formatting-a-rounded-number-to-n-decimals/2909252#2909252
     var precision = precision || 0,
     neg      = value < 0,
@@ -12,6 +12,9 @@ function toFixed(value, precision) {
     return precision ? integral + '.' +  padding + fraction : integral;
 }
 
+function isArray ( val ) {
+    return Object.prototype.toString.call( val ) === '[object Array]';
+};
 
 
 
@@ -323,6 +326,7 @@ SimpleGraph = function (chartHolder, options) {
     this.options.padlockIconMaxSize  = options.padlockIconMaxSize  ||  20;
     this.options.compassMaxSize      = options.compassMaxSize      ||  75;
     this.options.compassMinSize      = options.compassMinSize      ||  20;
+    this.parallel                    = options.parallel            || isArray( this.points[0] );
     //this.options.radius         = options.radius         || 5.0;
 
 
@@ -383,13 +387,11 @@ SimpleGraph = function (chartHolder, options) {
 
     this.regSize                     = 7;
 
-    this.parallel                    = false;
-
     this.numRegs                     = [];
 
 
-    if ( Object.prototype.toString.call(this.points[0]) === '[object Array]' ) {
-        this.parallel       = true;
+
+    if  ( this.parallel ) {
         this.options.ymin   = 0;
         this.options.ymax   = this.points.length + 1;
         this.options.yTicks = this.points.length + 1;
@@ -693,6 +695,7 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
                         .attr("j"        , j                                               )
                         .attr("scaf"     , vars.nameNum                                    )
                         .on(  "mouseover", function(d) { self.highlight( this          ); })
+                        .on(  "mouseout" , function(d) { self.downlight( this          ); })
                         ;
 
             //coords[ coords.length ] = stVal;
@@ -748,7 +751,7 @@ SimpleGraph.prototype.update = function () {
 
 
     for ( var p = 0; p < this.points.length; p++ ) {
-        console.log('updating reg #' + p + ": " + this.numRegs[p]);
+        //console.log('updating reg #' + p + ": " + this.numRegs[p]);
         this.updateWorker( p );
     }
 
@@ -817,14 +820,14 @@ SimpleGraph.prototype.highlight = function( el ) {
 
 
     var sc = 0;
-    self.greenbox.selectAll('#scaf-square').each( function(d,i){
+    self.greenbox.selectAll('.scaf-square').each( function(d,i){
         var bsnum = d3.select(this).attr('scaf');
         //console.log('bsnum ' + bsnum + ' vs ' + nameNum)
         //console.log(' returning' );
         if (bsnum == nameNum) {
             sc += 1;
         } else {
-            self.greenbox.selectAll('#scaf-square').remove();
+            self.greenbox.selectAll('.scaf-square').remove();
         }
     });
     if ( sc > 0 ) { return; };
@@ -837,9 +840,12 @@ SimpleGraph.prototype.highlight = function( el ) {
     var maxY      = 0;
     var scafLines = self.vis.selectAll(".points[scaf='"+nameNum+"'][k='"+gK+"']");//.selectAll("");
 
+    var greenWidth = null;
+
     scafLines.each( function(d, i){
         var k    = JSON.parse(this.getAttribute('k'));
         var j    = JSON.parse(this.getAttribute('j'));
+        var d    = this.getAttribute('d');
         var vars = self.parsepoint( k, j );
         var x1   = self.x( vars.x1 );
         var x2   = self.x( vars.x2 );
@@ -860,6 +866,21 @@ SimpleGraph.prototype.highlight = function( el ) {
         maxX = x2 > maxX ? x2 : maxX;
         maxY = y1 > maxY ? y1 : maxY;
         maxY = y2 > maxY ? y2 : maxY;
+
+        if ( !greenWidth ) {
+            var gss = window.getComputedStyle(this, null).getPropertyCSSValue('stroke-width').cssText;
+            var gwt = gss.replace(/[^-\d\.]/g, '');
+            var gwn = parseInt(gwt);
+            var uni = gss.replace(gwt, '');
+            greenWidth = (2 * gwn) + uni;
+        }
+
+        self.greenbox.append( "path" )
+                    .attr( "class"       , "scaf-square" )
+                    .attr( "d"           , d             )
+                    .attr( "scaf"        , nameNum       )
+                    .style("stroke-width", greenWidth    )
+                    ;
     });
 
 
@@ -870,6 +891,7 @@ SimpleGraph.prototype.highlight = function( el ) {
 
     var lenX = maxX - minX;
     var lenY = maxY - minY;
+
 
     //var lenX = Math.round( ( maxX - minX )*1.1 );
     //var lenY = Math.round( ( maxY - minY )*1.1 );
@@ -892,17 +914,17 @@ SimpleGraph.prototype.highlight = function( el ) {
         console.log('no tip');
     }
 
-    self.greenbox.append("rect")
-        .attr( "id"     , 'scaf-square' )
-        .attr( "class"  , 'scaf-square' )
-        .attr( "scaf"   , nameNum       )
-        .attr( "x"      , minX          )
-        .attr( "y"      , minY          )
-        //.attr( "rx"     , lenX * 0.3    )
-        //.attr( "ry"     , lenY * 0.3    )
-        .attr( "width"  , lenX          )
-        .attr( "height" , lenY          )
-        .on(   "mouseout" , function(d) { self.downlight( this          ); });
+    //self.greenbox.append("rect")
+    //    .attr( "id"     , 'scaf-square' )
+    //    .attr( "class"  , 'scaf-square' )
+    //    .attr( "scaf"   , nameNum       )
+    //    .attr( "x"      , minX          )
+    //    .attr( "y"      , minY          )
+    //    //.attr( "rx"     , lenX * 0.3    )
+    //    //.attr( "ry"     , lenY * 0.3    )
+    //    .attr( "width"  , lenX          )
+    //    .attr( "height" , lenY          )
+    //    .on(   "mouseout" , function(d) { self.downlight( this          ); });
 };
 
 
@@ -1271,7 +1293,10 @@ SimpleGraph.prototype.redraw = function () {
   return function () {
     //console.log( d3.event );
 
-    self.greenbox.selectAll('#scaf-square').remove();
+    self.greenbox.selectAll('.scaf-square').remove();
+    if (self.tip) {
+        self.tip.style.visibility = 'hidden';
+    }
 
     var tx = function(d) {
       return "translate(" + self.x(d) + ",0)";

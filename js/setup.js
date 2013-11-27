@@ -461,7 +461,7 @@ function getQueryString () {
         var anchor = parsed.anchor;
 
         if (anchor !== '') {
-            console.log('has anchor');
+            //console.log('has anchor');
             var data64 = null;
             try {
                 data64 = base64.decode(anchor);
@@ -496,7 +496,7 @@ function setQueryString () {
         var anchor = parsed.anchor;
 
         if ( localStorage.length === 0 ) {
-            console.log('nothing to save');
+            //console.log('nothing to save');
             return null;
         }
 
@@ -504,14 +504,14 @@ function setQueryString () {
         var data64 = base64.encode( data );
 
         if ( anchor != data64) {
-            console.log( 'current url and current config differ');
+            //console.log( 'current url and current config differ');
             console.log(anchor);
             console.log(data64);
             window.location.hash = data64;
             console.log(data64.length);
         } else {
-            console.log( 'current url and current config are equal');
-            console.log(anchor.length);
+            //console.log( 'current url and current config are equal');
+            //console.log(anchor.length);
         }
     }
 }
@@ -903,7 +903,7 @@ function mergeregs( regs ) {
     var hreg         = { };
     var yTicksLabels = [];
 
-    console.log(regs);
+    //console.log(regs);
 
 
     for ( var r = 0; r < regs.length; r++ ) {
@@ -918,7 +918,7 @@ function mergeregs( regs ) {
         }
     }
 
-    console.log(hreg);
+    //console.log(hreg);
 
     for ( var v in hreg ) {
         var vals = hreg[v];
@@ -927,9 +927,11 @@ function mergeregs( regs ) {
         });
 
         if (uniqueArray.length == 1) {
-            hreg[v] = vals[0];
+            if (['tgts', 'points'].indexOf(v) == -1) {
+                hreg[v] = vals[0];
+            }
         } else {
-            if (['tgtName', 'status'].indexOf(v) != -1) {
+            if (['tgtName', 'tgtChrom', 'status'].indexOf(v) != -1) {
                 console.log('MORE '+v);
                 for ( var h = 0; h < hreg[v].length; h++) {
                     yTicksLabels[h].push( hreg[v][h] );
@@ -938,13 +940,13 @@ function mergeregs( regs ) {
         }
     }
 
-    console.log(hreg);
+    //console.log(hreg);
 
     for ( var r = 0; r < yTicksLabels.length; r++ ) {
         yTicksLabels[r] = yTicksLabels[r].join('+');
     }
 
-    console.log(hreg);
+    //console.log(hreg);
 
     try {
         hreg.xmax   = Math.max.apply(null, hreg.xmax);
@@ -1006,7 +1008,9 @@ function loadGraph( regs ) {
 
 
     if (horizontal) {
-        var hreg = mergeregs( regs );
+        var hreg      = mergeregs( regs );
+        hreg.parallel = true;
+        console.log( hreg );
 
         graphdb.add(chartName, hreg);
     } else {
