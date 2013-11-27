@@ -20,11 +20,6 @@ The dot plot will be shown and can be browsed with either the keyboard or mouse.
 Use arrow keys, +/-/0, drag with mouse, [shift] double-click, scroll-wheel or use the compass.
 
 
-Screenshot
--------------
-<img src="https://raw.github.com/sauloal/webmummer/master/Screenshot.png"/>
-
-
 Saving
 -------
 On the top left corther of each graph there's a button to save the current view to a svg file.
@@ -33,6 +28,24 @@ On the top left corther of each graph there's a button to save the current view 
 Help
 -------
 On the top right corther there's a help message. Hover over it to all configurations and help available.
+
+
+Screenshot
+-------------
+### A diagonal plot for close species
+<img src="http://sauloal.github.io/webmummer/Screenshot_01_diagonal.png"/>
+### A diagonal plot for distant species
+<img src="http://sauloal.github.io/webmummer/Screenshot_02_distant_spps.png"/>
+### Configuration pop-up
+<img src="http://sauloal.github.io/webmummer/Screenshot_03_config.png"/>
+### Horizontal multi display
+<img src="http://sauloal.github.io/webmummer/Screenshot_04_horizontal.png"/>
+### Horizontal multi display - Zoomed with description in the right corner
+<img src="http://sauloal.github.io/webmummer/Screenshot_05_horizontal_zoom.png"/>
+### SVG output
+<img src="http://sauloal.github.io/webmummer/Plot_diagonal.svg"/>
+### SVG output - zoomed
+<img src="http://sauloal.github.io/webmummer/Plot_diagonal_zoom.svg"/>
 
 
 Thanks
