@@ -10,7 +10,7 @@ function toFixed(value, precision) {
     padding  = new Array(Math.max(precision - fraction.length, 0) + 1).join('0');
 
     return precision ? integral + '.' +  padding + fraction : integral;
-};
+}
 
 
 
@@ -50,15 +50,14 @@ function toFixed(value, precision) {
 
 
 // register keyboard events
-registerKeyboardHandler = function(callback) {
-  var callback = callback;
-  d3.select(window).on("keydown", callback);
+registerKeyboardHandler = function (callback) {
+    d3.select(window).on("keydown", callback);
 };
 
 
-d3.selection.prototype.size = function(){
+d3.selection.prototype.size = function () {
     var n = 0;
-    this.each( function() {
+    this.each( function () {
         n++;
     } );
     return n;
@@ -84,10 +83,10 @@ SyncSimpleGraph = function (opts) {
         maxX      : 0,
         minY      : Number.MAX_VALUE,
         maxY      : 0
-    }
+    };
 
-    document.body.addEventListener('d3zoom' , function(e) { self.d3zoomed( e ) }, false);
-    document.body.addEventListener('d3close', function(e) { self.d3closed( e ) }, false);
+    document.body.addEventListener( 'd3zoom' , function (e) { self.d3zoomed( e ); }, false );
+    document.body.addEventListener( 'd3close', function (e) { self.d3closed( e ); }, false );
 };
 
 
@@ -95,15 +94,15 @@ SyncSimpleGraph = function (opts) {
 //
 // SimpleGraph methods
 //
-SyncSimpleGraph.prototype.getVar = function( vari ) {
+SyncSimpleGraph.prototype.getVar = function ( vari ) {
     //console.log( typeof(vari) );
 
-    if      (typeof(vari) === 'function') {
+    if      ( typeof(vari) === 'function' ) {
         var res = vari();
         //console.log( res );
         return res;
     }
-    else if (typeof(vari) === 'boolean') {
+    else if ( typeof(vari) === 'boolean' ) {
         return vari;
     }
 };
@@ -111,11 +110,11 @@ SyncSimpleGraph.prototype.getVar = function( vari ) {
 
 
 
-SyncSimpleGraph.prototype.clear = function() {
-	for ( var uid in this.db ) {
-		console.log( 'cleaning ' + uid )
-		this.deleteUid(uid);
-	}
+SyncSimpleGraph.prototype.clear = function () {
+    for ( var uid in this.db ) {
+        console.log( 'cleaning ' + uid );
+        this.deleteUid(uid);
+    }
 
     this.db      = {};
     this.props   = {
@@ -123,7 +122,7 @@ SyncSimpleGraph.prototype.clear = function() {
         maxX      : 0,
         minY      : Number.MAX_VALUE,
         maxY      : 0
-    }
+    };
 };
 
 
@@ -278,19 +277,17 @@ SyncSimpleGraph.prototype.d3closed = function (e) {
 // SimpleGraph
 /////////////////////////////////////
 SimpleGraph = function (chartHolder, options) {
-    var self                         = this;
-
     this.uid                         = options.uid                 || 'uid_' + new Date();
 
     this.options                     = {};
 
-    this.tgts                        = options.tgts              || null;
+    this.tgts                        = options.tgts                || null;
                                                                    //              from tgts
                                                                    //                   f/r
                                                                    //  x1   y1 x2 y2 scaf 0/1 q
     this.points                      = options.points              || null; //[0 , 0, 0, 0, 0,   0,  0.0];
 
-	this.options.chartClass          = options.chartClass          || 'chartpart';
+    this.options.chartClass          = options.chartClass          || 'chartpart';
 
     this.options.xmax                = options.xmax                || null;
     this.options.xmin                = options.xmin                || null;
@@ -299,7 +296,7 @@ SimpleGraph = function (chartHolder, options) {
 
 
     this.options.labelId             = options.labelId             || null;
-	this.options.tipId               = options.tipId               || null;
+    this.options.tipId               = options.tipId               || null;
 
     this.options.xlabel              = options.xlabel              || 'x';
     this.options.ylabel              = options.ylabel              || 'y';
@@ -330,31 +327,31 @@ SimpleGraph = function (chartHolder, options) {
 
 
     if (!this.tgts) {
-		console.log('no tgts');
+        console.log('no tgts');
         return;
     }
     if (!this.points) {
-		console.log('no points');
+        console.log('no points');
         return;
     }
 
     if (!this.options.xmax) {
-		console.log('no xmax');
+        console.log('no xmax');
         return;
     }
 
     if (!this.options.xmin) {
-		console.log('no xmin');
+        console.log('no xmin');
         return;
     }
 
     if (!this.options.ymax) {
-		console.log('no ymax');
+        console.log('no ymax');
         return;
     }
 
     if (!this.options.ymin) {
-		console.log('no ymin');
+        console.log('no ymin');
         return;
     }
 
@@ -392,15 +389,14 @@ SimpleGraph = function (chartHolder, options) {
 
 
     if ( Object.prototype.toString.call(this.points[0]) === '[object Array]' ) {
-        this.parallel     = true;
-
+        this.parallel       = true;
         this.options.ymin   = 0;
         this.options.ymax   = this.points.length + 1;
         this.options.yTicks = this.points.length + 1;
     } else {
-        this.numRegs      = [ (this.points.length / this.regSize) ];
-        this.tgts         = [ this.tgts   ];
-        this.points       = [ this.points ];
+        this.numRegs        = [ (this.points.length / this.regSize) ];
+        this.tgts           = [ this.tgts   ];
+        this.points         = [ this.points ];
     }
 
 
@@ -420,7 +416,7 @@ SimpleGraph = function (chartHolder, options) {
 //
 // SimpleGraph methods
 //
-SimpleGraph.prototype.draw = function() {
+SimpleGraph.prototype.draw = function () {
     var self = this;
 
     this.cx  = this.chart.clientWidth;
@@ -484,7 +480,7 @@ SimpleGraph.prototype.draw = function() {
 
 
 
-	this.chartd3 = d3.select(this.chart);
+    this.chartd3 = d3.select(this.chart);
 
     this.chartd3
         .on("mousemove.drag", self.mousemove())
@@ -516,7 +512,7 @@ SimpleGraph.prototype.draw = function() {
 
 
     this.compass = this.svg.append("g")
-		.attr("class"    , 'compass-g')
+        .attr("class"    , 'compass-g')
         .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")")
     ;
 
@@ -590,14 +586,14 @@ SimpleGraph.prototype.draw = function() {
 
 
     this.greenbox         = this.vis
-		.append("g")
-			.attr('class', 'greenbox');
+        .append("g")
+            .attr('class', 'greenbox');
 
 
     this.grid             = this.vis
-		.append("g")
-			.attr('class' , 'grid' )
-		;
+        .append("g")
+            .attr('class' , 'grid' )
+        ;
 
 
     this.lines = this.vis.append("svg")
@@ -611,28 +607,28 @@ SimpleGraph.prototype.draw = function() {
 
 
 
-	//this.tip      = this.chart.appendChild( document.createElement('div') );
-	//var chartRect = this.chart.getBoundingClientRect();
-	//console.log( chartRect );
-	//
-	//var tipProp   = 0.1;
-	//var tipSize   = this.size.width  * tipProp;
-	//var tipX      = chartRect.right  - tipSize;
-	//var tipY      = chartRect.bottom;
-	//
-	//this.tip.setAttribute( 'class'     , 'tip'   );
-	//this.tip.style.width    = tipSize + 'px';
-	//this.tip.style.height   = tipSize + 'px';
-	//this.tip.style.top      = tipY    + 'px';
-	//this.tip.style.left     = tipX    + 'px';
-	//this.tip.style.display  = 'inline';
-	//this.tip.style.position = 'absolute';
+    //this.tip      = this.chart.appendChild( document.createElement('div') );
+    //var chartRect = this.chart.getBoundingClientRect();
+    //console.log( chartRect );
+    //
+    //var tipProp   = 0.1;
+    //var tipSize   = this.size.width  * tipProp;
+    //var tipX      = chartRect.right  - tipSize;
+    //var tipY      = chartRect.bottom;
+    //
+    //this.tip.setAttribute( 'class'     , 'tip'   );
+    //this.tip.style.width    = tipSize + 'px';
+    //this.tip.style.height   = tipSize + 'px';
+    //this.tip.style.top      = tipY    + 'px';
+    //this.tip.style.left     = tipX    + 'px';
+    //this.tip.style.display  = 'inline';
+    //this.tip.style.position = 'absolute';
 
-	//this.tip.style.visibility = 'hidden';
+    //this.tip.style.visibility = 'hidden';
     //        .attr( "transform" , "translate("+tipX+","+tipY+")"  )
-    //		;
+    //        ;
 
-    //	this.tip.append('rect')
+    //    this.tip.append('rect')
     //        .attr( "class"     , 'tooltip'      )
     //        .attr( "rx"        , tipSize * 0.3  )
     //        .attr( "ry"        , tipSize * 0.3  )
@@ -640,15 +636,15 @@ SimpleGraph.prototype.draw = function() {
     //        .attr( "y"         , 0              )
     //        .attr( "width"     , tipSize + 'px' )
     //        .attr( "height"    , tipSize + 'px' )
-    //		;
+    //        ;
 
-	this.tip = null;
-	if (this.options.tipId) {
-		//console.log( 'adding tip' );
-		this.tip = document.getElementById( this.options.tipId )
-	} else {
-		console.log('no tip id given');
-	};
+    this.tip = null;
+    if (this.options.tipId) {
+        //console.log( 'adding tip' );
+        this.tip = document.getElementById( this.options.tipId );
+    } else {
+        console.log('no tip id given');
+    }
 
     this.currScale        = 1;
     this.currTranslationX = 0;
@@ -746,7 +742,7 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
 
 
 
-SimpleGraph.prototype.update = function() {
+SimpleGraph.prototype.update = function () {
     var self   = this;
     //var coords = [];
 
@@ -805,8 +801,8 @@ SimpleGraph.prototype.downlight = function( el ) {
     d3.select(el).classed( "scaf-highlight", false );
     self.greenbox.selectAll('.scaf-square').remove();
     if (self.tip) {
-		self.tip.style.visibility = 'hidden';
-	}
+        self.tip.style.visibility = 'hidden';
+    }
 };
 
 
@@ -823,13 +819,13 @@ SimpleGraph.prototype.highlight = function( el ) {
     var sc = 0;
     self.greenbox.selectAll('#scaf-square').each( function(d,i){
         var bsnum = d3.select(this).attr('scaf');
-		//console.log('bsnum ' + bsnum + ' vs ' + nameNum)
-		//console.log(' returning' );
-		if (bsnum == nameNum) {
-			sc += 1;
-		} else {
-			self.greenbox.selectAll('#scaf-square').remove();
-		}
+        //console.log('bsnum ' + bsnum + ' vs ' + nameNum)
+        //console.log(' returning' );
+        if (bsnum == nameNum) {
+            sc += 1;
+        } else {
+            self.greenbox.selectAll('#scaf-square').remove();
+        }
     });
     if ( sc > 0 ) { return; };
 
@@ -867,10 +863,10 @@ SimpleGraph.prototype.highlight = function( el ) {
     });
 
 
-	minX = minX * 0.995;
-	maxX = maxX * 1.005;
-	minY = minY * 0.995;
-	maxY = maxY * 1.005;
+    minX = minX * 0.995;
+    maxX = maxX * 1.005;
+    minY = minY * 0.995;
+    maxY = maxY * 1.005;
 
     var lenX = maxX - minX;
     var lenY = maxY - minY;
@@ -887,16 +883,16 @@ SimpleGraph.prototype.highlight = function( el ) {
     //console.log("len X " + lenX + ' Y ' + lenY);
     //console.log("cx " + minX + " cy " + minY + ' width ' + lenX + ' heigth ' + lenY);
 
-	//console.log(el);
+    //console.log(el);
 
-	if (self.tip) {
-		self.tip.style.visibility = 'visible';
-		self.tip.innerHTML        = self.genTip(gK, gJ);
-	} else {
-		console.log('no tip');
-	}
+    if (self.tip) {
+        self.tip.style.visibility = 'visible';
+        self.tip.innerHTML        = self.genTip(gK, gJ);
+    } else {
+        console.log('no tip');
+    }
 
-    var r = self.greenbox.append("rect")
+    self.greenbox.append("rect")
         .attr( "id"     , 'scaf-square' )
         .attr( "class"  , 'scaf-square' )
         .attr( "scaf"   , nameNum       )
@@ -960,9 +956,9 @@ SimpleGraph.prototype.genTip = function (k,j) {
 
 
 
-SimpleGraph.prototype.plot_drag = function() {
+SimpleGraph.prototype.plot_drag = function () {
     var self = this;
-    return function() {
+    return function () {
         registerKeyboardHandler(self.keydown());
 
         d3.select('body').style("cursor", "move");
@@ -989,7 +985,7 @@ SimpleGraph.prototype.plot_drag = function() {
 
 
 
-SimpleGraph.prototype.updatePos = function(){
+SimpleGraph.prototype.updatePos = function (){
     if (this.options.labelId){
 
         var text   = ' - <b>Zoom:</b> ' + toFixed(this.currScale,1) + 'X - ';
@@ -1002,11 +998,11 @@ SimpleGraph.prototype.updatePos = function(){
 
 
 
-SimpleGraph.prototype.datapoint_drag = function() {
+SimpleGraph.prototype.datapoint_drag = function () {
     var self = this;
     return function(d) {
         registerKeyboardHandler(self.keydown());
-        document.onselectstart = function() { return false; };
+        document.onselectstart = function () { return false; };
         self.selected          = self.dragged = d;
         self.update();
     };
@@ -1015,11 +1011,11 @@ SimpleGraph.prototype.datapoint_drag = function() {
 
 
 
-SimpleGraph.prototype.mousemove = function() {
+SimpleGraph.prototype.mousemove = function () {
     var self = this;
-    return function() {
-        var p = d3.mouse(self.vis[0][0]),
-            t = d3.event.changedTouches;
+    return function () {
+        var p = d3.mouse(self.vis[0][0]);
+        //,            t = d3.event.changedTouches;
 
         if (self.dragged) {
             self.dragged.y = self.y.invert(Math.max(0, Math.min(self.size.height, p[1])));
@@ -1069,10 +1065,10 @@ SimpleGraph.prototype.mousemove = function() {
 
 
 
-SimpleGraph.prototype.mouseup = function() {
+SimpleGraph.prototype.mouseup = function () {
     var self = this;
-    return function() {
-        document.onselectstart = function() { return true; };
+    return function () {
+        document.onselectstart = function () { return true; };
         d3.select('body').style("cursor", "auto");
         d3.select('body').style("cursor", "auto");
 
@@ -1093,15 +1089,15 @@ SimpleGraph.prototype.mouseup = function() {
         if (self.dragged) {
             self.dragged = null;
         }
-    }
+    };
 };
 
 
 
 
-SimpleGraph.prototype.keydown = function() {
+SimpleGraph.prototype.keydown = function () {
   var self = this;
-  return function() {
+  return function () {
     var keyPressed = d3.event.keyCode;
     if (self.selected) {
       switch (keyPressed) {
@@ -1184,7 +1180,7 @@ SimpleGraph.prototype.mover = function(valPressed) {
 
 
 
-SimpleGraph.prototype.reset = function() {
+SimpleGraph.prototype.reset = function () {
     var self = this;
     console.log("reseting");
 
@@ -1269,13 +1265,13 @@ SimpleGraph.prototype.applyZoom = function(z, x, y){
 
 
 
-SimpleGraph.prototype.redraw = function() {
+SimpleGraph.prototype.redraw = function () {
   var self = this;
 
-  return function() {
+  return function () {
     //console.log( d3.event );
 
-	self.greenbox.selectAll('#scaf-square').remove();
+    self.greenbox.selectAll('#scaf-square').remove();
 
     var tx = function(d) {
       return "translate(" + self.x(d) + ",0)";
@@ -1330,6 +1326,7 @@ SimpleGraph.prototype.redraw = function() {
                 if ( d > 0 && d <= self.options.yTicksLabels.length ) {
                     return self.options.yTicksLabels[d-1];
                 }
+                return null;
             };
         }
     }
@@ -1403,7 +1400,7 @@ SimpleGraph.prototype.redraw = function() {
                         .text( w[y]   )
                         .attr( 'x' , 0         )
                         .attr( 'dx', 0  + 'em' )
-                        .attr( 'dy', (y == 0 ? (((w.length/2)-1)*-1) : 1) + 'em' );
+                        .attr( 'dy', (y === 0 ? (((w.length/2)-1)*-1) : 1) + 'em' );
             }
         });
 
@@ -1475,10 +1472,10 @@ SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
 
 
 
-SimpleGraph.prototype.xaxis_drag = function() {
+SimpleGraph.prototype.xaxis_drag = function () {
   var self = this;
   return function(d) {
-    document.onselectstart = function() { return false; };
+    document.onselectstart = function () { return false; };
     var p      = d3.mouse(self.vis[0][0]);
     self.downx = self.x.invert(p[0]);
   };
@@ -1490,7 +1487,7 @@ SimpleGraph.prototype.xaxis_drag = function() {
 SimpleGraph.prototype.yaxis_drag = function(d) {
   var self = this;
   return function(d) {
-    document.onselectstart = function() { return false; };
+    document.onselectstart = function () { return false; };
     var p      = d3.mouse(self.vis[0][0]);
     self.downy = self.y.invert(p[1]);
   };
@@ -1569,7 +1566,7 @@ SimpleGraph.prototype.download = function(obj) {
 
     a.node().click();
 
-    setTimeout(function() {
+    setTimeout(function () {
         window.URL.revokeObjectURL(url);
     }, 10);
 
@@ -1587,8 +1584,8 @@ SimpleGraph.prototype.download = function(obj) {
 
 
 
-SimpleGraph.prototype.getStyles = function() {
-    var self        = this;
+SimpleGraph.prototype.getStyles = function () {
+    //var self        = this;
     var doc         = window.document;
     var styles      = "";
     var styleSheets = doc.styleSheets;
@@ -1676,7 +1673,7 @@ SimpleGraph.prototype.toggleLock = function(obj) {
 
 
 
-SimpleGraph.prototype.addCompass = function() {
+SimpleGraph.prototype.addCompass = function () {
     var gW     = 42;
     var startX = 50;
     var startY = 50;
@@ -1716,7 +1713,7 @@ SimpleGraph.prototype.addCompass = function() {
     //console.log("gw "+gW+" sw "+sW+" sw10 "+sW10+" wp "+wP);
 
     // big circle
-	this.compass
+    this.compass
         .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ") scale("+wP+")");
 
 
@@ -1733,22 +1730,22 @@ SimpleGraph.prototype.addCompass = function() {
     this.compass.append('path')
         .attr('class', 'compass-button'                   )
         .attr('d'    , "M50 10 l12 20 a40,70 0 0,0 -24,0z")
-        .on('click'  ,  function() { self.mover('t'); }    ); //t
+        .on('click'  ,  function () { self.mover('t'); }    ); //t
 
     this.compass.append('path')
         .attr('class', 'compass-button'                    )
         .attr('d'    , "M90 50 l-20 -12 a70,40 0 0,1 0,24z")
-        .on('click'  ,  function() { self.mover('r'); }     ); // r
+        .on('click'  ,  function () { self.mover('r'); }     ); // r
 
     this.compass.append('path')
         .attr('class', 'compass-button'                    )
         .attr('d'    , "M50 90 l12 -20 a40,70 0 0,1 -24,0z")
-        .on('click'  ,  function() { self.mover('b'); }     ); // b
+        .on('click'  ,  function () { self.mover('b'); }     ); // b
 
     this.compass.append('path')
         .attr('class', 'compass-button'                   )
         .attr('d'    , "M10 50 l20 -12 a70,40 0 0,0 0,24z")
-        .on('click'  ,  function() { self.mover('l'); }    ); // l
+        .on('click'  ,  function () { self.mover('l'); }    ); // l
 
 
     //white center
@@ -1762,7 +1759,7 @@ SimpleGraph.prototype.addCompass = function() {
     //zoom buttons
     //zoom buttons - minus
     var gm = this.compass.append('g')
-          .on('click'  , function() { self.mover('-'); } );
+          .on('click'  , function () { self.mover('-'); } );
 
         gm.append('circle')
           .attr('class', 'compass-button')
@@ -1779,7 +1776,7 @@ SimpleGraph.prototype.addCompass = function() {
 
     //zoom buttons - plus
     var gp = this.compass.append('g')
-          .on('click'  ,  function() { self.mover('+'); } );
+          .on('click'  ,  function () { self.mover('+'); } );
 
         gp.append('circle')
           .attr('class', 'compass-button')
@@ -1804,7 +1801,7 @@ SimpleGraph.prototype.addCompass = function() {
 
     //zoom buttons - zero
     var gz = this.compass.append('g')
-          .on('click'  ,  function() { self.mover('0'); } );
+          .on('click'  ,  function () { self.mover('0'); } );
 
         gz.append('circle')
           .attr('class', 'compass-button')
@@ -1852,8 +1849,8 @@ SimpleGraph.prototype.calcIconPos = function(gW, maxSize, coor, ord) {
 
     var wP   = sW10 / gW;
         sW10 = gW * wP;
-    var xPos = this.size.width - ((ord+1)*sW10) + this.padding.right;
-    var yPos = 0 + coor;
+    //var xPos = this.size.width - ((ord+1)*sW10) + this.padding.right;
+    //var yPos = 0 + coor;
 
     return { 'wP': wP, 'sW10': sW10 };
 };
@@ -1861,7 +1858,7 @@ SimpleGraph.prototype.calcIconPos = function(gW, maxSize, coor, ord) {
 
 
 
-SimpleGraph.prototype.addCloseIcon = function() {
+SimpleGraph.prototype.addCloseIcon = function () {
     var self   = this;
     var coords = this.calcIconPos( 300, this.options.closeIconMaxSize, 1 );
 
@@ -1951,7 +1948,7 @@ SimpleGraph.prototype.addCloseIcon = function() {
 
 
 
-SimpleGraph.prototype.addDownloadIcon = function() {
+SimpleGraph.prototype.addDownloadIcon = function () {
     var self   = this;
     var coords = this.calcIconPos( 300, this.options.closeIconMaxSize, 2 );
 
@@ -2012,7 +2009,7 @@ SimpleGraph.prototype.addDownloadIcon = function() {
 
 
 
-SimpleGraph.prototype.addPadLockIcon = function() {
+SimpleGraph.prototype.addPadLockIcon = function () {
     var self   = this;
     var coords = this.calcIconPos( 260, this.options.padlockIconMaxSize, 3 );
 
@@ -2021,7 +2018,7 @@ SimpleGraph.prototype.addPadLockIcon = function() {
             .attr("class"    , 'padlock-icon'                                          )
             .attr("transform", "translate("+(2*coords.sW10)+",0) scale("+coords.wP+")" )
             .attr("id"       , 'padlock-icon'                                          )
-            .on(  'click'    , function()  { self.toggleLock(this);                   });
+            .on(  'click'    , function ()  { self.toggleLock(this);                   });
 
     //background
     g1.append('path')
