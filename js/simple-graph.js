@@ -83,7 +83,7 @@ SyncSimpleGraph = function (opts) {
         minX      : Number.MAX_VALUE,
         maxX      : 0,
         minY      : Number.MAX_VALUE,
-        maxY      : 0,
+        maxY      : 0
     }
 
     document.body.addEventListener('d3zoom' , function(e) { self.d3zoomed( e ) }, false);
@@ -122,7 +122,7 @@ SyncSimpleGraph.prototype.clear = function() {
         minX      : Number.MAX_VALUE,
         maxX      : 0,
         minY      : Number.MAX_VALUE,
-        maxY      : 0,
+        maxY      : 0
     }
 };
 

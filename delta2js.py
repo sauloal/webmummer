@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
 #pointFmt = "[{x:%d,y:%d},{x:%d,y:%d},{n:%d,s:%d,q:%.2f}]," # db format 1.0
 #pointFmt = "[%d,%d,%d,%d,%d,%d,%.2f],"                     # db format 2.0
-pointFmt = "%d,%d,%d,%d,%d,%d,%.2f,"                        # db format 3.0
+pointFmt = "%d,%d,%d,%d,%d,%d,%.2f"                         # db format 3.0
 """
 All numbers (x1, x2, y1, y2, ref name, tgt name, quality) are printed in a single array.
 By knowing the array size (7), each register can be recovered by simple arithmetics (k * 7).
@@ -159,6 +159,8 @@ class exp(object):
 
         self.fhd     = open(outfile, 'w')
 
+	self.linec   = 0;
+
         self.dbreg   = "_filelist[ '%s' ][ '%s' ][ '%s' ][ '%s' ][ '%s' ]" % ( refName, refChrom, tgtName, tgtChrom, status )
 
         #outfiles[ refName ][ chromNumber ][ spp ][ status ]
@@ -168,8 +170,7 @@ class exp(object):
 %(dbreg)s[ 'xlabel' ] = '%(xlabel)s';
 %(dbreg)s[ 'ylabel' ] = '%(ylabel)s';
 
-%(dbreg)s[ 'points' ] = [
-""" % { 'dbreg': self.dbreg, 'title': self.title, 'xlabel': self.xlabel, 'ylabel': self.ylabel } )
+%(dbreg)s[ 'points' ] = [""" % { 'dbreg': self.dbreg, 'title': self.title, 'xlabel': self.xlabel, 'ylabel': self.ylabel } )
 
     def append(self, x1, y1, x2, y2, name, sense, q):
         """
@@ -180,6 +181,9 @@ class exp(object):
 
         Updates min and max positions;
         """
+
+	self.linec += 1
+
         if name not in self.tgts:
             self.tgts[name] = len(self.tgts)
 
@@ -189,7 +193,10 @@ class exp(object):
 
         line  = pointFmt % ( x1, y1, x2, y2, name, sense, q )
 
-        self.fhd.write( line )
+	if self.linec != 1:
+		line = ',' + line
+
+	self.fhd.write( line )
 
         if x1 > self.maxX: self.maxX = x1
         if x2 > self.maxX: self.maxX = x2
@@ -227,39 +234,18 @@ class exp(object):
 
 %(dbreg)s[ 'ymin'   ]  = %(minY)12d;
 %(dbreg)s[ 'ymax'   ]  = %(maxY)12d;
-%(dbreg)s[ 'tgts'   ]  = [\
-""" % { 'dbreg': self.dbreg, 'minX': self.minX, 'maxX': self.maxX, 'minY': self.minY, 'maxY': self.maxY }
+%(dbreg)s[ 'tgts'   ]  = [""" % { 'dbreg': self.dbreg, 'minX': self.minX, 'maxX': self.maxX, 'minY': self.minY, 'maxY': self.maxY }
 
         for scaf in sorted(self.tgts, key=lambda p: self.tgts[p]):
             line += "'%s'," % scaf
 
+	line  = line.strip(',')
         line += '];'
 
         self.fhd.write( line )
 
         self.fhd.close()
 
-
-#var points = [
-#    [{x:  0,   y:   1}, {x:   1,   y:   2}, {n: 'first'  , s: 'f'}],
-#    [{x:  2,   y:   3}, {x:   3,   y:   5}, {n: 'second' , s: 'f'}],
-#    [{x:  4,   y:  13}, {x:   5,   y:   8}, {n: 'third'  , s: 'r'}],
-#    [{x:  6,   y:  21}, {x:   7,   y:  34}, {n: 'fourth' , s: 'f'}],
-#    [{x:  8,   y:  55}, {x:   9,   y:  89}, {n: 'fifth'  , s: 'f'}],
-#    [{x: 10,   y: 144}, {x:  11,   y:1033}, {n: 'sixth'  , s: 'f'}],
-#];
-#
-#var xmin   =    0;
-#var xmax   =   30;
-#
-#var ymin   =    0;
-#var ymax   = 1100;
-#
-#var xlabel = 'xlabel';
-#var ylabel = 'ylabel';
-#
-#var title  = 'title';
-#
 
 
 def parseDelta(delta):
@@ -627,28 +613,54 @@ def main():
         fhd.write( 'var _filelist = {\n');
 
 
-        for refName in sorted(outfiles):
+	refNames = sorted(outfiles)
+        for v, refName in enumerate(refNames):
             fhd.write("  '%s': {\n" % refName )
 
-            for refChrom in sorted(outfiles[ refName ]):
+            refChroms = sorted(outfiles[ refName ])
+            for w, refChrom in enumerate(refChroms):
                 fhd.write("    '%s': {\n" % refChrom )
 
-                for tgtName in sorted(outfiles[ refName ][ refChrom ]):
+		tgtNames = sorted(outfiles[ refName ][ refChrom ])
+                for x, tgtName in enumerate(tgtNames):
                     fhd.write("      '%s': {\n" % tgtName )
 
-                    for tgtChrom in sorted(outfiles[ refName ][ refChrom ][ tgtName ]):
+		    tgtChroms = sorted(outfiles[ refName ][ refChrom ][ tgtName ])
+                    for y, tgtChrom in enumerate(tgtChroms):
                         fhd.write("        '%s': {\n" % tgtChrom )
 
-                        for status in sorted(outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ]):
+			statuses = sorted(outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ])
+                        for z, status in enumerate(statuses):
                             filedata = outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ][ status ]
-                            fhd.write('        "%s": {\n' % status)
-                            fhd.write('          "filename": "%s"\n' % ( filedata[1][1] ) )
-                            fhd.write('          },\n')
-                        fhd.write('        },\n')
-                    fhd.write('      },\n')
-                fhd.write('    },\n')
-            fhd.write('  },\n')
-        fhd.write('};\n')
+                            fhd.write("          '%s': {\n" % status)
+                            fhd.write("                  'filename': '%s'\n" % ( filedata[1][1] ) )
+
+                            fhd.write('          }')
+		            if z < len(statuses)-1:
+	                        fhd.write(',')
+	                    fhd.write('\n')
+
+	                fhd.write('        }')
+			if y < len(tgtChroms)-1:
+	                    fhd.write(',')
+	                fhd.write('\n')
+
+                    fhd.write('      }')
+		    if x < len(tgtNames)-1:
+	                fhd.write(',')
+	            fhd.write('\n')
+
+                fhd.write('    }')
+		if w < len(refChroms)-1:
+	            fhd.write(',')
+	        fhd.write('\n')
+
+            fhd.write('  }')
+	    if v < len(refNames)-1:
+	        fhd.write(',')
+	    fhd.write('\n')
+
+        fhd.write('};')
 
     print "done"
 

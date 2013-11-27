@@ -44,14 +44,14 @@ var opts   = {
     'refChrom': [ _refsChroms, 'Select Reference Chromosome' ],
     'tgtName' : [ _tgtsNames , 'Select Target'               ],
     'tgtChrom': [ _tgtsChroms, 'Select Target Chromosome'    ],
-    'status'  : [ _statuses  , 'Select Status'               ],
+    'status'  : [ _statuses  , 'Select Status'               ]
 };
 
 
 var sizes = {
         chartfull : 'Full'   ,
         chartpart : 'Half'   ,
-        chartquart: 'Quarter',
+        chartquart: 'Quarter'
     };
 
 
@@ -99,7 +99,7 @@ var csss = {
                         'type'   : 'color',
                         'value'  : '#EEEEEE',
                         'alt'    : 'Graphic background color'
-                },
+                }
     },
 
     '.grid-line': {
@@ -107,7 +107,7 @@ var csss = {
                         'type'   : 'color',
                         'value'  : '#CCCCCC',
                         'alt'    : 'Grid line color'
-                },
+                }
     },
 
     '.points': {
@@ -132,7 +132,7 @@ var csss = {
                         'type'   : 'color',
                         'value'  : '#0000FF',
                         'alt'    : 'Forward line color'
-                },
+                }
     },
 
     '.points-r': {
@@ -145,7 +145,7 @@ var csss = {
                         'type'   : 'color',
                         'value'  : '#FF3300',
                         'alt'    : 'Reverse line color'
-                },
+                }
     },
 
     '.scaf-square': {
