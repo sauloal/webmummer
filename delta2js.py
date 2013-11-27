@@ -159,7 +159,7 @@ class exp(object):
 
         self.fhd     = open(outfile, 'w')
 
-	self.linec   = 0;
+        self.linec   = 0;
 
         self.dbreg   = "_filelist[ '%s' ][ '%s' ][ '%s' ][ '%s' ][ '%s' ]" % ( refName, refChrom, tgtName, tgtChrom, status )
 
@@ -172,6 +172,7 @@ class exp(object):
 
 %(dbreg)s[ 'points' ] = [""" % { 'dbreg': self.dbreg, 'title': self.title, 'xlabel': self.xlabel, 'ylabel': self.ylabel } )
 
+
     def append(self, x1, y1, x2, y2, name, sense, q):
         """
         Adds query name to database of names (a list of all names).
@@ -182,7 +183,7 @@ class exp(object):
         Updates min and max positions;
         """
 
-	self.linec += 1
+        self.linec += 1
 
         if name not in self.tgts:
             self.tgts[name] = len(self.tgts)
@@ -193,10 +194,10 @@ class exp(object):
 
         line  = pointFmt % ( x1, y1, x2, y2, name, sense, q )
 
-	if self.linec != 1:
-		line = ',' + line
-
-	self.fhd.write( line )
+        if self.linec != 1:
+            line = ',' + line
+    
+        self.fhd.write( line )
 
         if x1 > self.maxX: self.maxX = x1
         if x2 > self.maxX: self.maxX = x2
@@ -239,7 +240,7 @@ class exp(object):
         for scaf in sorted(self.tgts, key=lambda p: self.tgts[p]):
             line += "'%s'," % scaf
 
-	line  = line.strip(',')
+        line  = line.strip(',')
         line += '];'
 
         self.fhd.write( line )
@@ -613,7 +614,7 @@ def main():
         fhd.write( 'var _filelist = {\n');
 
 
-	refNames = sorted(outfiles)
+        refNames = sorted(outfiles)
         for v, refName in enumerate(refNames):
             fhd.write("  '%s': {\n" % refName )
 
@@ -621,44 +622,44 @@ def main():
             for w, refChrom in enumerate(refChroms):
                 fhd.write("    '%s': {\n" % refChrom )
 
-		tgtNames = sorted(outfiles[ refName ][ refChrom ])
+                tgtNames = sorted(outfiles[ refName ][ refChrom ])
                 for x, tgtName in enumerate(tgtNames):
                     fhd.write("      '%s': {\n" % tgtName )
 
-		    tgtChroms = sorted(outfiles[ refName ][ refChrom ][ tgtName ])
+                    tgtChroms = sorted(outfiles[ refName ][ refChrom ][ tgtName ])
                     for y, tgtChrom in enumerate(tgtChroms):
                         fhd.write("        '%s': {\n" % tgtChrom )
 
-			statuses = sorted(outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ])
+                        statuses = sorted(outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ])
                         for z, status in enumerate(statuses):
                             filedata = outfiles[ refName ][ refChrom ][ tgtName ][ tgtChrom ][ status ]
                             fhd.write("          '%s': {\n" % status)
                             fhd.write("                  'filename': '%s'\n" % ( filedata[1][1] ) )
 
                             fhd.write('          }')
-		            if z < len(statuses)-1:
-	                        fhd.write(',')
-	                    fhd.write('\n')
+                            if z < len(statuses)-1:
+                                fhd.write(',')
+                            fhd.write('\n')
 
-	                fhd.write('        }')
-			if y < len(tgtChroms)-1:
-	                    fhd.write(',')
-	                fhd.write('\n')
+                    fhd.write('        }')
+                    if y < len(tgtChroms)-1:
+                        fhd.write(',')
+                    fhd.write('\n')
 
                     fhd.write('      }')
-		    if x < len(tgtNames)-1:
-	                fhd.write(',')
-	            fhd.write('\n')
+                    if x < len(tgtNames)-1:
+                        fhd.write(',')
+                    fhd.write('\n')
 
                 fhd.write('    }')
-		if w < len(refChroms)-1:
-	            fhd.write(',')
-	        fhd.write('\n')
+                if w < len(refChroms)-1:
+                    fhd.write(',')
+                fhd.write('\n')
 
             fhd.write('  }')
-	    if v < len(refNames)-1:
-	        fhd.write(',')
-	    fhd.write('\n')
+            if v < len(refNames)-1:
+                fhd.write(',')
+            fhd.write('\n')
 
         fhd.write('};')
 

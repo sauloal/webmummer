@@ -15,18 +15,20 @@ var win = window,
     doc = document,
     del = doc.documentElement,
     bdy = doc.getElementsByTagName('body')[0],
-    wid = win.innerWidth || del.clientWidth || bdy.clientWidth,
-    hei = win.innerHeight|| del.clientHeight|| bdy.clientHeight;
+    wid = win.innerWidth  || del.clientWidth  || bdy.clientWidth,
+    hei = win.innerHeight || del.clientHeight || bdy.clientHeight;
 
 var huid = '';
 
 function hasStorage() {
     try {
-		var res = 'localStorage' in window && window['localStorage'] !== null;
+        //var res = 'localStorage' in window && window['localStorage'] !== null;
+        var res = windowhasOwnProperty('localStorage') && window.localStorage !== null;
+
         return res;
     } catch(e) {
         //alert('no storage');
-		console.log('no storage');
+        console.log('no storage');
         return false;
     }
 }
@@ -394,7 +396,7 @@ function start() {
 
 
 
-	var clb = document.createElement('button');   // add button and it's click action
+    var clb = document.createElement('button');   // add button and it's click action
         clb.onclick   = clearPics;
         clb.innerHTML = 'clear';
     sels.appendChild(clb);
@@ -405,8 +407,8 @@ function start() {
         pos.id = 'pos'; // creates position label
     sels.appendChild(pos);
 
-	var tip = document.body.appendChild( document.createElement('div') );
-		tip.id             = 'tipper';
+    var tip = document.body.appendChild( document.createElement('div') );
+        tip.id             = 'tipper';
 
 
     graphdb = new SyncSimpleGraph( {
@@ -421,11 +423,11 @@ function start() {
     createOptions();
 
 
-	var chartDiv       = document.createElement('div');
-	chartDiv.className = 'chart';
-	chartDiv.id        = chartName;
+    var chartDiv       = document.createElement('div');
+    chartDiv.className = 'chart';
+    chartDiv.id        = chartName;
 
-	document.body.appendChild( chartDiv );
+    document.body.appendChild( chartDiv );
 
 
     if ( false ) {
@@ -577,7 +579,7 @@ function createPositions(el) {
     };
 
     var posK = Object.keys( positions );
-    posK.sort()
+    posK.sort();
 
     for (var idN = 0; idN < posK.length; idN++ ) {
         var tr    = tbl .appendChild( document.createElement('tr'   ) );
@@ -603,7 +605,7 @@ function createOptions(){
     divH.appendChild( hlp     );
     divH.appendChild( document.createElement('br') );
 
-    var syncs             = createSyncs(divH);
+    createSyncs(divH);
     divH.appendChild( document.createElement('br') );
 
 
@@ -621,12 +623,12 @@ function createOptions(){
     var trD21        = tr  .appendChild( document.createElement('td'   ) );
     var trD22        = tr  .appendChild( document.createElement('td'   ) );
 
-    var posSel       = createPositions(trD21);
+    createPositions(trD21);
 
-    var cssSel       = createCsss(trD22);
+    createCsss(trD22);
 
-    var clsBtn       = document.createElement('button')
-    clsBtn.onclick   = function(e) { if (hasStorage) { localStorage.clear(); alert('cleaning all preferences'); location.reload() }; };
+    var clsBtn       = document.createElement('button');
+    clsBtn.onclick   = function(e) { if (hasStorage) { localStorage.clear(); alert('cleaning all preferences'); location.reload(); } };
     clsBtn.innerHTML = 'Clear';
 
     divH.appendChild( clsBtn );
@@ -741,7 +743,7 @@ function genSelectors(sels){
 
 
     for ( var optName in opts ) {
-		var opt      = opts[optName];
+        var opt      = opts[optName];
         var optVar   = opt[0];
         var optLabel = opt[1];
 
@@ -759,7 +761,7 @@ function genSelectors(sels){
                 refOp.value     = null;
                 refOp.innerHTML = optLabel;
 
-			var allOp           = document.createElement('option');
+            var allOp           = document.createElement('option');
                 allOp.value     = '*all*';
                 allOp.innerHTML = 'All';
 
@@ -866,7 +868,7 @@ function mergeregs( regs ) {
                 }
             }
         }
-    };
+    }
 
     for ( var r = 0; r < yTicksLabels.length; r++ ) {
         yTicksLabels[r] = yTicksLabels[r].join('+');
@@ -908,7 +910,7 @@ function mergeregs( regs ) {
     hreg.yTicksLabels = yTicksLabels;
 
     hreg.uid          = huid;
-	huid              = '';
+    huid              = '';
 
 
     return hreg;
@@ -926,19 +928,19 @@ function loadGraph( regs ) {
 
 
     var horizontal = getOpt( 'horizontal', false );
-	var holder     = document.getElementById( scriptHolder );
+    //var holder     = document.getElementById( scriptHolder );
 
 
-	if (horizontal) {
+    if (horizontal) {
         var hreg = mergeregs( regs );
 
-		graphdb.add(chartName, hreg);
-	} else {
-		regs.map( function(reg) {
+        graphdb.add(chartName, hreg);
+    } else {
+        regs.map( function(reg) {
             console.log( reg );
-			graphdb.add(chartName, reg);
-		});
-	}
+            graphdb.add(chartName, reg);
+        });
+    }
 
 
     // clean up
@@ -952,59 +954,59 @@ function loadGraph( regs ) {
 //        }
 //
 //        delete reg.points;
-//		delete reg.scaffs;
+//        delete reg.scaffs;
 //    }
 };
 
 
 syncLoadScript = function( regs, callback ) {
-	var self          = this;
-	this.regs         = regs;
-	this.callback     = callback;
-	this.size         = 0;
-	this.received     = 0;
-	this.receivedData = [];
+    var self          = this;
+    this.regs         = regs;
+    this.callback     = callback;
+    this.size         = 0;
+    this.received     = 0;
+    this.receivedData = [];
 
-	this.regs.map( function(reg) {
-		var files  = reg.filename;
-		if (files) {
-			self.size += 1;
-		}
-	});
+    this.regs.map( function(reg) {
+        var files  = reg.filename;
+        if (files) {
+            self.size += 1;
+        }
+    });
 
 
-	if (this.size === 0) {
-		console.log('nothing to plot');
-		return;
-	}
+    if (this.size === 0) {
+        console.log('nothing to plot');
+        return;
+    }
 
-	var count = 0;
-	regs.map( function(reg) {
-		var files  = reg.filename;
-		var func   = function(sregv) { loadScript( sregv, self.receive() ); };
+    var count = 0;
+    regs.map( function(reg) {
+        var files  = reg.filename;
+        var func   = function(sregv) { loadScript( sregv, self.receive() ); };
 
-		if (files) {
-			console.log( 'sending ' + files );
-			setTimeout( func(reg), (count * 1000));
-			count += 1;
-		}
-	});
+        if (files) {
+            console.log( 'sending ' + files );
+            setTimeout( func(reg), (count * 1000));
+            count += 1;
+        }
+    });
 };
 
 
 syncLoadScript.prototype.receive = function( ) {
-	var self = this;
+    var self = this;
 
-	return function( reg ) {
-		self.received += 1;
+    return function( reg ) {
+        self.received += 1;
 
-		self.receivedData.push( reg );
-		console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.filename );
+        self.receivedData.push( reg );
+        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.filename );
 
-		if ( self.received == self.size) {
-			self.callback( self.receivedData );
-		}
-	};
+        if ( self.received == self.size) {
+            self.callback( self.receivedData );
+        }
+    };
 };
 
 
@@ -1019,34 +1021,32 @@ function selclick(){
     //console.log( vals );
 
     var regs  = getRegister( vals );
-	if ( !regs ) {
-		return;
-	}
-    if ( regs.length == 0 ) {
+    if ( !regs ) {
+        return;
+    }
+    if ( regs.length === 0 ) {
         console.log('no reg');
         return;
     }
 
-	var count      = 0;
-	var horizontal = getOpt( 'horizontal', false );
-	var syncer     = new syncLoadScript( regs, loadGraph );
-};
+    new syncLoadScript( regs, loadGraph );
+}
 
 
 function clearPics(){
-	console.log('cleaning');
-	//console.log(graphdb);
-	graphdb.clear();
+    console.log('cleaning');
+    //console.log(graphdb);
+    graphdb.clear();
 }
 
 
 function getFieldValue(fieldId) {
-	var field = document.getElementById( fieldId );
+    var field = document.getElementById( fieldId );
     var val   = null;
 
     if ( field.localName == 'select' ) {
-		var sel = field.selectedIndex;
-		var fio = field.options[ sel ];
+        var sel = field.selectedIndex;
+        var fio = field.options[ sel ];
         val     = fio.value;
     } else {
         if ( field.type == 'checkbox' ) {
@@ -1070,14 +1070,10 @@ function getVals() {
     var uid  = '';
 
     for ( var optName in opts ) {
-		var opt      = opts[optName];
-        var optVar   = opt[0];
-        var optLabel = opt[1];
-
         var val      = getFieldValue( optName );
 
         if ( val === null ) {
-            return;
+            return null;
         }
 
         //console.log( 'appending '+optName+' = '+val );
@@ -1090,79 +1086,79 @@ function getVals() {
 
 
 function getRegister( gvals ){
-	var evals     = [];
-	var refNames  = [];
-	var refChroms = [];
-	var tgtNames  = [];
-	var tgtChroms = [];
-	var statuses  = [];
+    var evals     = [];
+    var refNames  = [];
+    var refChroms = [];
+    var tgtNames  = [];
+    var tgtChroms = [];
+    var statuses  = [];
 
 
-	if (gvals.refName == '*all*') {
-		opts.refName[0].map( function(refName) {
-			refNames.push( refName );
-		});
-	} else {
-		refNames.push( gvals.refName );
-	}
+    if (gvals.refName == '*all*') {
+        opts.refName[0].map( function(refName) {
+            refNames.push( refName );
+        });
+    } else {
+        refNames.push( gvals.refName );
+    }
 
-	if (gvals.refChrom == '*all*') {
-		opts.refChrom[0].map( function(refChrom) {
-			refChroms.push( refChrom );
-		});
-	} else {
-		refChroms.push( gvals.refChrom );
-	}
+    if (gvals.refChrom == '*all*') {
+        opts.refChrom[0].map( function(refChrom) {
+            refChroms.push( refChrom );
+        });
+    } else {
+        refChroms.push( gvals.refChrom );
+    }
 
-	if (gvals.tgtName == '*all*') {
-		opts.tgtName[0].map( function(tgtName) {
-			tgtNames.push( tgtName );
-		});
-	} else {
-		tgtNames.push( gvals.tgtName );
-	}
+    if (gvals.tgtName == '*all*') {
+        opts.tgtName[0].map( function(tgtName) {
+            tgtNames.push( tgtName );
+        });
+    } else {
+        tgtNames.push( gvals.tgtName );
+    }
 
-	if (gvals.tgtChrom == '*all*') {
-		opts.tgtChrom[0].map( function(tgtChrom) {
-			tgtChroms.push( tgtChrom );
-		});
-	} else {
-		tgtChroms.push( gvals.tgtChrom );
-	}
+    if (gvals.tgtChrom == '*all*') {
+        opts.tgtChrom[0].map( function(tgtChrom) {
+            tgtChroms.push( tgtChrom );
+        });
+    } else {
+        tgtChroms.push( gvals.tgtChrom );
+    }
 
-	if (gvals.status == '*all*') {
-		opts.status[0].map( function(status) {
-			statuses.push( status );
-		});
-	} else {
-		statuses.push( gvals.status );
-	}
+    if (gvals.status == '*all*') {
+        opts.status[0].map( function(status) {
+            statuses.push( status );
+        });
+    } else {
+        statuses.push( gvals.status );
+    }
 
 
 
     var horizontal = getOpt( 'horizontal', false );
 
-	if (horizontal) {
-		huid = 'horiz_';
-		for ( var k in gvals ) {
-			huid += gvals[k];
-		}
+    if (horizontal) {
+        huid = 'horiz_';
+        for ( var k in gvals ) {
+            huid += gvals[k];
+        }
 
-		if ( refNames.length != 1 ) {
-			alert( 'more than one reference while using horizontal graph ' + refNames.length + ' ' + refNames );
-			return;
-		}
+        if ( refNames.length != 1 ) {
+            alert( 'more than one reference while using horizontal graph ' + refNames.length + ' ' + refNames );
+            return null;
+        }
 
-		if ( refChroms.length != 1 ) {
-			alert( 'more than one chromosome while using horizontal graph ' + refChroms.length + ' ' + refChroms);
-			return;
-		}
-	}
+        if ( refChroms.length != 1 ) {
+            alert( 'more than one chromosome while using horizontal graph ' + refChroms.length + ' ' + refChroms);
+            return null;
+        }
+    }
 
 
-	refNames.map( function(refName) {
-		refChroms.map( function(refChrom) {
-			tgtNames.map( function(tgtName) {
+    refNames.map( function(refName) {
+        refChroms.map( function(refChrom) {
+            tgtNames.map( function(tgtName) {
                 tgtChroms.map( function(tgtChrom) {
                     statuses.map( function(status) {
                         //console.log(ref + ' ' + refChrom + ' ' + tgtName + ' ' + status);
@@ -1176,69 +1172,69 @@ function getRegister( gvals ){
                         evals.push( reg );
                     });
                 });
-			});
-		});
-	});
+            });
+        });
+    });
 
 
-	var regs       = [];
+    var regs       = [];
 
 
-	for ( var e = 0; e < evals.length; e++ ) {
-		var vals = evals[e];
-		var reg  = null;
+    for ( var e = 0; e < evals.length; e++ ) {
+        var vals = evals[e];
+        var reg  = null;
 
-		try {
-			reg = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
-		}
-		catch(err) {
-			console.error('combination does not exists for:');
-			console.error( vals );
-			continue;
-		}
+        try {
+            reg = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
+        }
+        catch(err) {
+            console.error('combination does not exists for:');
+            console.error( vals );
+            continue;
+        }
 
-		var uid = vals.ref + vals.refChrom + vals.tgtName + vals.tgtChrom + vals.status;
-			uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+        var uid = vals.ref + vals.refChrom + vals.tgtName + vals.tgtChrom + vals.status;
+            uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
-		reg.uid        = uid;
-		reg.chartClass = getOpt('size', Object.keys( sizes )[0]);
-		reg.tipId      = 'tipper';
+        reg.uid        = uid;
+        reg.chartClass = getOpt('size', Object.keys( sizes )[0]);
+        reg.tipId      = 'tipper';
 
-		reg.filepath   = datafolder + reg.filename;
-		reg.scriptid   = 'script_'  + reg.uid;
-		reg.refName    = vals.refName;
-		reg.refChrom   = vals.refChrom;
-		reg.tgtName    = vals.tgtName;
-		reg.tgtChrom   = vals.tgtChrom;
-		reg.status     = vals.status;
+        reg.filepath   = datafolder + reg.filename;
+        reg.scriptid   = 'script_'  + reg.uid;
+        reg.refName    = vals.refName;
+        reg.refChrom   = vals.refChrom;
+        reg.tgtName    = vals.tgtName;
+        reg.tgtChrom   = vals.tgtChrom;
+        reg.status     = vals.status;
 
-		var posK = Object.keys( positions );
-			posK.sort();
+        var posK = Object.keys( positions );
+            posK.sort();
 
-			for (var idN = 0; idN < posK.length; idN++ ) {
-				var id    = posK[idN];
-				var nfo   = positions[id];
-				var dfl   = nfo.value;
-				var curr  = getOpt( id, nfo.value );
+            for (var idN = 0; idN < posK.length; idN++ ) {
+                var id    = posK[idN];
+                var nfo   = positions[id];
+                var dfl   = nfo.value;
+                var curr  = getOpt( id, nfo.value );
 
-				if ( dfl != curr ) {
-					console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
-					reg[id] = curr;
-				} else {
-					if (reg[id]) {
-						delete reg[id];
-					}
-				}
-			}
-		regs.push( reg );
-	}
+                if ( dfl != curr ) {
+                    console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
+                    reg[id] = curr;
+                } else {
+                    if (reg[id]) {
+                        delete reg[id];
+                    }
+                }
+            }
+        regs.push( reg );
+    }
 
 
-	if (regs.length == 0) {
-		return;
-	}
+    if (regs.length === 0) {
+        return null;
+    }
 
-	return regs;
+    return regs;
 }
 
 
@@ -1259,7 +1255,7 @@ function obj2str(obj) {
 
 function saveOpt (k ,v) {
     if ( hasstorage ) {
-		console.log('saving k "' + k + '" v "' + v + '"');
+        console.log('saving k "' + k + '" v "' + v + '"');
         localStorage[k] = JSON.stringify( v );
     }
 };
@@ -1267,18 +1263,18 @@ function saveOpt (k ,v) {
 
 function getOpt(k, d) {
     if ( hasstorage ) {
-		//console.log('getting ' + k);
+        //console.log('getting ' + k);
         try {
             var res = localStorage[k];
-			//console.log('getting ' + k + ' val "' + res + '"');
-			if ( res === undefined || res === null ) {
-				//console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
-				return d;
-			} else {
-				res = JSON.parse( res );
-				//console.log('getting ' + k + ' val "' + res + '"');
-				return res;
-			}
+            //console.log('getting ' + k + ' val "' + res + '"');
+            if ( res === undefined || res === null ) {
+                //console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
+                return d;
+            } else {
+                res = JSON.parse( res );
+                //console.log('getting ' + k + ' val "' + res + '"');
+                return res;
+            }
         } catch (e) {
             return d;
         }
@@ -1301,7 +1297,7 @@ function getOpt(k, d) {
 
 
 //http://stackoverflow.com/questions/799981/document-ready-equivalent-without-jquery
-document.addEventListener('DOMContentLoaded', start )
+document.addEventListener('DOMContentLoaded', start );
 
 
 
