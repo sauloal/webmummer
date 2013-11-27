@@ -1,27 +1,220 @@
+<!doctype html>
 <html>
-    <head>
-        <title>WebMummer</title>
-    </head>
-    <body>
-        <h1>WebMummer</h1>
-        <h3>A diagonal plot for close species</h3>
-        <img src="http://sauloal.github.io/webmummer/Screenshot_01_diagonal.png"/>
-        <h3>A diagonal plot for distant species</h3>
-        <img src="http://sauloal.github.io/webmummer/Screenshot_02_distant_spps.png"/>
-        <h3>Configuration pop-up</h3>
-        <img src="http://sauloal.github.io/webmummer/Screenshot_03_config.png"/>
-        <h3>Horizontal multi display</h3>
-        <img src="http://sauloal.github.io/webmummer/Screenshot_04_horizontal.png"/>
-        <h3>Horizontal multi display - Zoomed with description in the right corner</h3>
-        <img src="http://sauloal.github.io/webmummer/Screenshot_05_horizontal_zoom.png"/>
-        <h3>SVG output</h3>
-        <img src="http://sauloal.github.io/webmummer/Plot_diagonal.svg"/>
-        <h3>SVG output - zoomed</h3>
-        <img src="http://sauloal.github.io/webmummer/Plot_diagonal_zoom.svg"/>
-    </body>
-    <style>
-        img {
-            width: 1024px;
-        }
-    </style>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Webmummer by sauloal</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Webmummer</h1>
+        <p class="header">Web Browser Mummer Plot Viewer</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/sauloal/webmummer/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/sauloal/webmummer/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/sauloal/webmummer">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/sauloal">sauloal</a></p>
+
+
+      </header>
+      <section>
+        <h1>
+<a name="webmummer" class="anchor" href="#webmummer"><span class="octicon octicon-link"></span></a>WebMummer</h1>
+
+<h1>
+<a name="web-browser-mummer-plot-viewer" class="anchor" href="#web-browser-mummer-plot-viewer"><span class="octicon octicon-link"></span></a>Web Browser Mummer Plot Viewer</h1>
+
+<h2>
+<a name="conversion" class="anchor" href="#conversion"><span class="octicon octicon-link"></span></a>Conversion</h2>
+
+<p>Given a set of .delta files, delta2js.py will convert those to javascript (under data/ folder) and create a list.js file.</p>
+
+<h2>
+<a name="opening" class="anchor" href="#opening"><span class="octicon octicon-link"></span></a>Opening</h2>
+
+<p>By opening index.html in a browser (not Internet Explorer), choose reference, chromosome, target species and status.</p>
+
+<h2>
+<a name="navigation" class="anchor" href="#navigation"><span class="octicon octicon-link"></span></a>Navigation</h2>
+
+<p>The dot plot will be shown and can be browsed with either the keyboard or mouse.</p>
+
+<p>Use arrow keys, +/-/0, drag with mouse, [shift] double-click, scroll-wheel or use the compass.</p>
+
+<h2>
+<a name="screenshot" class="anchor" href="#screenshot"><span class="octicon octicon-link"></span></a>Screenshot</h2>
+
+<p><img src="https://raw.github.com/sauloal/webmummer/master/Screenshot.png"><img src="http://sauloal.github.io/webmummer/solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean-Dot-Plot.svg"><img src="http://sauloal.github.io/webmummer/solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean---Filtered-Dot-Plot--Only-Inversions.svg"></p>
+
+<h2>
+<a name="saving" class="anchor" href="#saving"><span class="octicon octicon-link"></span></a>Saving</h2>
+
+<p>On the top left corther of each graph there's a button to save the current view to a svg file.</p>
+
+<h2>
+<a name="help" class="anchor" href="#help"><span class="octicon octicon-link"></span></a>Help</h2>
+
+<p>On the top right corther there's a help message. Hover over it to all configurations and help available.</p>
+
+<h2>
+<a name="thanks" class="anchor" href="#thanks"><span class="octicon octicon-link"></span></a>Thanks</h2>
+
+<ul>
+<li>Mummer      - <a href="http://mummer.sourceforge.net/">http://mummer.sourceforge.net/</a>
+</li>
+<li>D3          - <a href="http://d3js.org/">http://d3js.org/</a>
+</li>
+<li>JQuery      - <a href="http://jquery.com/">http://jquery.com/</a>
+</li>
+<li>Tipsy       - <a href="http://onehackoranother.com/projects/jquery/tipsy/">http://onehackoranother.com/projects/jquery/tipsy/</a>
+</li>
+<li>Stepheneb   - <a href="http://bl.ocks.org/stepheneb/1182434">http://bl.ocks.org/stepheneb/1182434</a>
+</li>
+<li>SVG Crowbar - <a href="http://nytimes.github.io/svg-crowbar/">http://nytimes.github.io/svg-crowbar/</a>
+</li>
+<li>SMO script  - <a href="http://www.shawnolson.net">http://www.shawnolson.net</a>
+</li>
+</ul><h2>
+<a name="technical-details" class="anchor" href="#technical-details"><span class="octicon octicon-link"></span></a>Technical details</h2>
+
+<h3>
+<a name="jssetupjs" class="anchor" href="#jssetupjs"><span class="octicon octicon-link"></span></a>js/setup.js</h3>
+
+<p>Agnostic of the project, gets all data from list.js, creates the drop-down lists and plots when requested.</p>
+
+<h3>
+<a name="jssimple-graphjs" class="anchor" href="#jssimple-graphjs"><span class="octicon octicon-link"></span></a>js/simple-graph.js</h3>
+
+<p>Workhorse of the graphics library</p>
+
+<h3>
+<a name="indexhtml" class="anchor" href="#indexhtml"><span class="octicon octicon-link"></span></a>index.html</h3>
+
+<p>Contains the relevant css for coloring the graph.</p>
+
+<h3>
+<a name="delta2jspy" class="anchor" href="#delta2jspy"><span class="octicon octicon-link"></span></a>delta2js.py</h3>
+
+<p>Delta files are parsed and converted to cartesian coordinates by delta2js.py.</p>
+
+<p>It exports all values to java script files because that's the only type of file that can be loaded in a browser without a web server.</p>
+
+<p>data/*.js contains minimum and maximum values, as well as an array with all coordinates.</p>
+
+<p>It also exports a list (data/list.js) of all the available files and their sources (reference, chromosome, target and status). This file will be loaded automatically and will draw the options drop-down list.</p>
+
+<p>In data/list.js, also list the x/y labels and graphic title.</p>
+
+<p>deltajs.py MUST be modified to your own project file naming.</p>
+
+<p>data/list.js can also be created manually.</p>
+
+<h4>
+<a name="run" class="anchor" href="#run"><span class="octicon octicon-link"></span></a>Run</h4>
+
+<div class="highlight highlight-bash"><pre><span class="nb">cd </span>data
+rm ../../../out/*.js
+../delta2js.py ../../../out/*.delta
+cp -l ../../../out/*.js .
+rm webmummer.tar.xz; tar --exclude .git -ahcvf webmummer.tar.xz .
+</pre></div>
+
+<h4>
+<a name="output" class="anchor" href="#output"><span class="octicon octicon-link"></span></a>Output</h4>
+
+<h5>
+<a name="datalistjs" class="anchor" href="#datalistjs"><span class="octicon octicon-link"></span></a>data/list.js</h5>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">statuses</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Clean &amp; Filtered Dot Plot. Only Inversions'</span><span class="p">,</span> <span class="s1">'Clean Dot Plot'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">spps</span>     <span class="o">=</span> <span class="p">[</span><span class="s1">'solanum arcanum'</span><span class="p">,</span> <span class="s1">'solanum habrochaites'</span><span class="p">,</span> <span class="s1">'solanum lycopersicum heinz denovo'</span><span class="p">,</span> <span class="s1">'solanum pennellii'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">chroms</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">'00'</span><span class="p">,</span> <span class="s1">'01'</span><span class="p">,</span> <span class="s1">'02'</span><span class="p">,</span> <span class="s1">'03'</span><span class="p">,</span> <span class="s1">'04'</span><span class="p">,</span> <span class="s1">'05'</span><span class="p">,</span> <span class="s1">'06'</span><span class="p">,</span> <span class="s1">'07'</span><span class="p">,</span> <span class="s1">'08'</span><span class="p">,</span> <span class="s1">'09'</span><span class="p">,</span> <span class="s1">'10'</span><span class="p">,</span> <span class="s1">'11'</span><span class="p">,</span> <span class="s1">'12'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">refs</span>     <span class="o">=</span> <span class="p">[</span><span class="s1">'solanum lycopersicum heinz'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">filelist</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">'solanum lycopersicum heinz'</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s1">'00'</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s1">'solanum arcanum'</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">"Clean &amp; Filtered Dot Plot. Only Inversions"</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s2">"filename"</span><span class="o">:</span> <span class="s2">"solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.filter.invertions.delta.js"</span>
+        <span class="p">},</span>
+        <span class="s2">"Clean Dot Plot"</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s2">"filename"</span><span class="o">:</span> <span class="s2">"solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.js"</span>
+        <span class="p">},</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h5>
+<a name="datafilejs" class="anchor" href="#datafilejs"><span class="octicon octicon-link"></span></a>data/file.js</h5>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'title'</span>  <span class="p">]</span> <span class="o">=</span> <span class="s1">'solanum lycopersicum heinz vs solanum pennellii - Chromosome 12 - Clean Dot Plot'</span><span class="p">;</span>
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xlabel'</span> <span class="p">]</span> <span class="o">=</span> <span class="s1">'solanum lycopersicum heinz Chromosome 12'</span><span class="p">;</span>
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ylabel'</span> <span class="p">]</span> <span class="o">=</span> <span class="s1">'solanum pennellii'</span><span class="p">;</span>
+
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'points'</span> <span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3159</span><span class="p">,</span><span class="mi">3057</span><span class="p">,</span><span class="mi">8585</span><span class="p">,</span><span class="mi">8485</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">96.19</span><span class="p">];</span>
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xmin'</span> <span class="p">]</span>  <span class="o">=</span>         <span class="mi">3159</span><span class="p">;</span>
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xmax'</span> <span class="p">]</span>  <span class="o">=</span>     <span class="mi">65485119</span><span class="p">;</span>
+
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ymin'</span> <span class="p">]</span>  <span class="o">=</span>         <span class="mi">3057</span><span class="p">;</span>
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ymax'</span> <span class="p">]</span>  <span class="o">=</span>     <span class="mi">60818323</span><span class="p">;</span>
+<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'scafs'</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">'scaffold_2657'</span><span class="p">];</span>
+</pre></div>
+
+<h2>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h2>
+
+<h3>
+<a name="priority" class="anchor" href="#priority"><span class="octicon octicon-link"></span></a>Priority</h3>
+
+<ul>
+<li>[ ] better keyboard zoom</li>
+<li>[ ] allow parallel display</li>
+<li>[ ] sync resize axis</li>
+<li>[ ] calculate maxX and maxY</li>
+<li>[x] apply sizes configuration</li>
+<li>[x] allow for multiple plots</li>
+<li>[x] highlight same scaffold</li>
+<li>[x] clean out-of-graph lines</li>
+</ul><h3>
+<a name="optional" class="anchor" href="#optional"><span class="octicon octicon-link"></span></a>Optional</h3>
+
+<ul>
+<li>[x] replace all jquery selector for d3 selector in simple-graph.js</li>
+<li>[x] disable auto load
+~~ use jquery-ui to drop-down lists ~~
+~~ allow enablig circles ~~</li>
+</ul><h2>
+<a name="images" class="anchor" href="#images"><span class="octicon octicon-link"></span></a>IMAGES</h2>
+
+<div class="highlight highlight-bash"><pre>git checkout --orphan gh-pages
+rm -rf css/ data/ js/ delta2js.* index.html LICENSE.md
+rm .gitignore
+<span class="nb">echo</span> <span class="s2">"My GitHub Page"</span> &gt; index.html
+git add index.html
+git add solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean-*
+git commit -am <span class="s1">'my first page'</span>
+push origin gh-pages
+git checkout master
+</pre></div>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
 </html>
