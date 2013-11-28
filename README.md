@@ -143,7 +143,7 @@ TODO
 ### Priority
 - [ ] add zoom and position to address bar
 - [ ] permit multiple selection
-- [ ]
+- [ ] separate session preferences from global preferences
 - [ ] better keyboard zoom
 - [ ] sync resize axis
 - [ ] calculate maxX and maxY

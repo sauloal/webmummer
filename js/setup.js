@@ -569,7 +569,8 @@ function getQueryString () {
                 }
 
                 console.log('replacing preferences with ' + data64);
-                //localStorage[_db_domain] = data64;
+                localStorage[_db_domain] = data64;
+
                 //clearDb();
 
                 //for (var k in data) {
@@ -611,6 +612,8 @@ function setQueryString () {
         }
     }
 }
+
+
 
 
 
@@ -993,7 +996,6 @@ function genSelectors(sels){
             tbl.appendChild(refSel);
 
 
-
         } else {
             var opt2 = {};
 
@@ -1013,6 +1015,7 @@ function genSelectors(sels){
             optVar2.push( [ '*all*', 'All' ] );
 
             opt2.options = optVar2;
+            opt2.value   = getOpt( optName, opt2.value );
 
             addPicker(tbl, optName, 'selectors', opt2, callback, {addlbls: false} );
         }
