@@ -78,9 +78,9 @@ d3.selection.prototype.size = function () {
 /////////////////////////////////////
 SyncSimpleGraph = function (opts) {
     var self     = this;
-    this.sync    = opts.sync    || true;
-    this.resizeX = opts.resizeX || true;
-    this.resizeY = opts.resizeY || true;
+    this.sync    = opts.sync    === null ? true : opts.sync;
+    this.resizeX = opts.resizeX === null ? true : opts.resizeX;
+    this.resizeY = opts.resizeY === null ? true : opts.resizeY;
     this.db      = {};
     this.props   = {
         minX      : Number.MAX_VALUE,
@@ -134,7 +134,7 @@ SyncSimpleGraph.prototype.clear = function () {
 
 SyncSimpleGraph.prototype.add = function(chartHolder, options) {
     //console.log( options );
-    var uid  = options.uid || 'uid_' + new Date();
+    var uid  = options.uid === null ? 'uid_' + new Date() : options.uid;
     var self = this;
 
     this.props.minX = this.props.minX > options.xmin ? options.xmin : this.props.minX;
@@ -282,34 +282,30 @@ SyncSimpleGraph.prototype.d3closed = function (e) {
 // SimpleGraph
 /////////////////////////////////////
 SimpleGraph = function (chartHolder, options) {
-    this.uid                         = options.uid                 || 'uid_' + new Date();
+    this.uid                         = options.uid === null ? 'uid_' + new Date() : options.uid;
 
     this.options                     = {};
 
-    this.tgts                        = options.tgts                || null;
+    this.tgts                        = options.tgts;
                                                                    //              from tgts
                                                                    //                   f/r
                                                                    //  x1   y1 x2 y2 scaf 0/1 q
-    this.points                      = options.points              || null; //[0 , 0, 0, 0, 0,   0,  0.0];
+    this.points                      = options.points; //[0 , 0, 0, 0, 0,   0,  0.0];
 
-    this.options.chartClass          = options.chartClass          || 'chartpart';
+    this.options.xmax                = options.xmax;
+    this.options.xmin                = options.xmin;
+    this.options.ymax                = options.ymax;
+    this.options.ymin                = options.ymin;
 
+    this.options.labelId             = options.labelId;
+    this.options.tipId               = options.tipId;
+    this.parallel                    = options.parallel === null ? isArray( this.points[0] ) : options.parallel;
 
-    this.options.xmax                = options.xmax                || null;
-    this.options.xmin                = options.xmin                || null;
-    this.options.ymax                = options.ymax                || null;
-    this.options.ymin                = options.ymin                || null;
-
-
-    this.options.labelId             = options.labelId             || null;
-    this.options.tipId               = options.tipId               || null;
-
-    this.options.xlabel              = options.xlabel              || 'x';
-    this.options.ylabel              = options.ylabel              || 'y';
-    this.options.title               = options.title               || 'no title';
-    this.options.yTicksLabels        = options.yTicksLabels        || null;
-
-    this.parallel                    = options.parallel            || isArray( this.points[0] );
+    this.options.chartClass          = options.chartClass              || 'chartpart';
+    this.options.xlabel              = options.xlabel                  || 'x';
+    this.options.ylabel              = options.ylabel                  || 'y';
+    this.options.title               = options.title                   || 'no title';
+    this.options.yTicksLabels        = options.yTicksLabels;
 
     this.options.xTicks              = options.cfg.xTicks              || 5;
     this.options.yTicks              = options.cfg.yTicks              || 5;
@@ -331,6 +327,7 @@ SimpleGraph = function (chartHolder, options) {
     this.options.padlockIconMaxSize  = options.cfg.padlockIconMaxSize  ||  20;
     this.options.compassMaxSize      = options.cfg.compassMaxSize      ||  75;
     this.options.compassMinSize      = options.cfg.compassMinSize      ||  20;
+    this.options.crosshair           = options.cfg.crosshair           || false;
     //this.options.radius         = options.radius         || 5.0;
 
 
@@ -876,8 +873,10 @@ SimpleGraph.prototype.highlight = function( el ) {
             var gwt = gss.replace(/[^-\d\.]/g, '');
             var gwn = parseInt(gwt);
             var uni = gss.replace(gwt, '');
-            greenWidth = (2 * gwn) + uni;
+            greenWidth = (3 * gwn) + uni;
         }
+
+        //console.log( 'x ' + x1 + ',' + x2 + ' y ' + y1 + ',' + y2 );
 
         self.greenbox.append( "path" )
                     .attr( "class"       , "scaf-square" )
@@ -885,6 +884,30 @@ SimpleGraph.prototype.highlight = function( el ) {
                     .attr( "scaf"        , nameNum       )
                     .style("stroke-width", greenWidth    )
                     ;
+
+        if (self.options.crosshair) {
+            self.greenbox.append( "rect" )
+                        .attr( "class"       , "scaf-square" )
+                        .attr( "x"           , x1 < x2 ? x1 : x2  )
+                        .attr( "y"           , y1 < y2 ? y1 : y2  )
+                        .attr( "width"       , x1 < x2 ? x2 - x1 : x1 - x2 )
+                        .attr( "height"      , self.size.height - ( y1 < y2 ? y1 : y2 )      )
+                        .attr( "scaf"        , nameNum       )
+                        .style("stroke-width", greenWidth    )
+                        ;
+
+            if ( ! self.parallel ) {
+                self.greenbox.append( "rect" )
+                            .attr( "class"       , "scaf-square" )
+                            .attr( "x"           , 0  )
+                            .attr( "y"           , y1 < y2 ? y1 : y2  )
+                            .attr( "width"       , x1 > x2 ? x1 : x2  )
+                            .attr( "height"      , y1 < y2 ? y2 - y1 : y1 - y2 )
+                            .attr( "scaf"        , nameNum       )
+                            .style("stroke-width", greenWidth    )
+                            ;
+            }
+        }
     });
 
 

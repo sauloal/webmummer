@@ -43,24 +43,56 @@ initDb();
  * Used to create drop-down boxes
  */
 var opts   = {
-    'refName' : [ _refsNames , 'Select Reference'            ],
-    'refChrom': [ _refsChroms, 'Select Reference Chromosome' ],
-    'tgtName' : [ _tgtsNames , 'Select Target'               ],
-    'tgtChrom': [ _tgtsChroms, 'Select Target Chromosome'    ],
-    'status'  : [ _statuses  , 'Select Status'               ]
+    'refName' : {
+        'tag'    : 'select',
+        'options': _refsNames,
+        'alt'    : 'Select Reference'
+    },
+    'refChrom': {
+        'tag'    : 'select',
+        'options': _refsChroms,
+        'alt'    : 'Select Reference Chromosome'
+    },
+    'tgtName' : {
+        'tag'    : 'select',
+        'options': _tgtsNames ,
+        'alt'    : 'Select Target'
+    },
+    'tgtChrom': {
+        'tag'    : 'select',
+        'options': _tgtsChroms,
+        'alt'    : 'Select Target Chromosome'
+    },
+    'status'  : {
+        'tag'    : 'select',
+        'options': _statuses  ,
+        'alt'    : 'Select Status'
+    }
 };
 
 
+
+chartSizes = [
+        ['chartfull' , 'Full Page'   ],
+        ['chartpart' , 'Half Page'   ],
+        ['chartquart', 'Quarter Page']
+]
+
+
 var sizes = {
-        chartfull : 'Full'   ,
-        chartpart : 'Half'   ,
-        chartquart: 'Quarter'
-    };
+    'size'                       : {
+                        'tag'    : 'select',
+                        'value'  : chartSizes[0][0],
+                        'options': chartSizes,
+                        'alt'    : 'Chart Size'
+    }
+};
 
 
 var csss = {
     '.chart' :  {
                     'background-color': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#FFFFFF',
                         'alt'    : 'Chart\'s background color'
@@ -69,6 +101,7 @@ var csss = {
 
     '.grid': {
                 'font-size': {
+                        'tag'    : 'input',
                         'type'   : 'range',
                         'min'    : 0,
                         'max'    : 100,
@@ -81,12 +114,14 @@ var csss = {
 
     'body': {
                 'font-family': {
+                        'tag'    : 'input',
                         'type'   : 'text',
                         'value'  : 'sans-serif',
                         'alt'    : 'Global font family'
                 },
 
                 'font-size': {
+                        'tag'    : 'input',
                         'type'   : 'range',
                         'min'    : 0,
                         'max'    : 100,
@@ -99,6 +134,7 @@ var csss = {
 
     '.graph-background': {
                 'fill': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#EEEEEE',
                         'alt'    : 'Graphic background color'
@@ -107,6 +143,7 @@ var csss = {
 
     '.grid-line': {
                 'stroke': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#CCCCCC',
                         'alt'    : 'Grid line color'
@@ -115,23 +152,26 @@ var csss = {
 
     '.points': {
                 'stroke-width': {
-                    'type'   : 'range',
-                    'min'    : 0,
-                    'max'    : 100,
-                    'step'   : 0.5,
-                    'value'  : 5,
-                    'unity'  : 'px',
-                    'alt'    : 'Data line width'
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : 0,
+                        'max'    : 100,
+                        'step'   : 0.5,
+                        'value'  : 5,
+                        'unity'  : 'px',
+                        'alt'    : 'Data line width'
                 }
     },
 
     '.points-f': {
         //'fill': {
+                        //'tag'    : 'input',
         //                'type'   : 'color',
         //                'value'  : '#0000FF',
         //                'alt'    : 'Forward line color'
         //        },
         'stroke': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#0000FF',
                         'alt'    : 'Forward line color'
@@ -140,11 +180,13 @@ var csss = {
 
     '.points-r': {
         //'fill': {
+                        //'tag'    : 'input',
         //                'type'   : 'color',
         //                'value'  : '#FF3300',
         //                'alt'    : ''
         //        },
         'stroke': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#FF3300',
                         'alt'    : 'Reverse line color'
@@ -153,16 +195,19 @@ var csss = {
 
     '.scaf-square': {
         //'fill': {
+                        //'tag'    : 'input',
         //                'type'   : 'color',
         //                'value'  : '#33cc33',
         //                'alt'    : 'Scaffold highligh box color'
         //        },
         'stroke': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#33cc33',
                         'alt'    : 'Scaffold highligh line color'
                 },
         'opacity': {
+                        'tag'    : 'input',
                         'type'   : 'range',
                         'min'    : 0,
                         'max'    : 1,
@@ -174,11 +219,13 @@ var csss = {
 
     '#tipper': {
         'fill': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#0000FF',
                         'alt'    : 'Tooltip background color'
                 },
         'color': {
+                        'tag'    : 'input',
                         'type'   : 'color',
                         'value'  : '#FFFFFF',
                         'alt'    : 'Tooltip text color'
@@ -188,189 +235,219 @@ var csss = {
 
 
 var positions = {
-    'xTicks'              : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  10,
-                    'alt'    : 'Number of X ticks'
+    'xTicks'                     : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  10,
+                        'alt'    : 'Number of X ticks'
     },
-    'yTicks'              : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  10,
-                    'alt'    : 'Number of Y ticks'
+    'yTicks'                     : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  10,
+                        'alt'    : 'Number of Y ticks'
     },
-    'paddingTop'          : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  40,
-                    'alt'    : 'Padding top'
+    'paddingTop'                 : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  40,
+                        'alt'    : 'Padding top'
     },
-    'paddingRight'        : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  30,
-                    'alt'    : 'Padding right'
+    'paddingRight'               : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  30,
+                        'alt'    : 'Padding right'
     },
-    'paddingBottom'       : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  60,
-                    'alt'    : 'Padding bottom'
+    'paddingBottom'              : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  60,
+                        'alt'    : 'Padding bottom'
     },
-    'paddingLeft'         : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  70,
-                    'alt'    : 'Padding left'
+    'paddingLeft'                : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  70,
+                        'alt'    : 'Padding left'
     },
-    'titleDy'             : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 0.70,
-                    'alt'    : 'Title vertical offset'
+    'titleDy'                    : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 0.70,
+                        'alt'    : 'Title vertical offset'
     },
-    'xNumbersDy'          : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 1,
-                    'alt'    : 'X axis numbers vertical offset'
+    'xNumbersDy'                 : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 1,
+                        'alt'    : 'X axis numbers vertical offset'
     },
-    'yNumbersDy'          : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 0.20,
-                    'alt'    : 'Y axis numbers vertical offset'
+    'yNumbersDy'                 : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 0.20,
+                        'alt'    : 'Y axis numbers vertical offset'
     },
-    'xlabelDx'            : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 0,
-                    'alt'    : 'X axis label horizontal offset'
+    'xlabelDx'                   : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 0,
+                        'alt'    : 'X axis label horizontal offset'
     },
-    'xlabelDy'            : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 2.3,
-                    'alt'    : 'X axis label vertical offset'
+    'xlabelDy'                   : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 2.3,
+                        'alt'    : 'X axis label vertical offset'
     },
-    'ylabelX'             : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 0,
-                    'alt'    : 'Y axis label horizontal position'
+    'ylabelX'                    : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 0,
+                        'alt'    : 'Y axis label horizontal position'
     },
-    'ylabelY'             : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 0,
-                    'alt'    : 'Y axis label vertical position'
+    'ylabelY'                    : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 0,
+                        'alt'    : 'Y axis label vertical position'
     },
-    'ylabelDx'            : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : 0,
-                    'alt'    : 'Y axis label horizontal offset'
+    'ylabelDx'                   : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : 0,
+                        'alt'    : 'Y axis label horizontal offset'
     },
-    'ylabelDy'            : {
-                    'type'   : 'range',
-                    'min'    : -10,
-                    'max'    :  10,
-                    'step'   : 0.10,
-                    'value'  : -2.3,
-                    'alt'    : 'Y axis label vertical position'
+    'ylabelDy'                   : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    : -10,
+                        'max'    :  10,
+                        'step'   : 0.10,
+                        'value'  : -2.3,
+                        'alt'    : 'Y axis label vertical position'
     },
-    'downloadIconMaxSize' : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  20,
-                    'alt'    : 'Download icon max size'
+    'downloadIconMaxSize'        : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  20,
+                        'alt'    : 'Download icon max size'
     },
-    'closeIconMaxSize'    : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  20,
-                    'alt'    : 'Close icon max size'
+    'closeIconMaxSize'           : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  20,
+                        'alt'    : 'Close icon max size'
     },
-    'padlockIconMaxSize'  : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  20,
-                    'alt'    : 'Padlock icon max size'
+    'padlockIconMaxSize'         : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  20,
+                        'alt'    : 'Padlock icon max size'
     },
-    'compassMaxSize'      : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  75,
-                    'alt'    : 'Compass max size'
+    'compassMaxSize'             : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  75,
+                        'alt'    : 'Compass max size'
     },
-    'compassMinSize'      : {
-                    'type'   : 'range',
-                    'min'    :   0,
-                    'max'    : 100,
-                    'step'   :   1,
-                    'value'  :  20,
-                    'alt'    : 'Compass min size'
+    'compassMinSize'             : {
+                        'tag'    : 'input',
+                        'type'   : 'range',
+                        'min'    :   0,
+                        'max'    : 100,
+                        'step'   :   1,
+                        'value'  :  20,
+                        'alt'    : 'Compass min size'
     }
 };
 
 
 var syncFields = {
     'sync': {
+                'tag'    : 'input',
                 'type'   : 'checkbox',
                 'value'  :  true,
                 'alt'    : 'Synchronize Movement'
     },
     'resizeX': {
+                'tag'    : 'input',
                 'type'   : 'checkbox',
                 'value'  :  true,
                 'alt'    : 'Resize X'
     },
     'resizeY': {
+                'tag'    : 'input',
                 'type'   : 'checkbox',
                 'value'  :  false,
                 'alt'    : 'Resize Y'
     },
     'horizontal': {
+                'tag'    : 'input',
                 'type'   : 'checkbox',
                 'value'  :  false,
                 'alt'    : 'Horizontal visualization'
+    },
+    'crosshair': {
+                'tag'    : 'input',
+                'type'   : 'checkbox',
+                'value'  :  false,
+                'alt'    : 'Show crosshair'
     }
 };
 
@@ -398,23 +475,9 @@ function start() {
 
     getQueryString();
 
-    setQueryString()
+    //setQueryString();
 
     genSelectors(sels); // generate selectors based on "opts" variable
-
-
-    var okb = document.createElement('button');   // add button and it's click action
-        okb.onclick   = selclick;
-        okb.innerHTML = 'view';
-    sels.appendChild( okb );
-
-
-
-    var clb = document.createElement('button');   // add button and it's click action
-        clb.onclick   = clearPics;
-        clb.innerHTML = 'clear';
-    sels.appendChild(clb);
-
 
 
     var pos = document.createElement('label');
@@ -427,9 +490,9 @@ function start() {
 
     graphdb = new SyncSimpleGraph( {
 
-        sync   : function () { return getFieldValue( 'sync'    ) || true ; },
-        resizeX: function () { return getFieldValue( 'resizeX' ) || true ; },
-        resizeY: function () { return getFieldValue( 'resizeY' ) || false; }
+        sync   : function () { var val = getFieldValue( 'sync'    ); return  val === null ? true : val; },
+        resizeX: function () { var val = getFieldValue( 'resizeX' ); return  val === null ? true : val; },
+        resizeY: function () { var val = getFieldValue( 'resizeY' ); return  val === null ? true : val; }
     });
     //graphdb = new SyncSimpleGraph( true );
 
@@ -457,7 +520,7 @@ function start() {
         }
     }
 
-    okb.onclick();
+    document.getElementById('okb').onclick();
 };
 
 
@@ -467,35 +530,51 @@ function start() {
 
 
 function getQueryString () {
-    return;
     if ( hasstorage ) {
-        var parsed = parseUri(document.URL);
-        var anchor = parsed.anchor;
+        if ( _db_domain ) {
+            var parsed = parseUri(document.URL);
+            var anchor = parsed.anchor;
+            var dbnfo  = '|' + _db_domain + '|';
 
-        if (anchor !== '') {
-            //console.log('has anchor');
-            var data64 = null;
-            try {
-                data64 = base64.decode(anchor);
-            } catch(e) {
-                console.log('invalid 64');
-                console.log(anchor      );
+
+            if ( anchor.indexOf(dbnfo) != 0 ) {
+                console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
+                console.log( anchor.indexOf(dbnfo) );
                 return null;
+            } else {
+                console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
+                anchor = anchor.substring(dbnfo.length, anchor.length);
+                console.log( 'anchor ' + anchor);
             }
 
-            var data = null;
-            try {
-                data   = JSON.parse( data64 );
-            } catch(e) {
-                console.log('invalid JSON');
-                console.log(data64        );
-                return null;
-            }
 
-            clearDb();
+            if (anchor !== '') {
+                //console.log('has anchor');
+                var data64 = null;
+                try {
+                    data64 = base64.decode(anchor);
+                } catch(e) {
+                    console.log('invalid 64');
+                    console.log(anchor      );
+                    return null;
+                }
 
-            for (var k in data) {
-                saveOpt(k, data[k]);
+                var data = null;
+                try {
+                    data   = JSON.parse( data64 );
+                } catch(e) {
+                    console.log('invalid JSON');
+                    console.log(data64        );
+                    return null;
+                }
+
+                console.log('replacing preferences with ' + data64);
+                //localStorage[_db_domain] = data64;
+                //clearDb();
+
+                //for (var k in data) {
+                //    saveOpt(k, data[k]);
+                //}
             }
         }
     }
@@ -503,75 +582,119 @@ function getQueryString () {
 
 
 function setQueryString () {
-    return;
     if ( hasstorage ) {
-        var parsed = parseUri(document.URL);
-        var anchor = parsed.anchor;
+        if ( _db_domain ) {
+            var parsed = parseUri(document.URL);
+            var anchor = parsed.anchor;
 
-        if ( localStorage[_db_domain].length === 0 ) {
-            //console.log('nothing to save');
-            return null;
-        }
+            if ( localStorage[_db_domain].length === 0 ) {
+                console.log('nothing to save');
+                return null;
+            }
 
-        var data   = JSON.stringify(localStorage[_db_domain]);
-        var data64 = base64.encode( data );
+            var data64 = base64.encode( localStorage[_db_domain] );
 
-        if ( anchor != data64) {
-            //console.log( 'current url and current config differ');
-            //console.log(anchor);
-            //console.log(data64);
-            window.location.hash = data64;
-            //console.log(data64.length);
-        } else {
-            //console.log( 'current url and current config are equal');
-            //console.log(anchor.length);
+            var dbnfo  = '|' + _db_domain + '|';
+            var nurl   = dbnfo + data64;
+
+            if ( anchor != nurl) {
+                console.log( 'current url and current config differ');
+                //console.log(anchor);
+                //console.log(data64);
+                console.log(nurl);
+                window.location.hash = nurl;
+                //console.log(data64.length);
+            } else {
+                console.log( 'current url and current config are equal');
+                //console.log(anchor.length);
+            }
         }
     }
 }
 
 
-function addPicker(el, id, cls, nfo, callback) {
-    var trD1       = el  .appendChild( document.createElement('td'   ) );
-    var trD2       = el  .appendChild( document.createElement('td'   ) );
-    var trD3       = el  .appendChild( document.createElement('td'   ) );
 
-    var sel        = trD2.appendChild( document.createElement('input') );
+
+
+
+function addPicker(el, id, cls, nfo, callback, opts) {
+    var addlbls = true;
+    var addlbl1 = true;
+    var addlbl2 = true;
+
+
+    if (opts) {
+        if ( opts.addlbls !== undefined ) { addlbls = opts.addlbls; }
+        if ( opts.addlbl1 !== undefined ) { addlbl1 = opts.addlbl1; }
+        if ( opts.addlbl2 !== undefined ) { addlbl2 = opts.addlbl2; }
+    }
+
+
+
+    if ( addlbls && addlbl1 ) {
+        var trD1       = el  .appendChild( document.createElement('td'   ) );
+        var lbl1       = document.createElement('label');
+        lbl1.htmlFor   = id;
+        lbl1.id        = id + '_labelB';
+        lbl1.innerHTML = "<b>" + id + "</b>";
+
+        if (nfo.alt) {
+            lbl1.innerHTML = "<b>" + nfo.alt + "</b>";
+        }
+
+        trD1.appendChild(lbl1);
+    }
+
+
+
+
+
+    var trD2       = el  .appendChild( document.createElement('td'   ) );
+
+    var sel        = trD2.appendChild( document.createElement(nfo.tag) );
+
+    sel.id         = id;
+    sel.onchange   = callback;
 
 
     for ( var opt in nfo ) {
-        sel[opt] = nfo[opt];
+        if (opt != 'tag') {
+            if (nfo.tag == 'select' && (opt == 'value' || opt == 'options')) {
+                continue;
+            }
+
+            sel[opt] = nfo[opt];
+        }
     }
 
-    sel.id        = id;
 
-    var lbl1       = document.createElement('label');
-    lbl1.htmlFor   = sel.id;
-    lbl1.innerHTML = "<b>" + sel.id + "</b>";
+    if (nfo.tag == 'select') {
+        genSelectorsOpts(nfo.options, sel, nfo.value);
 
-    if (sel.alt) {
-        lbl1.innerHTML = "<b>" + sel.alt + "</b>";
-    }
-
-    trD1.appendChild(lbl1);
-
-    var unity      = sel.unity;
-
-    var lbl2       = document.createElement('label');
-    lbl2.htmlFor   = sel.id;
-    lbl2.id        = sel.id + '_label';
-    lbl2.innerHTML = sel.value;
-
-    if (unity) {
-        lbl2.innerHTML = sel.value + unity;
-    }
-
-    trD3.appendChild(lbl2);
-
-    if ( sel.type == 'checkbox' ) {
+    } else if ( sel.type == 'checkbox' ) {
         sel.checked = nfo.value;
+
     }
 
-    sel.onchange  = callback;
+
+
+
+
+    if ( addlbls && addlbl1 ) {
+        var trD3       = el  .appendChild( document.createElement('td'   ) );
+
+        var lbl2       = document.createElement('label');
+        lbl2.htmlFor   = id;
+        lbl2.id        = id + '_labelA';
+        lbl2.innerHTML = nfo.value;
+
+        var unity      = nfo.unity;
+        if (unity) {
+            lbl2.innerHTML = nfo.value + unity;
+        }
+
+        trD3.appendChild(lbl2);
+    }
 }
 
 
@@ -580,10 +703,22 @@ function createCsss(el) {
     tbl.className = 'setuptable';
 
     var callback = function(e) {
-        var id    = e.srcElement.id;
-        var obj   = e.srcElement.obj;
-        var prop  = e.srcElement.prop;
-        var unity = e.srcElement.unity;
+        var tgt = null
+        try {
+            tgt = e.srcElement;
+        } catch(e) {
+            tgt = e.target; //Firefox
+        }
+
+        if (!tgt) {
+            return null;
+        }
+
+        var id    = tgt.id;
+        var obj   = tgt.obj;
+        var prop  = tgt.prop;
+        var unity = tgt.unity;
+
         var val   = getFieldValue( id );
 
         console.log('changing obj ' + obj + ' property ' + prop + ' value ' + val);
@@ -619,7 +754,7 @@ function createCsss(el) {
 
             nfo.obj      = obj;
             nfo.prop     = prop;
-            nfo.value    = getOpt( id ) || nfo.value;
+            nfo.value    = getOpt( id, nfo.value );
 
             if ( nfo.value !== valueDfl ) {
                 var val   = nfo.value;
@@ -641,7 +776,19 @@ function createPositions(el) {
     tbl.className = 'setuptable';
 
     var callback = function(e) {
-        var id  = e.srcElement.id;
+        var tgt = null
+        try {
+            tgt = e.srcElement;
+        } catch(e) {
+            tgt = e.target; //Firefox
+        }
+
+        if (!tgt) {
+            return null;
+        }
+
+        var id  = tgt.id;
+
         var val = getFieldValue( id );
 
         console.log('changing property ' + id + ' value ' + val);
@@ -658,11 +805,10 @@ function createPositions(el) {
     posK.sort();
 
     for (var idN = 0; idN < posK.length; idN++ ) {
-        var tr    = tbl .appendChild( document.createElement('tr'   ) );
-
-        var id    = posK[idN];
-        var nfo   = copyKeys( positions[id] );
-        nfo.value = getOpt( id ) || nfo.value;
+        var tr     = tbl .appendChild( document.createElement('tr'   ) );
+        var id     = posK[idN];
+        var nfo    = copyKeys( positions[id] );
+        nfo.value  = getOpt( id, nfo.value );
         addPicker(tr, id, 'positions', nfo, callback);
     }
 };
@@ -709,7 +855,7 @@ function createOptions(){
     createCsss(trD22);
 
     var clsBtn       = document.createElement('button');
-    clsBtn.onclick   = function(e) { if (hasStorage) { alert('cleaning all preferences'); localStorage.clear(); location.reload(); } };
+    clsBtn.onclick   = function(e) { if (hasStorage) { alert('cleaning all preferences'); clearDb(); location.reload(); } };
     clsBtn.innerHTML = 'Clear';
 
     divH.appendChild( clsBtn );
@@ -725,7 +871,19 @@ function createSyncs(el) {
     tbl.className = 'setuptable';
 
     var callback = function(e) {
-        var id  = e.srcElement.id;
+        var tgt = null
+        try {
+            tgt = e.srcElement;
+        } catch(e) {
+            tgt = e.target; //Firefox
+        }
+
+        if (!tgt) {
+            return null;
+        }
+
+        var id  = tgt.id;
+
         var val = getFieldValue( id );
 
         console.log('changing property ' + id + ' value ' + val);
@@ -747,46 +905,28 @@ function createSyncs(el) {
     for (var idN = 0; idN < posK.length; idN++ ) {
         var id    = posK[idN];
         var nfo   = syncFields[id];
-
-        nfo.value = getOpt( id ) || nfo.value;
+        nfo.value = getOpt( id, nfo.value );
 
         addPicker(tr, id, 'positions', nfo, callback);
     }
 
 
 
-
-
-
-    var sizeTd          = tr.appendChild(  document.createElement("td") );
-
-    var sizeLbl         = sizeTd.appendChild( document.createElement('label') );
-    sizeLbl.innerHTML   = '<b>Graphic size</b>';
-
-    var sizeSel         = sizeTd.appendChild(  document.createElement("select") );
-        sizeSel.id      = 'size';
-        sizeSel.alt     = 'Select Graphic Size';
-
-    var val = getOpt('size', Object.keys( sizes )[0]);
-
-    for ( var size in sizes ){
-        var opf       = document.createElement("option");
-        opf.value     = size;
-        opf.innerHTML = sizes[size];
-
-        if (val)
-        {
-            if (val == size) {
-                opf.selected = true;
+    var callback2 = function(e) {
+            var tgt = null
+            try {
+                tgt = e.srcElement;
+            } catch(e) {
+                tgt = e.target; //Firefox
             }
-        }
 
-        sizeSel.appendChild( opf );
-    }
-
-    sizeSel.onchange  = function(e) {
-            saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) );
+            if (tgt) {
+                var id = tgt.id;
+                saveOpt( id, getFieldValue( id ) );
+            }
         };
+
+    addPicker( tr, 'size', 'sizes', sizes['size'], callback2);
 }
 
 
@@ -794,16 +934,17 @@ function genSelectorsOpts(obj, refSel, dflt){
     /*
      * Generate drop-down lists options base on "opts"
      */
+
     for ( var o = 0; o < obj.length; o++ ){
         var opt = obj[ o ];
 
         var op           = document.createElement('option');
-            op.value     = opt;
-            op.innerHTML = opt;
+            op.value     = opt[0];
+            op.innerHTML = opt[1];
 
         if (dflt)
         {
-            if (dflt == opt) {
+            if (dflt == opt[0]) {
                 op.selected = true;
             }
         }
@@ -818,71 +959,78 @@ function genSelectors(sels){
      * Generate "select" elements. Calls genOpts to read options
      * If only one option available, adds a label field, otherwise, adds a drop-down menu.
      */
-    //var statuses = ['Clean & Filtered Dot Plot. Only Inversions', 'Clean Dot Plot'];
-    //var tgts     = ['solanum arcanum', 'solanum habrochaites', 'solanum lycopersicum heinz denovo', 'solanum pennellii'];
-    //var refChrom   = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-    //var refs     = ['solanum lycopersicum heinz'];
-    //var filelist = {
 
+    var callback = function(e) {
+            var tgt = null;
+
+            try {
+                tgt = e.srcElement;
+            } catch(e) {
+                tgt = e.target; //Firefox
+            }
+
+            if (tgt) {
+                var id = tgt.id;
+                saveOpt( id, getFieldValue( id ) );
+            }
+        };
+
+
+    var tbl = sels.appendChild( document.createElement('table').appendChild( document.createElement('tr') ));
 
     for ( var optName in opts ) {
-        var opt      = opts[optName];
-        var optVar   = opt[0];
-        var optLabel = opt[1];
+        var opt = opts[optName];
+
+        var optVar = opt.options;
 
         if ( optVar.length == 1 ) {
             var refSel           = document.createElement("label");
                 refSel.id        = optName;
-                refSel.alt       = optLabel;
+                refSel.alt       = opt.alt;
                 refSel.value     = optVar[0];
                 refSel.innerHTML = optVar[0];
 
-            sels.appendChild(refSel);
+            tbl.appendChild(refSel);
+
+
 
         } else {
-            var refOp           = document.createElement('option');
-                refOp.value     = null;
-                refOp.innerHTML = optLabel;
+            var opt2 = {};
 
-            var allOp           = document.createElement('option');
-                allOp.value     = '*all*';
-                allOp.innerHTML = 'All';
-
-            var val = getOpt(optName, null);
-            console.log( optName + ' ' + val );
-
-            if ( val ) {
-                if (optVar.indexOf(val) == -1) {
-                    if (val != '*all*') {
-                        console.log( 'val ' + val + ' not in optvar ' );
-                        console.log( optVar );
-                        val = null;
-                        saveOpt(optName, val);
-                    }
-                }
+            for ( var k in opt ) {
+                opt2[k] = opt[k];
             }
 
+            var optVar2 = [
+                ['null', opt.alt]
+            ];
 
-            if (val)
-            {
-                if (val == '*all*') {
-                    allOp.selected = true;
-                }
+            for ( var o = 0; o < optVar.length; o++ ){
+                var val = optVar[ o ];
+                optVar2.push([ val , val]);
             }
 
-            var refSel          = document.createElement("select");
-                refSel.id       = optName;
-                refSel.alt      = optLabel;
+            optVar2.push( [ '*all*', 'All' ] );
 
-                refSel.appendChild( refOp );
-                genSelectorsOpts( optVar, refSel, val );
-                refSel.appendChild( allOp );
+            opt2.options = optVar2;
 
-                refSel.onchange  = function(e) { saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) ); };
-
-            sels.appendChild(refSel);
+            addPicker(tbl, optName, 'selectors', opt2, callback, {addlbls: false} );
         }
     }
+
+    var okb = document.createElement('button');   // add button and it's click action
+        okb.id        = 'okb';
+        okb.onclick   = selclick;
+        okb.innerHTML = 'view';
+    tbl.appendChild( document.createElement('td').appendChild( okb ) );
+
+
+
+    var clb = document.createElement('button');   // add button and it's click action
+        clb.id        = 'clb';
+        clb.onclick   = clearPics;
+        clb.innerHTML = 'clear';
+    tbl.appendChild( document.createElement('td').appendChild( clb ) );
 }
 
 
@@ -1124,7 +1272,7 @@ function loadGraph( regs ) {
     //
     //reg.cfg
 
-    var horizontal = getFieldValue( 'horizontal' ) || false;
+    var horizontal = getFieldValue( 'horizontal' );
 
     if (horizontal) {
         var hreg      = mergeregs( regs );
@@ -1246,11 +1394,14 @@ function clearPics(){
 function getFieldValue(fieldId) {
     var field = document.getElementById( fieldId );
 
+    //console.log('getting ' + fieldId);
     if (field) {
         var val   = null;
 
         if ( field.localName == 'select' ) {
+            //console.log('getting ' + fieldId + ' select');
             var sel = field.selectedIndex;
+            //console.log('getting ' + fieldId + ' select index ' + sel);
             if ( sel == -1 ) {
                 sel = null;
             } else {
@@ -1258,9 +1409,12 @@ function getFieldValue(fieldId) {
                 val     = fio.value;
             }
         } else {
+            //console.log('getting ' + fieldId + ' !select');
             if ( field.type == 'checkbox' ) {
+                //console.log('getting ' + fieldId + ' !select CHECKBOX');
                 val = field.checked;
             } else {
+                //console.log('getting ' + fieldId + ' !select !CHECKBOX');
                 val = field.value;
             }
         }
@@ -1269,8 +1423,10 @@ function getFieldValue(fieldId) {
             val = null;
         }
 
+        //console.log('getting ' + fieldId + ' VAL ' + val);
         return val;
     } else {
+        //console.log('getting ' + fieldId + ' NO SUCH FIELD');
         return null;
     }
 };
@@ -1280,13 +1436,14 @@ function getVals() {
     var vals = {};
 
     for ( var optName in opts ) {
-        var val      = getFieldValue( optName ) || null;
+        var val      = getFieldValue( optName );
 
         if ( val === null ) {
+            console.log( 'value ' + optName + ' not defined' );
             return null;
         }
 
-        console.log( 'appending ' + optName + ' = '+ val );
+        //console.log( 'appending ' + optName + ' = '+ val );
         vals[ optName ] = val;
     }
 
@@ -1345,7 +1502,8 @@ function getRegister( gvals ){
 
 
 
-    var horizontal = getFieldValue( 'horizontal' ) || false;
+    var horizontal = getFieldValue( 'horizontal' );
+
 
     if (horizontal) {
         huid = 'horiz_';
@@ -1354,7 +1512,7 @@ function getRegister( gvals ){
         }
 
         if ( refNames.length != 1 ) {
-            alert( 'more than one reference while using horizontal graph ' + refNames.length   + ' ' + refNames );
+            alert( 'more than one reference while using horizontal graph '  + refNames.length  + ' ' + refNames );
             return null;
         }
 
@@ -1416,10 +1574,13 @@ function getRegister( gvals ){
             uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
         reg.nfo.uid        = uid;
-        reg.nfo.chartClass = getFieldValue( 'size' ) || Object.keys( sizes )[0];
+        reg.nfo.chartClass = getFieldValue( 'size' );
         reg.nfo.tipId      = 'tipper';
         reg.nfo.filepath   = datafolder + reg.res.filename;
         reg.nfo.scriptid   = 'script_'  + reg.nfo.uid;
+
+        if ( reg.nfo.chartClass === null ) { reg.nfo.chartClass = Object.keys( sizes )[0]; };
+
 
         var posK = Object.keys( positions );
             posK.sort();
@@ -1505,6 +1666,12 @@ function getOpt(k, d) {
             }
         }
     }
+
+    if (val === undefined) {
+        val = d;
+    }
+
+    //console.log( 'returning ' + val );
     return val;
 };
 
