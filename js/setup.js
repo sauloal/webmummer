@@ -924,120 +924,156 @@ function loadScript( reg, callback ){
 function mergeregs( regs ) {
     huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
-    //var sreg = simplifyReg( reg );
     
     var hreg         = {
-        qry: [],
-        res: [],
-        nfo: [],
-        cfg: []
+        qry: {},
+        res: {},
+        nfo: {},
+        cfg: {}
     };
     var yTicksLabels = [];
 
+
     //console.log(regs);
 
-    for ( var r = 0; r < regs.length; r++ ) {
-        var reg         = regs[r];
-        yTicksLabels[r] = [];
 
-        hreg.qry.push( reg.qry );
-        hreg.res.push( reg.res );
-        hreg.nfo.push( reg.nfo );
-        hreg.cfg.push( reg.cfg );
+    for ( var r = 0; r < regs.length; r++ ) {
+        var reg = regs[r];
+        yTicksLabels[r] = [];
+        for ( var cls in reg ) {
+            for ( var k in reg[cls] ) {
+                if (!hreg[cls][k]) {
+                    hreg[cls][k] = [];
+                }
+                var val = reg[cls][k];
+                hreg[cls][k].push( val );
+            }
+        }
     }
 
-    console.log(hreg); return;
 
-    for ( var v in hreg.res ) {
-        var vals = hreg.res[v];
+    //console.log(hregs);
+
+
+    var sreg = simplifyReg( hreg );
+
+
+    //console.log(sreg);
+    
+
+    for ( var v in sreg.res ) {
+        var vals = sreg.res[v];
         var uniqueArray = vals.filter(function(elem, pos) {
             return vals.indexOf(elem) == pos;
         });
 
         if (uniqueArray.length == 1) {
             if (['tgts', 'points'].indexOf(v) == -1) {
-                hreg.res[v] = vals[0];
+                sreg.res[v] = vals[0];
             }
         }
     }
 
 
-    for ( var v in hreg.qry ) {
-        var vals = hreg.qry[v];
+    //console.log(sreg);
+
+
+    for ( var v in sreg.qry ) {
+        var vals = sreg.qry[v];
         var uniqueArray = vals.filter(function(elem, pos) {
             return vals.indexOf(elem) == pos;
         });
+        //console.log(vals);
+        //console.log(uniqueArray);
 
         if (uniqueArray.length != 1) {
-            for ( var h = 0; h < hreg.qry[v].length; h++) {
-                yTicksLabels[h].push( hreg.qry[v][h] );
+            for ( var h = 0; h < sreg.qry[v].length; h++) {
+                var val = sreg.qry[v][h];
+                //console.log ( val );
+                yTicksLabels[h].push( val );
             }
         }
     }
 
-    //console.log(hreg);
+
+    //console.log(yTicksLabels);
+    //console.log(sreg);
+
 
     for ( var r = 0; r < yTicksLabels.length; r++ ) {
-        yTicksLabels[r] = yTicksLabels[r].join('+');
+        yTicksLabels[r] = joinVals( yTicksLabels[r] );
     }
 
-    //console.log(hreg);
+
+    //console.log(yTicksLabels);
+    //console.log(sreg);
+
+    var rKeys = ['xmax', 'ymax', 'xmin', 'ymin'];
+    for ( var k in rKeys ) {
+        var key = rKeys[k];
+        var res = [];
+        for ( var k = 0; k < sreg[ key ].length; k++ ) {
+            res.push( sreg[ key ][ k ] );
+        }
+        sreg[ key ] = Math.max.apply(null, res);
+    }
+
+
+    //console.log(sreg);
 
     
-    for ( var key in ['xmax', 'ymax', 'xmin', 'ymin'] ) {
-        var res = [];
-        for ( var k = 0; k < hreg.res[ key ].length; k++ ) {
-            res.push( hreg.res[ key ][ k ] );
-        }
-        hreg.res[ key ] = Math.max.apply(null, res);
-    }
+    var refs    = joinVals( sreg.qry.refName  );
+    var refsCr  = joinVals( sreg.qry.refChrom );
+    var tgts    = joinVals( sreg.qry.tgtName  );
+    var tgtsCr  = joinVals( sreg.qry.tgtChrom );
+    var sts     = joinVals( sreg.qry.status   );
+    var ylabel  = joinVals( sreg.ylabel       );
+    var xlabel  = joinVals( sreg.xlabel       );
 
 
+    sreg.title        = refs + ' #' + refsCr + ' vs ' + tgts  + ' #' + tgtsCr + ' - Status ' + sts;
+    sreg.ylabel       = ylabel;
+    sreg.xlabel       = xlabel;
+    sreg.yTicksLabels = yTicksLabels;
+    sreg.tipId        = sreg.tipId[0];
+    sreg.chartClass   = sreg.chartClass[0];
 
-
-    var tgts    = hreg.qry.map( function(val) { return val.tgtName; } );
-    var sts     = hreg.qry.map( function(val) { return val.status;  } );
-    var ylabel  = hreg.qry.map( function(val) { return val.ylabel;  } );
-
-
-
-    try {
-        tgts    = '(' + hreg.tgtName.join('+') + ')';
-    } catch (e) {
-        //
-    }
-
-    try {
-        sts     = '(' + hreg.status.join('+') + ')';
-    } catch (e) {
-        //
-    }
-
-    try {
-        ylabel  = '(' + hreg.ylabel('+') + ')';
-    } catch (e) {
-        //
-    }
-
-    hreg.title        = hreg.refName + ' - chromosome ' + hreg.refChrom + ' vs ' + tgts  + ' - Status ' + sts;
-    hreg.ylabel       = ylabel;
-    hreg.yTicksLabels = yTicksLabels;
-
-    hreg.uid          = huid;
+    sreg.uid          = huid;
     huid              = '';
 
+    
+    //console.log(sreg);
 
-    return hreg;
+    return sreg;
+};
+
+
+function joinVals( vals ) {
+    var res = []
+
+    var res = vals.filter(function(elem, pos) {
+        return vals.indexOf(elem) == pos;
+    });
+
+    if (res.length == 1) {
+        return res.join('+');
+    } else {
+        return '(' + res.join('+') + ')';
+    }
 };
 
 
 function simplifyReg( reg ) {
-    var res = [];
-    for ( var cls in reg ) {
+    var res  = [];
+    var keys = ['res', 'nfo'];
+    for ( var c in keys ) {
+        var cls = keys[c];
         for ( var k in reg[cls] ) {
             res[k] = reg[cls][k];
         }
     }
+    res.qry = reg.qry;
+    res.uid = reg.nfo.uid;
     return res;
 }
 
@@ -1080,15 +1116,14 @@ function loadGraph( regs ) {
 
     if (horizontal) {
         var hreg      = mergeregs( regs );
-        hreg.nfo.parallel = true;
+        hreg.parallel = true;
         console.log( hreg );
         graphdb.add(chartName, hreg);
-        delete hreg;
+        
     } else {
         regs.map( function(reg) {
             var sreg = simplifyReg( reg );
             graphdb.add(chartName, sreg);
-            delete reg;
         });
     }
 };
