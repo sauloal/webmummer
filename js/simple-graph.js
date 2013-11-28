@@ -133,7 +133,7 @@ SyncSimpleGraph.prototype.clear = function () {
 
 
 SyncSimpleGraph.prototype.add = function(chartHolder, options) {
-    console.log( options );
+    //console.log( options );
     var uid  = options.uid || 'uid_' + new Date();
     var self = this;
 
@@ -294,6 +294,7 @@ SimpleGraph = function (chartHolder, options) {
 
     this.options.chartClass          = options.chartClass          || 'chartpart';
 
+
     this.options.xmax                = options.xmax                || null;
     this.options.xmin                = options.xmin                || null;
     this.options.ymax                = options.ymax                || null;
@@ -306,29 +307,29 @@ SimpleGraph = function (chartHolder, options) {
     this.options.xlabel              = options.xlabel              || 'x';
     this.options.ylabel              = options.ylabel              || 'y';
     this.options.title               = options.title               || 'no title';
-
-    this.options.xTicks              = options.xTicks              || 5;
-    this.options.yTicks              = options.yTicks              || 5;
-    this.options.yTicksLabels        = options.yTicksLabels        || null;
-    this.options.paddingTop          = options.paddingTop          || 40;
-    this.options.paddingRight        = options.paddingRight        || 30;
-    this.options.paddingBottom       = options.paddingBottom       || 60;
-    this.options.paddingLeft         = options.paddingLeft         || 120;
-    this.options.titleDy             = options.titleDy             || -0.8;
-    this.options.xNumbersDy          = options.xNumbersDy          || 1;
-    this.options.yNumbersDy          = options.yNumbersDy          || 0.35;
-    this.options.xlabelDx            = options.xlabelDx            || 0;
-    this.options.xlabelDy            = options.xlabelDy            || +2.3;
-    this.options.ylabelX             = options.ylabelX             || 0;
-    this.options.ylabelY             = options.ylabelY             || 0;
-    this.options.ylabelDx            = options.ylabelDx            || 0;
-    this.options.ylabelDy            = options.ylabelDy            || -3.3;
-    this.options.downloadIconMaxSize = options.downloadIconMaxSize ||  20;
-    this.options.closeIconMaxSize    = options.closeIconMaxSize    ||  20;
-    this.options.padlockIconMaxSize  = options.padlockIconMaxSize  ||  20;
-    this.options.compassMaxSize      = options.compassMaxSize      ||  75;
-    this.options.compassMinSize      = options.compassMinSize      ||  20;
     this.parallel                    = options.parallel            || isArray( this.points[0] );
+
+    this.options.xTicks              = options.cfg.xTicks              || 5;
+    this.options.yTicks              = options.cfg.yTicks              || 5;
+    this.options.yTicksLabels        = options.cfg.yTicksLabels        || null;
+    this.options.paddingTop          = options.cfg.paddingTop          || 40;
+    this.options.paddingRight        = options.cfg.paddingRight        || 30;
+    this.options.paddingBottom       = options.cfg.paddingBottom       || 60;
+    this.options.paddingLeft         = options.cfg.paddingLeft         || 120;
+    this.options.titleDy             = options.cfg.titleDy             || -0.8;
+    this.options.xNumbersDy          = options.cfg.xNumbersDy          || 1;
+    this.options.yNumbersDy          = options.cfg.yNumbersDy          || 0.35;
+    this.options.xlabelDx            = options.cfg.xlabelDx            || 0;
+    this.options.xlabelDy            = options.cfg.xlabelDy            || +2.3;
+    this.options.ylabelX             = options.cfg.ylabelX             || 0;
+    this.options.ylabelY             = options.cfg.ylabelY             || 0;
+    this.options.ylabelDx            = options.cfg.ylabelDx            || 0;
+    this.options.ylabelDy            = options.cfg.ylabelDy            || -3.3;
+    this.options.downloadIconMaxSize = options.cfg.downloadIconMaxSize ||  20;
+    this.options.closeIconMaxSize    = options.cfg.closeIconMaxSize    ||  20;
+    this.options.padlockIconMaxSize  = options.cfg.padlockIconMaxSize  ||  20;
+    this.options.compassMaxSize      = options.cfg.compassMaxSize      ||  75;
+    this.options.compassMinSize      = options.cfg.compassMinSize      ||  20;
     //this.options.radius         = options.radius         || 5.0;
 
 

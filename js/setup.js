@@ -388,10 +388,10 @@ function start() {
     * Creates page elements
     */
 
-    
+
     var sels = document.createElement('span');
     sels.id  = 'selectors';
-    
+
     var bfc  = bdy.firstChild;
     sels     = bdy.insertBefore( sels, bfc );
 
@@ -790,7 +790,7 @@ function createSyncs(el) {
 }
 
 
-function genOpts(obj, refSel, dflt){
+function genSelectorsOpts(obj, refSel, dflt){
     /*
      * Generate drop-down lists options base on "opts"
      */
@@ -862,7 +862,7 @@ function genSelectors(sels){
                 }
             }
 
-            
+
             if (val)
             {
                 if (val == '*all*') {
@@ -875,7 +875,7 @@ function genSelectors(sels){
                 refSel.alt      = optLabel;
 
                 refSel.appendChild( refOp );
-                genOpts( optVar, refSel, val );
+                genSelectorsOpts( optVar, refSel, val );
                 refSel.appendChild( allOp );
 
                 refSel.onchange  = function(e) { saveOpt( e.srcElement.id, getFieldValue( e.srcElement.id ) ); };
@@ -924,7 +924,7 @@ function loadScript( reg, callback ){
 function mergeregs( regs ) {
     huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
-    
+
     var hreg         = {
         qry: {},
         res: {},
@@ -959,7 +959,7 @@ function mergeregs( regs ) {
 
 
     //console.log(sreg);
-    
+
 
     for ( var v in sreg.res ) {
         var vals = sreg.res[v];
@@ -974,6 +974,17 @@ function mergeregs( regs ) {
         }
     }
 
+
+    for ( var v in sreg.cfg ) {
+        var vals = sreg.cfg[v];
+        var uniqueArray = vals.filter(function(elem, pos) {
+            return vals.indexOf(elem) == pos;
+        });
+
+        if (uniqueArray.length == 1) {
+            sreg.cfg[v] = vals[0];
+        }
+    }
 
     //console.log(sreg);
 
@@ -1021,7 +1032,7 @@ function mergeregs( regs ) {
 
     //console.log(sreg);
 
-    
+
     var refs    = joinVals( sreg.qry.refName  );
     var refsCr  = joinVals( sreg.qry.refChrom );
     var tgts    = joinVals( sreg.qry.tgtName  );
@@ -1041,7 +1052,7 @@ function mergeregs( regs ) {
     sreg.uid          = huid;
     huid              = '';
 
-    
+
     //console.log(sreg);
 
     return sreg;
@@ -1073,6 +1084,7 @@ function simplifyReg( reg ) {
         }
     }
     res.qry = reg.qry;
+    res.cfg = reg.cfg;
     res.uid = reg.nfo.uid;
     return res;
 }
@@ -1117,9 +1129,9 @@ function loadGraph( regs ) {
     if (horizontal) {
         var hreg      = mergeregs( regs );
         hreg.parallel = true;
-        console.log( hreg );
+        //console.log( hreg );
         graphdb.add(chartName, hreg);
-        
+
     } else {
         regs.map( function(reg) {
             var sreg = simplifyReg( reg );
@@ -1135,6 +1147,7 @@ syncLoadScript = function( regs, callback ) {
     this.callback     = callback;
     this.size         = 0;
     this.received     = 0;
+    this.sentData     = [];
     this.receivedData = [];
 
     this.regs.map( function(reg) {
@@ -1153,9 +1166,10 @@ syncLoadScript = function( regs, callback ) {
 
     var count = 0;
     var func  = function(sregv) { loadScript( sregv, self.receive() ); };
-    
+
     regs.map( function(reg) {
         var file   = reg.res.filename;
+        self.sentData.push( file );
         if (file) {
             console.log( 'sending ' + file );
             //setTimeout( func(reg), (count * 1000));
@@ -1172,23 +1186,27 @@ syncLoadScript.prototype.receive = function( ) {
     return function( reg ) {
         self.received += 1;
 
-        self.receivedData.push( reg );
-        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.res.filename );
+        var dataPos = self.sentData.indexOf( reg.res.filename );
+
+        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.res.filename + ' pos ' + dataPos );
 
         var res = _filelist[ reg.qry.refName ][ reg.qry.refChrom ][ reg.qry.tgtName ][ reg.qry.tgtChrom ][ reg.qry.status ];
-        
+
         reg.res = JSON.parse(JSON.stringify(res));
-        
+
+        self.receivedData[ dataPos ] = reg;
+
         delete res.points;
         delete res.tgts;
-        
+
         var script = document.getElementById( reg.nfo.scriptid );
 
         if ( script ) {
             document.getElementById( scriptHolder ).removeChild( script );
         }
-        
-        if ( self.received == self.size) {
+
+        if ( self.received == self.size ) {
+            //console.log( self.receivedData );
             self.callback( self.receivedData );
         }
     };
@@ -1389,7 +1407,7 @@ function getRegister( gvals ){
             console.error( vals );
             continue;
         }
-        
+
         for ( var k in regD ) {
             reg.res[k] = regD[k];
         }
@@ -1411,8 +1429,8 @@ function getRegister( gvals ){
             var nfo   = positions[id];
             var dfl   = nfo.value;
             var curr  = getFieldValue( id );
-            
-            
+
+
             if ( dfl != curr ) {
                 console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
                 console.log( nfo );
@@ -1470,7 +1488,7 @@ function saveOpt (k ,v) {
 
 function getOpt(k, d) {
     var val = d;
-    
+
     if ( hasstorage ) {
         if ( _db_domain ) {
             if ( localStorage[_db_domain] ) {
