@@ -307,11 +307,12 @@ SimpleGraph = function (chartHolder, options) {
     this.options.xlabel              = options.xlabel              || 'x';
     this.options.ylabel              = options.ylabel              || 'y';
     this.options.title               = options.title               || 'no title';
+    this.options.yTicksLabels        = options.yTicksLabels        || null;
+
     this.parallel                    = options.parallel            || isArray( this.points[0] );
 
     this.options.xTicks              = options.cfg.xTicks              || 5;
     this.options.yTicks              = options.cfg.yTicks              || 5;
-    this.options.yTicksLabels        = options.cfg.yTicksLabels        || null;
     this.options.paddingTop          = options.cfg.paddingTop          || 40;
     this.options.paddingRight        = options.cfg.paddingRight        || 30;
     this.options.paddingBottom       = options.cfg.paddingBottom       || 60;
