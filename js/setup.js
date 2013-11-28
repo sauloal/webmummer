@@ -9,16 +9,17 @@ var chartName  = 'chart1';
 var scriptHolder = 'scriptholder';
 
 
-var bdy = document.getElementsByTagName('body')[0];
 
-var win = window,
-    doc = document,
-    del = doc.documentElement,
-    bdy = doc.getElementsByTagName('body')[0],
-    wid = win.innerWidth  || del.clientWidth  || bdy.clientWidth,
-    hei = win.innerHeight || del.clientHeight || bdy.clientHeight;
+var bdy    = document.getElementsByTagName('body')[0];
 
-var huid = '';
+var win    = window,
+    doc    = document,
+    del    = doc.documentElement,
+    bdy    = doc.getElementsByTagName('body')[0],
+    wid    = win.innerWidth  || del.clientWidth  || bdy.clientWidth,
+    hei    = win.innerHeight || del.clientHeight || bdy.clientHeight;
+
+var huid   = '';
 
 function hasStorage() {
     try {
@@ -35,7 +36,7 @@ function hasStorage() {
 
 var hasstorage = hasStorage();
 
-
+initDb();
 
 /*
  * Available fields to be queried in the database
@@ -240,7 +241,7 @@ var positions = {
                     'min'    : -10,
                     'max'    :  10,
                     'step'   : 0.10,
-                    'value'  : 0.75,
+                    'value'  : 0.70,
                     'alt'    : 'Title vertical offset'
     },
     'xNumbersDy'          : {
@@ -256,7 +257,7 @@ var positions = {
                     'min'    : -10,
                     'max'    :  10,
                     'step'   : 0.10,
-                    'value'  : 0.25,
+                    'value'  : 0.20,
                     'alt'    : 'Y axis numbers vertical offset'
     },
     'xlabelDx'            : {
@@ -384,14 +385,15 @@ var syncFields = {
 
 function start() {
     /*
-     * Creates page elements
-     */
+    * Creates page elements
+    */
 
-    var sels    = document.createElement('span');
-        sels.id = 'selectors';
-
-    var bfc = bdy.firstChild;
-    sels = bdy.insertBefore( sels, bfc );
+    
+    var sels = document.createElement('span');
+    sels.id  = 'selectors';
+    
+    var bfc  = bdy.firstChild;
+    sels     = bdy.insertBefore( sels, bfc );
 
 
     getQueryString();
@@ -399,7 +401,6 @@ function start() {
     setQueryString()
 
     genSelectors(sels); // generate selectors based on "opts" variable
-
 
 
     var okb = document.createElement('button');   // add button and it's click action
@@ -426,9 +427,9 @@ function start() {
 
     graphdb = new SyncSimpleGraph( {
 
-        sync   : function () { return getOpt( 'sync'   , true  ); },
-        resizeX: function () { return getOpt( 'resizeX', true  ); },
-        resizeY: function () { return getOpt( 'resizeY', false ); }
+        sync   : function () { return getFieldValue( 'sync'    ) || true ; },
+        resizeX: function () { return getFieldValue( 'resizeX' ) || true ; },
+        resizeY: function () { return getFieldValue( 'resizeY' ) || false; }
     });
     //graphdb = new SyncSimpleGraph( true );
 
@@ -466,6 +467,7 @@ function start() {
 
 
 function getQueryString () {
+    return;
     if ( hasstorage ) {
         var parsed = parseUri(document.URL);
         var anchor = parsed.anchor;
@@ -490,10 +492,10 @@ function getQueryString () {
                 return null;
             }
 
-            localStorage.clear();
+            clearDb();
 
             for (var k in data) {
-                localStorage[k] = data[k];
+                saveOpt(k, data[k]);
             }
         }
     }
@@ -501,24 +503,25 @@ function getQueryString () {
 
 
 function setQueryString () {
+    return;
     if ( hasstorage ) {
         var parsed = parseUri(document.URL);
         var anchor = parsed.anchor;
 
-        if ( localStorage.length === 0 ) {
+        if ( localStorage[_db_domain].length === 0 ) {
             //console.log('nothing to save');
             return null;
         }
 
-        var data   = JSON.stringify(localStorage);
+        var data   = JSON.stringify(localStorage[_db_domain]);
         var data64 = base64.encode( data );
 
         if ( anchor != data64) {
             //console.log( 'current url and current config differ');
-            console.log(anchor);
-            console.log(data64);
+            //console.log(anchor);
+            //console.log(data64);
             window.location.hash = data64;
-            console.log(data64.length);
+            //console.log(data64.length);
         } else {
             //console.log( 'current url and current config are equal');
             //console.log(anchor.length);
@@ -551,7 +554,7 @@ function addPicker(el, id, cls, nfo, callback) {
 
     trD1.appendChild(lbl1);
 
-    var unity = sel.unity;
+    var unity      = sel.unity;
 
     var lbl2       = document.createElement('label');
     lbl2.htmlFor   = sel.id;
@@ -616,7 +619,7 @@ function createCsss(el) {
 
             nfo.obj      = obj;
             nfo.prop     = prop;
-            nfo.value    = getOpt( id, nfo.value );
+            nfo.value    = getOpt( id ) || nfo.value;
 
             if ( nfo.value !== valueDfl ) {
                 var val   = nfo.value;
@@ -658,13 +661,18 @@ function createPositions(el) {
         var tr    = tbl .appendChild( document.createElement('tr'   ) );
 
         var id    = posK[idN];
-        var nfo   = positions[id];
-
-        nfo.value = getOpt( id, nfo.value );
-
+        var nfo   = copyKeys( positions[id] );
+        nfo.value = getOpt( id ) || nfo.value;
         addPicker(tr, id, 'positions', nfo, callback);
     }
 };
+
+
+function copyKeys( obj ) {
+    var str = JSON.stringify( obj );
+    var res = JSON.parse(     str )
+    return res;
+}
 
 
 function createOptions(){
@@ -740,7 +748,7 @@ function createSyncs(el) {
         var id    = posK[idN];
         var nfo   = syncFields[id];
 
-        nfo.value = getOpt( id, nfo.value );
+        nfo.value = getOpt( id ) || nfo.value;
 
         addPicker(tr, id, 'positions', nfo, callback);
     }
@@ -841,7 +849,20 @@ function genSelectors(sels){
                 allOp.innerHTML = 'All';
 
             var val = getOpt(optName, null);
+            console.log( optName + ' ' + val );
 
+            if ( val ) {
+                if (optVar.indexOf(val) == -1) {
+                    if (val != '*all*') {
+                        console.log( 'val ' + val + ' not in optvar ' );
+                        console.log( optVar );
+                        val = null;
+                        saveOpt(optName, val);
+                    }
+                }
+            }
+
+            
             if (val)
             {
                 if (val == '*all*') {
@@ -881,15 +902,14 @@ function loadScript( reg, callback ){
      * loadgraph as callback to its "onload".
      */
 
-    var filename = reg.filepath;
-    var scriptId = reg.scriptid;
-    var holder   = document.getElementById( scriptHolder );
+    var filepath  = reg.nfo.filepath;
+    var scriptId  = reg.nfo.scriptid;
 
     // Adding the script tag to the head as suggested before
     //var head     = document.getElementsByTagName('head')[0];
     var script    = document.createElement('script');
     script.type   = 'text/javascript';
-    script.src    = filename + '?' + _db_version;
+    script.src    = filepath + '?' + _db_version;
     script.id     = scriptId;
 
     // Then bind the event to the callback function.
@@ -897,55 +917,60 @@ function loadScript( reg, callback ){
     //script.onreadystatechange = callback;
     script.onload = function() { callback( reg ); };
 
-    // Fire the loading
-    //var holder = document.getElementById('scriptholder');
-    //while (holder.firstChild) {
-    //    holder.removeChild(holder.firstChild);
-    //}
-
-    holder.appendChild( script );
+    document.getElementById( scriptHolder ).appendChild( script );
 }
 
 
 function mergeregs( regs ) {
     huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
-    var hreg         = { };
+    //var sreg = simplifyReg( reg );
+    
+    var hreg         = {
+        qry: [],
+        res: [],
+        nfo: [],
+        cfg: []
+    };
     var yTicksLabels = [];
 
     //console.log(regs);
-
 
     for ( var r = 0; r < regs.length; r++ ) {
         var reg         = regs[r];
         yTicksLabels[r] = [];
 
-        for ( var v in reg ) {
-            if (!hreg[v]) {
-                hreg[v] = [];
-            }
-            hreg[v].push( regs[r][v] );
-        }
+        hreg.qry.push( reg.qry );
+        hreg.res.push( reg.res );
+        hreg.nfo.push( reg.nfo );
+        hreg.cfg.push( reg.cfg );
     }
 
-    //console.log(hreg);
+    console.log(hreg); return;
 
-    for ( var v in hreg ) {
-        var vals = hreg[v];
+    for ( var v in hreg.res ) {
+        var vals = hreg.res[v];
         var uniqueArray = vals.filter(function(elem, pos) {
             return vals.indexOf(elem) == pos;
         });
 
         if (uniqueArray.length == 1) {
             if (['tgts', 'points'].indexOf(v) == -1) {
-                hreg[v] = vals[0];
+                hreg.res[v] = vals[0];
             }
-        } else {
-            if (['tgtName', 'tgtChrom', 'status'].indexOf(v) != -1) {
-                console.log('MORE '+v);
-                for ( var h = 0; h < hreg[v].length; h++) {
-                    yTicksLabels[h].push( hreg[v][h] );
-                }
+        }
+    }
+
+
+    for ( var v in hreg.qry ) {
+        var vals = hreg.qry[v];
+        var uniqueArray = vals.filter(function(elem, pos) {
+            return vals.indexOf(elem) == pos;
+        });
+
+        if (uniqueArray.length != 1) {
+            for ( var h = 0; h < hreg.qry[v].length; h++) {
+                yTicksLabels[h].push( hreg.qry[v][h] );
             }
         }
     }
@@ -958,18 +983,21 @@ function mergeregs( regs ) {
 
     //console.log(hreg);
 
-    try {
-        hreg.xmax   = Math.max.apply(null, hreg.xmax);
-        hreg.ymax   = Math.max.apply(null, hreg.ymax);
-        hreg.xmin   = Math.min.apply(null, hreg.xmin);
-        hreg.ymin   = Math.min.apply(null, hreg.ymin);
-    } catch (e) {
-
+    
+    for ( var key in ['xmax', 'ymax', 'xmin', 'ymin'] ) {
+        var res = [];
+        for ( var k = 0; k < hreg.res[ key ].length; k++ ) {
+            res.push( hreg.res[ key ][ k ] );
+        }
+        hreg.res[ key ] = Math.max.apply(null, res);
     }
 
-    var tgts    = hreg.tgtName;
-    var sts     = hreg.status;
-    var ylabel  = hreg.ylabel;
+
+
+
+    var tgts    = hreg.qry.map( function(val) { return val.tgtName; } );
+    var sts     = hreg.qry.map( function(val) { return val.status;  } );
+    var ylabel  = hreg.qry.map( function(val) { return val.ylabel;  } );
 
 
 
@@ -1003,6 +1031,17 @@ function mergeregs( regs ) {
 };
 
 
+function simplifyReg( reg ) {
+    var res = [];
+    for ( var cls in reg ) {
+        for ( var k in reg[cls] ) {
+            res[k] = reg[cls][k];
+        }
+    }
+    return res;
+}
+
+
 function loadGraph( regs ) {
     /*
      * Deletes the <script> tag to release the memory in the DOM.
@@ -1012,38 +1051,46 @@ function loadGraph( regs ) {
      * Deletes from register
      */
 
+    //reg.qry.refName
+    //reg.qry.refChrom
+    //reg.qry.tgtName
+    //reg.qry.tgtChrom
+    //reg.qry.status
+    //
+    //reg.res.filename
+    //reg.res.title
+    //reg.res.xlabel
+    //reg.res.ylabel
+    //reg.res.points
+    //reg.res.xmin
+    //reg.res.xmax
+    //reg.res.ymin
+    //reg.res.ymax
+    //reg.res.tgts
+    //
+    //reg.nfo.uid
+    //reg.nfo.chartClass
+    //reg.nfo.tipId
+    //reg.nfo.filepath
+    //reg.nfo.scriptid
+    //
+    //reg.cfg
 
-    var horizontal = getOpt( 'horizontal', false );
-    //var holder     = document.getElementById( scriptHolder );
-
+    var horizontal = getFieldValue( 'horizontal' ) || false;
 
     if (horizontal) {
         var hreg      = mergeregs( regs );
-        hreg.parallel = true;
+        hreg.nfo.parallel = true;
         console.log( hreg );
-
         graphdb.add(chartName, hreg);
+        delete hreg;
     } else {
         regs.map( function(reg) {
-            console.log( reg );
-            graphdb.add(chartName, reg);
+            var sreg = simplifyReg( reg );
+            graphdb.add(chartName, sreg);
+            delete reg;
         });
     }
-
-
-    // clean up
-//    for ( var r = 0; r < regs.length; r++ ) {
-//        var reg = regs[r];
-//
-//        var script = document.getElementById( reg.scriptid );
-//
-//        if ( script ) {
-//            holder.removeChild( script );
-//        }
-//
-//        delete reg.points;
-//        delete reg.scaffs;
-//    }
 };
 
 
@@ -1056,8 +1103,8 @@ syncLoadScript = function( regs, callback ) {
     this.receivedData = [];
 
     this.regs.map( function(reg) {
-        var files  = reg.filename;
-        if (files) {
+        var file  = reg.res.filename;
+        if (file) {
             self.size += 1;
         }
     });
@@ -1065,17 +1112,19 @@ syncLoadScript = function( regs, callback ) {
 
     if (this.size === 0) {
         console.log('nothing to plot');
+        console.log(regs);
         return;
     }
 
     var count = 0;
+    var func  = function(sregv) { loadScript( sregv, self.receive() ); };
+    
     regs.map( function(reg) {
-        var files  = reg.filename;
-        var func   = function(sregv) { loadScript( sregv, self.receive() ); };
-
-        if (files) {
-            console.log( 'sending ' + files );
-            setTimeout( func(reg), (count * 1000));
+        var file   = reg.res.filename;
+        if (file) {
+            console.log( 'sending ' + file );
+            //setTimeout( func(reg), (count * 1000));
+            func(reg);
             count += 1;
         }
     });
@@ -1089,8 +1138,21 @@ syncLoadScript.prototype.receive = function( ) {
         self.received += 1;
 
         self.receivedData.push( reg );
-        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.filename );
+        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.res.filename );
 
+        var res = _filelist[ reg.qry.refName ][ reg.qry.refChrom ][ reg.qry.tgtName ][ reg.qry.tgtChrom ][ reg.qry.status ];
+        
+        reg.res = JSON.parse(JSON.stringify(res));
+        
+        delete res.points;
+        delete res.tgts;
+        
+        var script = document.getElementById( reg.nfo.scriptid );
+
+        if ( script ) {
+            document.getElementById( scriptHolder ).removeChild( script );
+        }
+        
         if ( self.received == self.size) {
             self.callback( self.receivedData );
         }
@@ -1136,8 +1198,12 @@ function getFieldValue(fieldId) {
 
         if ( field.localName == 'select' ) {
             var sel = field.selectedIndex;
-            var fio = field.options[ sel ];
-            val     = fio.value;
+            if ( sel == -1 ) {
+                sel = null;
+            } else {
+                var fio = field.options[ sel ];
+                val     = fio.value;
+            }
         } else {
             if ( field.type == 'checkbox' ) {
                 val = field.checked;
@@ -1160,18 +1226,15 @@ function getFieldValue(fieldId) {
 function getVals() {
     var vals = {};
 
-    var uid  = '';
-
     for ( var optName in opts ) {
-        var val      = getOpt( optName, null );
+        var val      = getFieldValue( optName ) || null;
 
         if ( val === null ) {
             return null;
         }
 
-        //console.log( 'appending '+optName+' = '+val );
+        console.log( 'appending ' + optName + ' = '+ val );
         vals[ optName ] = val;
-        uid += val;
     }
 
     return vals;
@@ -1229,7 +1292,7 @@ function getRegister( gvals ){
 
 
 
-    var horizontal = getOpt( 'horizontal', false );
+    var horizontal = getFieldValue( 'horizontal' ) || false;
 
     if (horizontal) {
         huid = 'horiz_';
@@ -1238,7 +1301,7 @@ function getRegister( gvals ){
         }
 
         if ( refNames.length != 1 ) {
-            alert( 'more than one reference while using horizontal graph ' + refNames.length + ' ' + refNames );
+            alert( 'more than one reference while using horizontal graph ' + refNames.length   + ' ' + refNames );
             return null;
         }
 
@@ -1275,50 +1338,56 @@ function getRegister( gvals ){
 
     for ( var e = 0; e < evals.length; e++ ) {
         var vals = evals[e];
-        var reg  = null;
+        var reg  = {
+                qry: vals,
+                res: {},
+                nfo: {},
+                cfg: {}
+            };
 
+        var regD = null;
         try {
-            reg = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
+            regD = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
         }
         catch(err) {
             console.error('combination does not exists for:');
             console.error( vals );
             continue;
         }
+        
+        for ( var k in regD ) {
+            reg.res[k] = regD[k];
+        }
 
-        var uid = vals.ref + vals.refChrom + vals.tgtName + vals.tgtChrom + vals.status;
+        var uid = vals.refName + vals.refChrom + vals.tgtName + vals.tgtChrom + vals.status;
             uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
-        reg.uid        = uid;
-        reg.chartClass = getOpt('size', Object.keys( sizes )[0]);
-        reg.tipId      = 'tipper';
-
-        reg.filepath   = datafolder + reg.filename;
-        reg.scriptid   = 'script_'  + reg.uid;
-        reg.refName    = vals.refName;
-        reg.refChrom   = vals.refChrom;
-        reg.tgtName    = vals.tgtName;
-        reg.tgtChrom   = vals.tgtChrom;
-        reg.status     = vals.status;
+        reg.nfo.uid        = uid;
+        reg.nfo.chartClass = getFieldValue( 'size' ) || Object.keys( sizes )[0];
+        reg.nfo.tipId      = 'tipper';
+        reg.nfo.filepath   = datafolder + reg.res.filename;
+        reg.nfo.scriptid   = 'script_'  + reg.nfo.uid;
 
         var posK = Object.keys( positions );
             posK.sort();
 
-            for (var idN = 0; idN < posK.length; idN++ ) {
-                var id    = posK[idN];
-                var nfo   = positions[id];
-                var dfl   = nfo.value;
-                var curr  = getOpt( id, nfo.value );
-
-                if ( dfl != curr ) {
-                    console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
-                    reg[id] = curr;
-                } else {
-                    if (reg[id]) {
-                        delete reg[id];
-                    }
+        for (var idN = 0; idN < posK.length; idN++ ) {
+            var id    = posK[idN];
+            var nfo   = positions[id];
+            var dfl   = nfo.value;
+            var curr  = getFieldValue( id );
+            
+            
+            if ( dfl != curr ) {
+                console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
+                console.log( nfo );
+                reg.cfg[id] = curr;
+            } else {
+                if (reg.cfg[id]) {
+                    delete reg.cfg[id];
                 }
             }
+        }
         regs.push( reg );
     }
 
@@ -1329,12 +1398,6 @@ function getRegister( gvals ){
 
     return regs;
 }
-
-
-
-
-
-
 
 
 function obj2str(obj) {
@@ -1348,39 +1411,65 @@ function obj2str(obj) {
 
 function saveOpt (k ,v) {
     if ( hasstorage ) {
-        console.log('saving k "' + k + '" v "' + v + '"');
-        localStorage[k] = JSON.stringify( v );
-        setQueryString();
+        if ( _db_domain ) {
+            if ( localStorage[_db_domain] ) {
+                if ( v === null ) {
+                    delete localStorage[_db_domain][k];
+                } else {
+                    //console.log('saving k "' + k + '" v "' + v + '"');
+                    var jso = localStorage[_db_domain];
+                    //console.log( jso );
+                    var val = JSON.parse( jso );
+                    //console.log( val );
+                        val[k] = v;
+                    jso = JSON.stringify( val );
+                    //console.log( jso );
+                    localStorage[_db_domain] = jso;
+                    setQueryString();
+                }
+            }
+        }
     }
 };
 
 
 function getOpt(k, d) {
+    var val = d;
+    
     if ( hasstorage ) {
-        //console.log('getting ' + k);
-        try {
-            var res = localStorage[k];
-            //console.log('getting ' + k + ' val "' + res + '"');
-            if ( res === undefined || res === null ) {
-                //console.log('getting ' + k + ' val "' + res + '" returning default "' + d + '"');
-                return d;
-            } else {
-                res = JSON.parse( res );
-                //console.log('getting ' + k + ' val "' + res + '"');
-                return res;
+        if ( _db_domain ) {
+            if ( localStorage[_db_domain] ) {
+                try {
+                    //console.log('getting ' + k);
+                    var jso = localStorage[_db_domain];
+                    //console.log( jso );
+                    var res = JSON.parse( jso );
+                    //console.log( res );
+                    val = res[k];
+                    //console.log( val );
+                } catch(e) {
+                }
             }
-        } catch (e) {
-            return d;
-        }
-    } else {
-        var val = getFieldValue(k);
-        if (val === null) {
-            return d;
-        } else {
-            return val;
         }
     }
-}
+    return val;
+};
+
+
+function clearDb () {
+    if (_db_domain) {
+        localStorage[_db_domain] = JSON.stringify( new Object() );
+    }
+};
+
+
+function initDb () {
+    if (_db_domain) {
+        if ( !localStorage[_db_domain] ) {
+            localStorage[_db_domain] = JSON.stringify( new Object() );
+        }
+    }
+};
 
 
 //function basename(path) {

@@ -602,6 +602,8 @@ def main():
 
         datestr = datetime.datetime.fromtimestamp( time.time() ).strftime('%Y_%m_%d_%H_%M_%S')
 
+        fhd.write( 'var _db_domain   = "%s";\n' % project_id);
+
         fhd.write( 'var _db_version  = "%s";\n' % datestr);
 
         refStr       = ', '.join( [ "'%s'" % x for x in sorted(refsNames ) ] )

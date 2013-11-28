@@ -12,6 +12,7 @@ function toFixed (value, precision) {
     return precision ? integral + '.' +  padding + fraction : integral;
 }
 
+
 function isArray ( val ) {
     return Object.prototype.toString.call( val ) === '[object Array]';
 };
@@ -132,6 +133,7 @@ SyncSimpleGraph.prototype.clear = function () {
 
 
 SyncSimpleGraph.prototype.add = function(chartHolder, options) {
+    console.log( options );
     var uid  = options.uid || 'uid_' + new Date();
     var self = this;
 

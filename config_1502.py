@@ -1,3 +1,7 @@
+project_id = '150.2'
+
+dry_run    = False
+
 compulsory = ['.delta', '.delta.coords']
 """
 compulsory extension of files
