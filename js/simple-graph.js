@@ -28,13 +28,6 @@ function compObjValue (objA, objB) {
 
 
 
-//http://stackoverflow.com/questions/500606/javascript-array-delete-elements
-Array.prototype.remove = function(from, to) {
-    var rest = this.slice((to || from) + 1 || this.length);
-    this.length = from < 0 ? this.length + from : from;
-    return this.push.apply(this, rest);
-};
-
 
 //http://stackoverflow.com/questions/446892/how-to-find-event-listeners-on-a-dom-node/447106#447106
 // keeps all event listeners attached to element
@@ -299,7 +292,11 @@ SyncSimpleGraph.prototype.deleteUid = function (uid) {
         var el = this.db[uid];
         el.close();
         delete this.db[uid];
-        this.bd.remove( this.bd.indexOf(uid) );
+        //console.log( 'B ' + JSON.stringify( this.bd ) );
+        delete this.bd[ this.bd.indexOf(uid) ];
+        //console.log( 'D ' + JSON.stringify( this.bd ) );
+        this.bd = this.bd.filter( function (v) { if (v !== null) { return v; } } );
+        //console.log( 'A ' + JSON.stringify( this.bd ) );
         //console.log(this.db);
     } else {
         console.log('uid '+uid+' not present');

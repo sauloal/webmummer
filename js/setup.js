@@ -526,7 +526,7 @@ function start() {
         }
     }
 
-    document.getElementById('okb').onclick();
+    //document.getElementById('okb').onclick();
 };
 
 
@@ -596,6 +596,7 @@ function getQueryString () {
                 //console.log('replacing preferences with ' + data64);
                 localStorage[_db_domain] = data64;
 
+                redoQueries();
                 //clearDb();
 
                 //for (var k in data) {
@@ -642,7 +643,23 @@ function setQueryString () {
 
 
 
-
+function redoQueries() {
+    var qries = getOpt('_queries', null);
+    console.log( qries );
+    for ( var d = 0; d < qries.length; d++ ) {
+        var data = qries[d];
+        var qid = data[ 0 ];
+        var cfg = data[ 1 ];
+        console.log( qid );
+        console.log( cfg );
+        var vals = decodeObj( qid );
+        console.log( vals );
+        // TURN OFF PREFERENCES
+        // TODO: PROCESS VALS
+        //processVals( vals );
+        // TURN PREFERENCES BACK ON
+    }
+}
 
 
 
@@ -1413,7 +1430,7 @@ syncLoadScript.prototype.receive = function( ) {
 
 
 
-function selclick(){
+function selclick() {
     var vals = getVals();
 
     if (!vals) {
@@ -1422,7 +1439,12 @@ function selclick(){
     }
 
     //console.log( vals );
+    
+    processVals( vals );
+};
 
+
+function processVals( vals ){
     var regs  = getRegister( vals );
     if ( !regs ) {
         return;
@@ -1433,10 +1455,10 @@ function selclick(){
     }
 
     new syncLoadScript( regs, loadGraph );
-}
+};
 
 
-function clearPics(){
+function clearPics() {
     console.log('cleaning');
     //console.log(graphdb);
     graphdb.clear();
@@ -1503,7 +1525,7 @@ function getVals() {
 }
 
 
-function getRegister( gvals ){
+function getRegister( gvals ) {
     var dvals     = {};
     var evals     = [];
 
