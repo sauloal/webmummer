@@ -475,10 +475,6 @@ function start() {
     sels     = bdy.insertBefore( sels, bfc );
 
 
-    getQueryString();
-
-    //setQueryString();
-
     genSelectors(sels); // generate selectors based on "opts" variable
 
 
@@ -490,17 +486,6 @@ function start() {
         tip.id             = 'tipper';
 
 
-    graphdb = new SyncSimpleGraph( {
-
-        sync   : function () { var val = getFieldValue( 'sync'    ); return  val === null ? true : val; },
-        resizeX: function () { var val = getFieldValue( 'resizeX' ); return  val === null ? true : val; },
-        resizeY: function () { var val = getFieldValue( 'resizeY' ); return  val === null ? true : val; }
-    });
-    //graphdb = new SyncSimpleGraph( true );
-
-    
-    document.body.addEventListener( 'd3SyncChanged' , updateQuery, false );
-
 
     createOptions();
 
@@ -510,6 +495,22 @@ function start() {
     chartDiv.id        = chartName;
 
     document.body.appendChild( chartDiv );
+
+
+
+
+    graphdb = new SyncSimpleGraph( {
+        sync   : function () { var val = getFieldValue( 'sync'    ); return  val === null ? true : val; },
+        resizeX: function () { var val = getFieldValue( 'resizeX' ); return  val === null ? true : val; },
+        resizeY: function () { var val = getFieldValue( 'resizeY' ); return  val === null ? true : val; }
+    });
+    //graphdb = new SyncSimpleGraph( true );
+
+
+    document.body.addEventListener( 'd3SyncChanged' , updateQuery, false );
+
+
+    getQueryString();
 
 
     if ( false ) {
@@ -561,14 +562,14 @@ function getQueryString () {
             var dbnfo  = '|' + _db_domain + '|';
 
 
-            if ( anchor.indexOf(dbnfo) != 0 ) {
-                console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
+            if ( anchor.indexOf(dbnfo) !== 0 ) {
+                //console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
                 //console.log( anchor.indexOf(dbnfo) );
                 return null;
             } else {
-                console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
+                //console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
                 anchor = anchor.substring(dbnfo.length, anchor.length);
-                console.log( 'anchor ' + anchor);
+                //console.log( 'anchor ' + anchor);
             }
 
 
@@ -592,7 +593,7 @@ function getQueryString () {
                     return null;
                 }
 
-                console.log('replacing preferences with ' + data64);
+                //console.log('replacing preferences with ' + data64);
                 localStorage[_db_domain] = data64;
 
                 //clearDb();
@@ -617,7 +618,7 @@ function setQueryString () {
                 return null;
             }
 
-            console.log( localStorage[_db_domain] );
+            //console.log( localStorage[_db_domain] );
 
             var data64 = encodeStr( localStorage[_db_domain] );
 
@@ -625,14 +626,14 @@ function setQueryString () {
             var nurl   = dbnfo + data64;
 
             if ( anchor != nurl) {
-                console.log( 'current url and current config differ');
+                //console.log( 'current url and current config differ');
                 //console.log(anchor);
                 //console.log(data64);
                 //console.log(nurl);
                 window.location.hash = nurl;
                 //console.log(data64.length);
             } else {
-                console.log( 'current url and current config are equal');
+                //console.log( 'current url and current config are equal');
                 //console.log(anchor.length);
             }
         }
@@ -644,6 +645,22 @@ function setQueryString () {
 
 
 
+
+
+
+function joinVals( vals ) {
+    var res = []
+
+    var res = vals.filter(function(elem, pos) {
+        return vals.indexOf(elem) == pos;
+    });
+
+    if (res.length == 1) {
+        return res.join('+');
+    } else {
+        return '(' + res.join('+') + ')';
+    }
+};
 
 
 function addPicker(el, id, cls, nfo, callback, opts) {
@@ -1047,6 +1064,8 @@ function genSelectors(sels){
         }
     }
 
+
+
     var okb = document.createElement('button');   // add button and it's click action
         okb.id        = 'okb';
         okb.onclick   = selclick;
@@ -1060,16 +1079,6 @@ function genSelectors(sels){
         clb.onclick   = clearPics;
         clb.innerHTML = 'Clear';
     tbl.appendChild( document.createElement('td').appendChild( clb ) );
-    
-    
-
-
-
-    var upd = document.createElement('button');   // add button and it's click action
-        upd.id        = 'upd';
-        upd.onclick   = setQueryString;
-        upd.innerHTML = 'Get URL';
-    tbl.appendChild( document.createElement('td').appendChild( upd ) );
 }
 
 
@@ -1209,7 +1218,7 @@ function mergeregs( regs ) {
     for ( var r = 0; r < rKeys.length; r++ ) {
         var key = rKeys[r];
         var res = [];
-        console.log( key );
+        //console.log( key );
         for ( var k = 0; k < sreg[ key ].length; k++ ) {
             res.push( sreg[ key ][ k ] );
         }
@@ -1236,8 +1245,10 @@ function mergeregs( regs ) {
     sreg.tipId        = sreg.tipId[0];
     sreg.chartClass   = sreg.chartClass[0];
 
-    sreg.qid          = sreg.qid[0];
     
+    sreg.qid          = sreg.qid[0];
+
+
     var qry           = decodeObj( sreg.qid );
     
     sreg.uid          = Object.keys( qry ).map( function(d) { return qry[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
@@ -1246,21 +1257,6 @@ function mergeregs( regs ) {
     //console.log(sreg);
 
     return sreg;
-};
-
-
-function joinVals( vals ) {
-    var res = []
-
-    var res = vals.filter(function(elem, pos) {
-        return vals.indexOf(elem) == pos;
-    });
-
-    if (res.length == 1) {
-        return res.join('+');
-    } else {
-        return '(' + res.join('+') + ')';
-    }
 };
 
 
@@ -1317,21 +1313,22 @@ function loadGraph( regs ) {
     var horizontal = getFieldValue( 'horizontal' );
 
     if (horizontal) {
-        var hreg      = mergeregs( regs );
-        hreg.parallel = true;
+        var hreg           = mergeregs( regs );
+        hreg.parallel      = true;
+        hreg.cfg.initState = getInitState( hreg.qid );
+
         //console.log( hreg );
         graphdb.add(chartName, hreg);
 
     } else {
         regs.map( function(reg) {
-            var sreg = simplifyReg( reg );
+            var sreg           = simplifyReg( reg );
+            sreg.cfg.initState = getInitState( sreg.qid );
             graphdb.add(chartName, sreg);
         });
     }
     
     setQueryString();
-    
-    //console.log( getDb() );
 };
 
 
@@ -1597,7 +1594,7 @@ function parseRegisters(evals) {
             reg.res[k] = regD[k];
         }
 
-        var uid = Object.keys( vals ).map( function(d) { return vals[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+        var uid            = Object.keys( vals ).map( function(d) { return vals[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
         reg.nfo.uid        = uid;
         reg.nfo.qid        = evals.qid;
@@ -1650,6 +1647,10 @@ function obj2str(obj) {
 }
 
 
+
+
+
+
 function saveOpt (k ,v) {
     if ( hasstorage ) {
         if ( _db_domain ) {
@@ -1677,11 +1678,11 @@ function saveOpt (k ,v) {
 
 
 function updateQuery (e) {
-    console.log( 'getting queries ');
+    //console.log( 'getting queries ');
 
-    console.log( e );
+    //console.log( e );
     var qries = e.detail.el;
-    console.log( qries );
+    //console.log( qries );
     
     saveOpt('_queries', qries);
 }
@@ -1756,6 +1757,36 @@ function getDb () {
 function getCurrQueries () {
     return graphdb.getQueries();
 }
+
+
+function getInitState (qid) {
+    var res   = null;
+    var qries = getOpt( '_queries', null );
+    
+    //console.log('getting init state '+qid);
+    //console.log(qries);
+    
+    if (qries) {
+        //console.log('there are initial states');
+        for ( var q = 0; q < qries.length; q++ ) {
+            var data = qries[ q ];
+            var vqid = data[0];
+            var vval = data[1];
+            //console.log( 'db qid ' + vqid + ' val ' + vval);
+            if ( vqid == qid ) {
+                res = vval;
+                //console.log( 'qid ' + qid + ' has initial value: ' + JSON.stringify( vval ) );
+                break;
+            }
+        }
+    } else {
+        //console.log( 'no init state')
+    }
+    
+    return res;
+}
+
+
 
 //function basename(path) {
 //    return path.replace(/\\/g,'/').replace( /.*\//, '' );

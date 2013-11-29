@@ -194,7 +194,7 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
                 obj2.draw();
             }
         } else {
-            console.log('there\'s only one register');
+            //console.log('there\'s only one register');
         }
     }
 
@@ -210,15 +210,17 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
 
 SyncSimpleGraph.prototype.getQueries = function() {
     var res = [];
-    console.log( 'getting current queries');
+    //console.log( 'getting current queries');
     for ( var u = 0; u < this.bd.length; u++ ) {
         var uid        = this.bd[u];
         var sgo        = this.db[uid];
-        var qid        = sgo.qid;
-        var currStatus = sgo.getCurrStatus();
-        
-        if (qid) {
-            res.push( [qid, currStatus] );
+        if ( sgo ) {
+            var qid        = sgo.qid;
+            var currStatus = sgo.getCurrStatus();
+            
+            if (qid) {
+                res.push( [qid, currStatus] );
+            }
         }
     }
     
@@ -352,6 +354,8 @@ SimpleGraph = function (chartHolder, options) {
                                                                    //  x1   y1 x2 y2 scaf 0/1 q
     this.points                      = options.points; //[0 , 0, 0, 0, 0,   0,  0.0];
 
+    this.parallel                    = options.parallel === null ? isArray( this.points[0] ) : options.parallel;
+    
     this.options.xmax                = options.xmax;
     this.options.xmin                = options.xmin;
     this.options.ymax                = options.ymax;
@@ -359,7 +363,6 @@ SimpleGraph = function (chartHolder, options) {
 
     this.options.labelId             = options.labelId;
     this.options.tipId               = options.tipId;
-    this.parallel                    = options.parallel === null ? isArray( this.points[0] ) : options.parallel;
 
     this.options.chartClass          = options.chartClass              || 'chartpart';
     this.options.xlabel              = options.xlabel                  || 'x';
@@ -388,43 +391,32 @@ SimpleGraph = function (chartHolder, options) {
     this.options.compassMaxSize      = options.cfg.compassMaxSize      ||  75;
     this.options.compassMinSize      = options.cfg.compassMinSize      ||  20;
     this.options.crosshair           = options.cfg.crosshair           || false;
+    this.options.initState           = options.cfg.initState           || null;
     //this.options.radius         = options.radius         || 5.0;
 
 
-    if (!this.tgts) {
-        console.log('no tgts');
-        return;
-    }
-    if (!this.points) {
-        console.log('no points');
-        return;
-    }
-
-    if (!this.options.xmax) {
-        console.log('no xmax');
-        return;
+    var requireds = [ 'tgts', 'points' ];
+    for ( var r = 0; r < requireds.length; r++ ) {
+        var req = requireds[r];
+        if (!this[req]) {
+            console.log( 'no required argument ' + req + ' defined' );
+        }
     }
 
-    if (!this.options.xmin) {
-        console.log('no xmin');
-        return;
-    }
 
-    if (!this.options.ymax) {
-        console.log('no ymax');
-        return;
-    }
-
-    if (!this.options.ymin) {
-        console.log('no ymin');
-        return;
+    requireds = [ 'xmax', 'xmin', 'ymax', 'ymin' ];
+    for ( var r = 0; r < requireds.length; r++ ) {
+        var req = requireds[r];
+        if (!this.options[req]) {
+            console.log( 'no required option ' + req + ' defined' );
+        }
     }
 
 
 
     this.elemid                      = 'div_' + this.uid;
 
-    console.log(' adding '+this.elemid+' to ' + chartHolder );
+    console.log(' adding ' + this.elemid + ' to ' + chartHolder );
 
     this.chartHolder = document.getElementById( chartHolder );
     this.chart       = document.getElementById( this.elemid );
@@ -580,7 +572,7 @@ SimpleGraph.prototype.draw = function () {
 
 
     this.btns   = this.svg.append("g")
-        .attr('class', 'gbtns')
+        .attr("class", 'gbtns')
             //.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
     ;
 
@@ -589,7 +581,7 @@ SimpleGraph.prototype.draw = function () {
 
     this.plot = this.vis.append("rect")
         .attr( "class"          , 'graph-background' )
-        .attr( 'id'             , 'rect_'+this.uid   )
+        .attr( "id"             , 'rect_'+this.uid   )
         .attr( "width"          , this.size.width    )
         .attr( "height"         , this.size.height   )
         .attr( "pointer-events" , "all"              )
@@ -602,9 +594,9 @@ SimpleGraph.prototype.draw = function () {
     this.zoom  = d3.behavior.zoom();
 
     if (this.parallel) {
-        this.vis.call(this.zoom.x(this.x).on("zoom", this.redraw()));
+        this.vis.call( self.zoomC = this.zoom.x(this.x).on("zoom", this.redraw()));
     } else {
-        this.vis.call(this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
+        this.vis.call( self.zoomC = this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
     }
 
 
@@ -711,7 +703,7 @@ SimpleGraph.prototype.draw = function () {
     this.currScale        = 1;
     this.currTranslationX = 0;
     this.currTranslationY = 0;
-
+    
     this.redraw()();
 
     this.addCompass();
@@ -723,20 +715,37 @@ SimpleGraph.prototype.draw = function () {
     this.addPadLockIcon();
 
     this.chart.focus();
+
+    this.zoomHistory = [];
+
+    if (this.options.initState) {
+        console.warn('applying initial state');
+        console.warn( this.options.initState );
+        console.warn( this.getCurrStatus()   );
+        var z  = this.options.initState.currScale;
+        var tX = this.options.initState.currTranslationX;
+        var tY = this.options.initState.currTranslationY;
+        //this.applyZoom( z, tX, tY );
+        this.zoomIt(z);
+        this.panIt(tX, tY);
+        console.warn( this.getCurrStatus() );
+    }
+    
 };
 
 
 
 
 SimpleGraph.prototype.getCurrStatus = function( ) {
-    return {
+    var val = {
         'currScale'       : this.currScale,
         'currTranslationX': this.currTranslationX,
         'currTranslationY': this.currTranslationY
-    //this.cx  = this.chart.clientWidth;
-    //this.cy  = this.chart.clientHeight;
-
+        //this.cx  = this.chart.clientWidth;
+        //this.cy  = this.chart.clientHeight;
     };
+
+    return val;
 };
 
 
@@ -1378,9 +1387,10 @@ SimpleGraph.prototype.zoomIt = function(z){
 
 SimpleGraph.prototype.applyZoom = function(z, x, y){
     var self = this;
-    console.log('applying zoom z: ' + z + ' x: ' + x + ' y: ' + y);
+    console.log( 'applying zoom z: ' + z + ' x: ' + x + ' y: ' + y );
 
-    self.vis.call( self.zoom.scale( z ).translate([ x, y ]) );
+    self.vis.call( self.zoomC = self.zoom.scale( z ).translate( [ x, y ] ) );
+    //.center([self.size.width/2, self.size.height/2])
 
     self.redraw()();
 };
@@ -1498,6 +1508,10 @@ SimpleGraph.prototype.redraw = function () {
             var scale             = d3.event.scale;
             var translate         = d3.event.translate;
 
+            self.zoomCscale       = scale;
+            self.zoomCtranslate   = translate;
+            console.log( 'scale ' + scale + ' trans ' + translate );
+            
             self.updateCurrentZoom( scale, translate );
         }
     }
@@ -1530,9 +1544,9 @@ SimpleGraph.prototype.redraw = function () {
             }
         });
 
-        self.vis.call( self.zoom.x(self.x).on("zoom", self.redraw()) );
+        self.vis.call( self.zoomC = self.zoom.x(self.x).on("zoom", self.redraw()) );
     } else {
-        self.vis.call( self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
+        self.vis.call( self.zoomC = self.zoom.x(self.x).y(self.y).on("zoom", self.redraw()) );
     }
 
     self.update();
@@ -1550,21 +1564,42 @@ SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
 
     var reset             = (scale === 1 && translationX === 0 &&  translationY === 0);
 
-    //console.log('current scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
-    //console.log('correct scale ' +          scale + ' translation X ' +          translationX + ' translation Y ' +          translationY + ' reset ' + reset);
+    console.log('current scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
+    console.log('correct scale ' +          scale + ' translation X ' +          translationX + ' translation Y ' +          translationY + ' reset ' + reset);
+    //console.log('this.zoom');
+    //console.log(this.zoom.scale()     );
+    //console.log(this.zoom.translate() );
+    //console.log('this.zoomC');
+    //console.log(this.zoomC.scale()    );
+    //console.log(this.zoomC.translate());
+    //console.log('this.zoomCval');
+    //console.log(this.zoomCscale       );
+    //console.log(this.zoomCtranslate   );
 
+    
     if ( reset ) {
+        self.prevScale        = self.currScale;
+        self.prevTranslationX = self.currTranslationX;
+        self.prevTranslationY = self.currTranslationY;
         self.currScale        = 1;
         self.currTranslationX = 0;
         self.currTranslationY = 0;
+        self.zoomHistory      = [];
     } else {
-        self.currScale        = self.currScale        * scale;
+        self.prevScale        = self.currScale;
+        self.prevTranslationX = self.currTranslationX;
+        self.prevTranslationY = self.currTranslationY;
+        
+        self.currScale        = self.currScale * scale;
         self.currTranslationX = self.currTranslationX + translationX;
         self.currTranslationY = self.currTranslationY + translationY;
     }
 
-    //console.log('result  scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
-    //console.log('\n');
+    self.zoomHistory.push( [ [self.prevScale, self.prevTranslationX, self.prevTranslationY], [scale, translate[0], translate[1]], [self.currScale, self.currTranslationX, self.currTranslationY] ] );
+
+    console.log('result  scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
+    console.log( JSON.stringify( self.zoomHistory ) );
+    console.log('\n');
 
     if (!self.syncing) {
         var data = {
