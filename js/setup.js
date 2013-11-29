@@ -1720,6 +1720,7 @@ function getOpt(k, d) {
 function clearDb () {
     if (_db_domain) {
         localStorage[_db_domain] = JSON.stringify( new Object() );
+        setQueryString();
     }
 };
 

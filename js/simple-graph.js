@@ -1,4 +1,7 @@
 //http://bl.ocks.org/stepheneb/1182434
+//.transition()
+//      .duration(700)
+
 function toFixed (value, precision) {
     //http://stackoverflow.com/questions/2221167/javascript-formatting-a-rounded-number-to-n-decimals/2909252#2909252
     var precision = precision || 0,
@@ -16,6 +19,13 @@ function toFixed (value, precision) {
 function isArray ( val ) {
     return Object.prototype.toString.call( val ) === '[object Array]';
 };
+
+
+function compObjValue (objA, objB) {
+    return JSON.stringify(objA) == JSON.stringify(objB);
+}
+
+
 
 
 //http://stackoverflow.com/questions/500606/javascript-array-delete-elements
@@ -476,6 +486,17 @@ SimpleGraph.prototype.draw = function () {
     this.cx  = this.chart.clientWidth;
     this.cy  = this.chart.clientHeight;
 
+
+    if (this.options.initState) {
+        var iState  = this.options.initState;
+        var cX      = iState.cX;
+        var cY      = iState.cY;
+        console.warn( JSON.stringify( iState ) );
+
+        this.cx     = cX;
+        this.cy     = cY;
+    }
+    
     this.chart.innerHTML = '';
 
     this.padding = {
@@ -716,19 +737,40 @@ SimpleGraph.prototype.draw = function () {
 
     this.chart.focus();
 
-    this.zoomHistory = [];
+
 
     if (this.options.initState) {
         console.warn('applying initial state');
-        console.warn( this.options.initState );
-        console.warn( this.getCurrStatus()   );
-        var z  = this.options.initState.currScale;
-        var tX = this.options.initState.currTranslationX;
-        var tY = this.options.initState.currTranslationY;
-        //this.applyZoom( z, tX, tY );
-        this.zoomIt(z);
-        this.panIt(tX, tY);
-        console.warn( this.getCurrStatus() );
+        console.warn( JSON.stringify( this.getCurrStatus() )   );
+
+        var iState  = this.options.initState;
+
+        console.warn( JSON.stringify( iState ) );
+        
+        var z       = iState.currScale;
+
+        var tX      = iState.currTranslationX;
+        var tY      = iState.currTranslationY;
+
+        var domainX = iState.domainX;
+        var domainY = iState.domainY;
+
+        var rangeX  = iState.rangeX;
+        var rangeY  = iState.rangeY;
+    
+        this.applyZoom( z, tX, tY );
+
+        this.redraw()();
+
+        self.x.domain( domainX );
+        self.x.range ( rangeX  );
+        self.y.domain( domainY );
+        self.y.range ( rangeY  );
+    
+        console.warn( JSON.stringify( this.getCurrStatus() ) );
+
+        this.redraw()();
+
     }
     
 };
@@ -739,10 +781,18 @@ SimpleGraph.prototype.draw = function () {
 SimpleGraph.prototype.getCurrStatus = function( ) {
     var val = {
         'currScale'       : this.currScale,
+        
         'currTranslationX': this.currTranslationX,
-        'currTranslationY': this.currTranslationY
-        //this.cx  = this.chart.clientWidth;
-        //this.cy  = this.chart.clientHeight;
+        'currTranslationY': this.currTranslationY,
+        
+        'domainX'         : this.x.domain(),
+        'domainY'         : this.y.domain(),
+        
+        'rangeX'          : this.x.range(),
+        'rangeY'          : this.y.range(),
+
+        'cX'              : this.cx,
+        'cY'              : this.cy
     };
 
     return val;
@@ -1325,7 +1375,7 @@ SimpleGraph.prototype.reset = function () {
     self.y     = d3.scale.linear()
         .domain([self.options.ymax, self.options.ymin])
         .nice()
-        .range( [0, self.size.height])
+        .range( [0                , self.size.height ])
         .nice();
 
     //this.currScale        = 1;
@@ -1387,10 +1437,13 @@ SimpleGraph.prototype.zoomIt = function(z){
 
 SimpleGraph.prototype.applyZoom = function(z, x, y){
     var self = this;
-    console.log( 'applying zoom z: ' + z + ' x: ' + x + ' y: ' + y );
 
-    self.vis.call( self.zoomC = self.zoom.scale( z ).translate( [ x, y ] ) );
-    //.center([self.size.width/2, self.size.height/2])
+    console.log( 'applying zoom z: ' + z + ' x: ' + x + ' y: ' + y);
+    
+    if (z || x || y) {
+        self.vis.call( self.zoomC = self.zoom.scale( z ).translate( [ x, y ] ) );
+        //.center([self.size.width/2, self.size.height/2])
+    }
 
     self.redraw()();
 };
@@ -1503,13 +1556,14 @@ SimpleGraph.prototype.redraw = function () {
     var d3e    = false;
     if ( d3.event ) {
         if (d3.event.type && d3.event.type=='zoom') {
-            d3e    = true;
+            d3e                   = true;
 
             var scale             = d3.event.scale;
             var translate         = d3.event.translate;
-
+            
             self.zoomCscale       = scale;
             self.zoomCtranslate   = translate;
+            
             console.log( 'scale ' + scale + ' trans ' + translate );
             
             self.updateCurrentZoom( scale, translate );
@@ -1564,41 +1618,27 @@ SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
 
     var reset             = (scale === 1 && translationX === 0 &&  translationY === 0);
 
-    console.log('current scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
-    console.log('correct scale ' +          scale + ' translation X ' +          translationX + ' translation Y ' +          translationY + ' reset ' + reset);
-    //console.log('this.zoom');
-    //console.log(this.zoom.scale()     );
-    //console.log(this.zoom.translate() );
-    //console.log('this.zoomC');
-    //console.log(this.zoomC.scale()    );
-    //console.log(this.zoomC.translate());
-    //console.log('this.zoomCval');
-    //console.log(this.zoomCscale       );
-    //console.log(this.zoomCtranslate   );
+    var currDomainX       = self.x.domain();
+    var currDomainY       = self.y.domain();
 
+    var currRangeX        = self.x.range();
+    var currRangeY        = self.y.range();
+    
+    console.log('current scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY + ' domain X ' + JSON.stringify(currDomainX) + ' domain Y ' + JSON.stringify(currDomainY) + ' range X ' + currRangeX + ' range Y ' + currRangeY );
+    console.log('correct scale ' +          scale + ' translation X ' +          translationX + ' translation Y ' +          translationY + ' reset ' + reset);
     
     if ( reset ) {
-        self.prevScale        = self.currScale;
-        self.prevTranslationX = self.currTranslationX;
-        self.prevTranslationY = self.currTranslationY;
         self.currScale        = 1;
         self.currTranslationX = 0;
         self.currTranslationY = 0;
-        self.zoomHistory      = [];
+
     } else {
-        self.prevScale        = self.currScale;
-        self.prevTranslationX = self.currTranslationX;
-        self.prevTranslationY = self.currTranslationY;
-        
-        self.currScale        = self.currScale * scale;
+        self.currScale        = self.currScale        * scale;
         self.currTranslationX = self.currTranslationX + translationX;
         self.currTranslationY = self.currTranslationY + translationY;
     }
 
-    self.zoomHistory.push( [ [self.prevScale, self.prevTranslationX, self.prevTranslationY], [scale, translate[0], translate[1]], [self.currScale, self.currTranslationX, self.currTranslationY] ] );
-
-    console.log('result  scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY );
-    console.log( JSON.stringify( self.zoomHistory ) );
+    console.log('result  scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY + ' domain X ' + JSON.stringify(currDomainX) + ' domain Y ' + JSON.stringify(currDomainY) );
     console.log('\n');
 
     if (!self.syncing) {
@@ -1653,6 +1693,11 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
     self.downy = self.y.invert(p[1]);
   };
 };
+
+
+
+
+
 
 
 
