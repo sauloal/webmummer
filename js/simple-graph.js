@@ -18,6 +18,12 @@ function isArray ( val ) {
 };
 
 
+//http://stackoverflow.com/questions/500606/javascript-array-delete-elements
+Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+};
 
 
 //http://stackoverflow.com/questions/446892/how-to-find-event-listeners-on-a-dom-node/447106#447106
@@ -82,6 +88,7 @@ SyncSimpleGraph = function (opts) {
     this.resizeX = opts.resizeX === null ? true : opts.resizeX;
     this.resizeY = opts.resizeY === null ? true : opts.resizeY;
     this.db      = {};
+    this.bd      = [];
     this.props   = {
         minX      : Number.MAX_VALUE,
         maxX      : 0,
@@ -95,12 +102,12 @@ SyncSimpleGraph = function (opts) {
 
 
 
+
 //
 // SimpleGraph methods
 //
 SyncSimpleGraph.prototype.getVar = function ( vari ) {
     //console.log( typeof(vari) );
-
     if      ( typeof(vari) === 'function' ) {
         var res = vari();
         //console.log( res );
@@ -121,6 +128,7 @@ SyncSimpleGraph.prototype.clear = function () {
     }
 
     this.db      = {};
+    this.bd      = [];
     this.props   = {
         minX      : Number.MAX_VALUE,
         maxX      : 0,
@@ -190,7 +198,28 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
         }
     }
 
-    this.db[ uid ] = new SimpleGraph(chartHolder, options);
+    this.bd.push( uid );
+    this.db[ uid ]     = new SimpleGraph(chartHolder, options);
+    this.db[ uid ].qid = options.qid;
+};
+
+
+
+
+SyncSimpleGraph.prototype.getQueries = function() {
+    var res = [];
+    
+    for ( var u = 0; u < this.bd.length; u++ ) {
+        var uid = this.bd[u];
+        var sgo = this.db[uid];
+        var qid = sgo.qid;
+        
+        if (qid) {
+            res.push( qid );
+        }
+    }
+    
+    return res;
 };
 
 
@@ -253,6 +282,7 @@ SyncSimpleGraph.prototype.deleteUid = function (uid) {
         var el = this.db[uid];
         el.close();
         delete this.db[uid];
+        this.bd.remove( this.bd.indexOf(uid) );
         //console.log(this.db);
     } else {
         console.log('uid '+uid+' not present');
@@ -411,7 +441,6 @@ SimpleGraph = function (chartHolder, options) {
 
     this.draw();
 };
-
 
 
 

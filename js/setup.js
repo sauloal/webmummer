@@ -19,7 +19,9 @@ var win    = window,
     wid    = win.innerWidth  || del.clientWidth  || bdy.clientWidth,
     hei    = win.innerHeight || del.clientHeight || bdy.clientHeight;
 
-var huid   = '';
+
+
+
 
 function hasStorage() {
     try {
@@ -528,6 +530,37 @@ function start() {
 
 
 
+function encodeStr ( json ) {
+    //console.log( 'encode json ' + json);
+    //console.log( 'encode json ' + json + '\n zip ' + RawDeflate.deflate( json ) );
+    //console.log( 'encode json ' + json + '\n zip ' + RawDeflate.deflate( json ) + '\n b64 ' + btoa( RawDeflate.deflate( json ) ) );
+    return btoa( RawDeflate.deflate( json ) );
+}
+
+
+function decodeStr ( b64 ) {
+    //console.log( 'decode b64 ' + b64 );
+    //console.log( 'decode b64 ' + b64 + '\n bin ' + atob( b64 ) );
+    //console.log( 'decode b64 ' + b64 + '\n bin ' + atob( b64 ) + '\n val ' + RawDeflate.inflate( atob( b64 ) ) );
+    return RawDeflate.inflate( atob( b64 ) );
+}
+
+
+function encodeObj ( obj ) {
+    //console.log( 'encode obj ' + obj );
+    //console.log( 'encode obj ' + obj + '\n json ' + JSON.stringify( obj ) );
+    //console.log( 'encode obj ' + obj + '\n json ' + JSON.stringify( obj ) + '\n b64 ' + encodeStr( JSON.stringify( obj ) ) );
+    return encodeStr( JSON.stringify( obj ) );
+}
+
+
+function decodeObj ( str ){
+    //console.log( 'decode obj ' + str );
+    //console.log( 'decode obj ' + str + '\n json ' + decodeStr( str ) );
+    //console.log( 'decode obj ' + str + '\n json ' + decodeStr( str ) + '\n val ' + JSON.parse( decodeStr( str ) ));
+    return JSON.parse( decodeStr( str ) );
+}
+
 
 function getQueryString () {
     if ( hasstorage ) {
@@ -539,7 +572,7 @@ function getQueryString () {
 
             if ( anchor.indexOf(dbnfo) != 0 ) {
                 console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
-                console.log( anchor.indexOf(dbnfo) );
+                //console.log( anchor.indexOf(dbnfo) );
                 return null;
             } else {
                 console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
@@ -552,7 +585,7 @@ function getQueryString () {
                 //console.log('has anchor');
                 var data64 = null;
                 try {
-                    data64 = base64.decode(anchor);
+                    data64 = decodeStr( anchor );
                 } catch(e) {
                     console.log('invalid 64');
                     console.log(anchor      );
@@ -593,7 +626,7 @@ function setQueryString () {
                 return null;
             }
 
-            var data64 = base64.encode( localStorage[_db_domain] );
+            var data64 = encodeStr( localStorage[_db_domain] );
 
             var dbnfo  = '|' + _db_domain + '|';
             var nurl   = dbnfo + data64;
@@ -602,7 +635,7 @@ function setQueryString () {
                 console.log( 'current url and current config differ');
                 //console.log(anchor);
                 //console.log(data64);
-                console.log(nurl);
+                //console.log(nurl);
                 window.location.hash = nurl;
                 //console.log(data64.length);
             } else {
@@ -1073,10 +1106,7 @@ function loadScript( reg, callback ){
 
 
 function mergeregs( regs ) {
-    huid = huid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
-
-
-    var hreg         = {
+    var hreg = {
         qry: {},
         res: {},
         nfo: {},
@@ -1103,7 +1133,7 @@ function mergeregs( regs ) {
     }
 
 
-    //console.log(hregs);
+    //console.log(hreg);
 
 
     var sreg = simplifyReg( hreg );
@@ -1137,6 +1167,7 @@ function mergeregs( regs ) {
         }
     }
 
+
     //console.log(sreg);
 
 
@@ -1169,11 +1200,13 @@ function mergeregs( regs ) {
 
     //console.log(yTicksLabels);
     //console.log(sreg);
+    
 
     var rKeys = ['xmax', 'ymax', 'xmin', 'ymin'];
-    for ( var k in rKeys ) {
-        var key = rKeys[k];
+    for ( var r = 0; r < rKeys.length; r++ ) {
+        var key = rKeys[r];
         var res = [];
+        console.log( key );
         for ( var k = 0; k < sreg[ key ].length; k++ ) {
             res.push( sreg[ key ][ k ] );
         }
@@ -1200,8 +1233,11 @@ function mergeregs( regs ) {
     sreg.tipId        = sreg.tipId[0];
     sreg.chartClass   = sreg.chartClass[0];
 
-    sreg.uid          = huid;
-    huid              = '';
+    sreg.qid          = sreg.qid[0];
+    
+    var qry           = decodeObj( sreg.qid );
+    
+    sreg.uid          = Object.keys( qry ).map( function(d) { return qry[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
 
 
     //console.log(sreg);
@@ -1289,7 +1325,19 @@ function loadGraph( regs ) {
             graphdb.add(chartName, sreg);
         });
     }
+    
+    var qries = graphdb.getQueries();
+    
+    saveOpt('_queries', qries);
+    
+    setQueryString();
+    
+    console.log( getDb() );
 };
+
+
+
+
 
 
 syncLoadScript = function( regs, callback ) {
@@ -1455,82 +1503,49 @@ function getVals() {
 
 
 function getRegister( gvals ){
+    var dvals     = {};
     var evals     = [];
-    var refNames  = [];
-    var refChroms = [];
-    var tgtNames  = [];
-    var tgtChroms = [];
-    var statuses  = [];
 
 
-    if (gvals.refName == '*all*') {
-        opts.refName[0].map( function(refName) {
-            refNames.push( refName );
-        });
-    } else {
-        refNames.push( gvals.refName );
+    for ( var key in opts ) {
+        var val    = gvals[key];
+        dvals[key] = [];
+        
+        if ( val == '*all*' ) {
+            opts[key].options.map( function(oval) {
+                dvals[key].push( oval );
+            });
+        } else {
+            dvals[key].push( val );
+        }
     }
 
-    if (gvals.refChrom == '*all*') {
-        opts.refChrom[0].map( function(refChrom) {
-            refChroms.push( refChrom );
-        });
-    } else {
-        refChroms.push( gvals.refChrom );
-    }
 
-    if (gvals.tgtName == '*all*') {
-        opts.tgtName[0].map( function(tgtName) {
-            tgtNames.push( tgtName );
-        });
-    } else {
-        tgtNames.push( gvals.tgtName );
-    }
-
-    if (gvals.tgtChrom == '*all*') {
-        opts.tgtChrom[0].map( function(tgtChrom) {
-            tgtChroms.push( tgtChrom );
-        });
-    } else {
-        tgtChroms.push( gvals.tgtChrom );
-    }
-
-    if (gvals.status == '*all*') {
-        opts.status[0].map( function(status) {
-            statuses.push( status );
-        });
-    } else {
-        statuses.push( gvals.status );
-    }
-
+    //console.log( dvals );
 
 
     var horizontal = getFieldValue( 'horizontal' );
 
 
     if (horizontal) {
-        huid = 'horiz_';
-        for ( var k in gvals ) {
-            huid += gvals[k];
-        }
-
-        if ( refNames.length != 1 ) {
-            alert( 'more than one reference while using horizontal graph '  + refNames.length  + ' ' + refNames );
+        if ( dvals.refName.length != 1 ) {
+            alert( 'more than one reference while using horizontal graph '  + dvals.refName.length  + ' ' + dvals.refName );
             return null;
         }
 
-        if ( refChroms.length != 1 ) {
-            alert( 'more than one chromosome while using horizontal graph ' + refChroms.length + ' ' + refChroms);
+        if ( dvals.refChrom.length != 1 ) {
+            alert( 'more than one chromosome while using horizontal graph ' + dvals.refChrom.length + ' ' + dvals.refChrom);
             return null;
         }
     }
 
+    var qid = encodeObj(gvals);
 
-    refNames.map( function(refName) {
-        refChroms.map( function(refChrom) {
-            tgtNames.map( function(tgtName) {
-                tgtChroms.map( function(tgtChrom) {
-                    statuses.map( function(status) {
+    dvals.refName.map( function(refName) {
+        dvals.refChrom.map( function(refChrom) {
+            dvals.tgtName.map( function(tgtName) {
+                dvals.tgtChrom.map( function(tgtChrom) {
+                    dvals.status.map( function(status) {
                         //console.log(ref + ' ' + refChrom + ' ' + tgtName + ' ' + status);
                         var reg = {
                             refName  : refName,
@@ -1546,9 +1561,14 @@ function getRegister( gvals ){
         });
     });
 
+    evals.qid = qid;
 
+    return parseRegisters( evals );
+}
+
+
+function parseRegisters(evals) {
     var regs       = [];
-
 
     for ( var e = 0; e < evals.length; e++ ) {
         var vals = evals[e];
@@ -1573,10 +1593,10 @@ function getRegister( gvals ){
             reg.res[k] = regD[k];
         }
 
-        var uid = vals.refName + vals.refChrom + vals.tgtName + vals.tgtChrom + vals.status;
-            uid = uid.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+        var uid = Object.keys( vals ).map( function(d) { return vals[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
 
         reg.nfo.uid        = uid;
+        reg.nfo.qid        = evals.qid;
         reg.nfo.chartClass = getFieldValue( 'size' );
         reg.nfo.tipId      = 'tipper';
         reg.nfo.filepath   = datafolder + reg.res.filename;
@@ -1694,6 +1714,26 @@ function initDb () {
     }
 };
 
+
+function getDb () {
+    var res = null;
+    
+    if ( hasstorage ) {
+        if ( _db_domain ) {
+            if ( localStorage[_db_domain] ) {
+                try {
+                    //console.log('getting ' + k);
+                    var jso = localStorage[_db_domain];
+                    //console.log( jso );
+                    res = JSON.parse( jso );
+                } catch(e) {
+                }
+            }
+        }
+    }
+    
+    return res;
+};
 
 //function basename(path) {
 //    return path.replace(/\\/g,'/').replace( /.*\//, '' );
