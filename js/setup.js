@@ -498,6 +498,9 @@ function start() {
     });
     //graphdb = new SyncSimpleGraph( true );
 
+    
+    document.body.addEventListener( 'd3SyncChanged' , updateQuery, false );
+
 
     createOptions();
 
@@ -531,33 +534,21 @@ function start() {
 
 
 function encodeStr ( json ) {
-    //console.log( 'encode json ' + json);
-    //console.log( 'encode json ' + json + '\n zip ' + RawDeflate.deflate( json ) );
-    //console.log( 'encode json ' + json + '\n zip ' + RawDeflate.deflate( json ) + '\n b64 ' + btoa( RawDeflate.deflate( json ) ) );
     return btoa( RawDeflate.deflate( json ) );
 }
 
 
 function decodeStr ( b64 ) {
-    //console.log( 'decode b64 ' + b64 );
-    //console.log( 'decode b64 ' + b64 + '\n bin ' + atob( b64 ) );
-    //console.log( 'decode b64 ' + b64 + '\n bin ' + atob( b64 ) + '\n val ' + RawDeflate.inflate( atob( b64 ) ) );
     return RawDeflate.inflate( atob( b64 ) );
 }
 
 
 function encodeObj ( obj ) {
-    //console.log( 'encode obj ' + obj );
-    //console.log( 'encode obj ' + obj + '\n json ' + JSON.stringify( obj ) );
-    //console.log( 'encode obj ' + obj + '\n json ' + JSON.stringify( obj ) + '\n b64 ' + encodeStr( JSON.stringify( obj ) ) );
     return encodeStr( JSON.stringify( obj ) );
 }
 
 
 function decodeObj ( str ){
-    //console.log( 'decode obj ' + str );
-    //console.log( 'decode obj ' + str + '\n json ' + decodeStr( str ) );
-    //console.log( 'decode obj ' + str + '\n json ' + decodeStr( str ) + '\n val ' + JSON.parse( decodeStr( str ) ));
     return JSON.parse( decodeStr( str ) );
 }
 
@@ -625,6 +616,8 @@ function setQueryString () {
                 console.log('nothing to save');
                 return null;
             }
+
+            console.log( localStorage[_db_domain] );
 
             var data64 = encodeStr( localStorage[_db_domain] );
 
@@ -1057,7 +1050,7 @@ function genSelectors(sels){
     var okb = document.createElement('button');   // add button and it's click action
         okb.id        = 'okb';
         okb.onclick   = selclick;
-        okb.innerHTML = 'view';
+        okb.innerHTML = 'View';
     tbl.appendChild( document.createElement('td').appendChild( okb ) );
 
 
@@ -1065,8 +1058,18 @@ function genSelectors(sels){
     var clb = document.createElement('button');   // add button and it's click action
         clb.id        = 'clb';
         clb.onclick   = clearPics;
-        clb.innerHTML = 'clear';
+        clb.innerHTML = 'Clear';
     tbl.appendChild( document.createElement('td').appendChild( clb ) );
+    
+    
+
+
+
+    var upd = document.createElement('button');   // add button and it's click action
+        upd.id        = 'upd';
+        upd.onclick   = setQueryString;
+        upd.innerHTML = 'Get URL';
+    tbl.appendChild( document.createElement('td').appendChild( upd ) );
 }
 
 
@@ -1326,13 +1329,9 @@ function loadGraph( regs ) {
         });
     }
     
-    var qries = graphdb.getQueries();
-    
-    saveOpt('_queries', qries);
-    
     setQueryString();
     
-    console.log( getDb() );
+    //console.log( getDb() );
 };
 
 
@@ -1410,6 +1409,11 @@ syncLoadScript.prototype.receive = function( ) {
         }
     };
 };
+
+
+
+
+
 
 
 function selclick(){
@@ -1658,16 +1662,29 @@ function saveOpt (k ,v) {
                     //console.log( jso );
                     var val = JSON.parse( jso );
                     //console.log( val );
-                        val[k] = v;
+                    val[k] = v;
+                    
                     jso = JSON.stringify( val );
                     //console.log( jso );
                     localStorage[_db_domain] = jso;
+                    
                     setQueryString();
                 }
             }
         }
     }
 };
+
+
+function updateQuery (e) {
+    console.log( 'getting queries ');
+
+    console.log( e );
+    var qries = e.detail.el;
+    console.log( qries );
+    
+    saveOpt('_queries', qries);
+}
 
 
 function getOpt(k, d) {
@@ -1734,6 +1751,11 @@ function getDb () {
     
     return res;
 };
+
+
+function getCurrQueries () {
+    return graphdb.getQueries();
+}
 
 //function basename(path) {
 //    return path.replace(/\\/g,'/').replace( /.*\//, '' );

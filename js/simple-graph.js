@@ -201,6 +201,8 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
     this.bd.push( uid );
     this.db[ uid ]     = new SimpleGraph(chartHolder, options);
     this.db[ uid ].qid = options.qid;
+    
+    self.dispatchChangedEvent();
 };
 
 
@@ -208,14 +210,15 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
 
 SyncSimpleGraph.prototype.getQueries = function() {
     var res = [];
-    
+    console.log( 'getting current queries');
     for ( var u = 0; u < this.bd.length; u++ ) {
-        var uid = this.bd[u];
-        var sgo = this.db[uid];
-        var qid = sgo.qid;
+        var uid        = this.bd[u];
+        var sgo        = this.db[uid];
+        var qid        = sgo.qid;
+        var currStatus = sgo.getCurrStatus();
         
         if (qid) {
-            res.push( qid );
+            res.push( [qid, currStatus] );
         }
     }
     
@@ -271,6 +274,8 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
         //console.log('only one graph');
         //console.log(Object.keys(this.db).length);
     }
+    
+    self.dispatchChangedEvent();
 };
 
 
@@ -287,7 +292,10 @@ SyncSimpleGraph.prototype.deleteUid = function (uid) {
     } else {
         console.log('uid '+uid+' not present');
     }
+    
+    this.dispatchChangedEvent();
 };
+
 
 
 
@@ -301,6 +309,28 @@ SyncSimpleGraph.prototype.d3closed = function (e) {
     this.deleteUid( uid );
 };
 
+
+
+
+SyncSimpleGraph.prototype.dispatchChangedEvent = function () {
+    var self = this;
+    
+    var d3eventChange = new CustomEvent(
+                "d3SyncChanged",
+                {
+                    detail: {
+                        message: 'd3 sync has changed',
+                        self   : self,
+                        el     : self.getQueries(),
+                        time   : new Date()
+                    },
+                    bubbles   : true,
+                    cancelable: true
+                }
+            );
+    
+    document.body.dispatchEvent( d3eventChange );
+};
 
 
 
@@ -694,6 +724,21 @@ SimpleGraph.prototype.draw = function () {
 
     this.chart.focus();
 };
+
+
+
+
+SimpleGraph.prototype.getCurrStatus = function( ) {
+    return {
+        'currScale'       : this.currScale,
+        'currTranslationX': this.currTranslationX,
+        'currTranslationY': this.currTranslationY
+    //this.cx  = this.chart.clientWidth;
+    //this.cy  = this.chart.clientHeight;
+
+    };
+};
+
 
 
 
