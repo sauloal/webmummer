@@ -1,32 +1,17 @@
-var datafolder = 'data/';
-/*
- * Folder where the databases resides
- */
-var chartName  = 'chart1';
-/*
- * Div where to draw graphs
- */
-var scriptHolder = 'scriptholder';
+var bdy          = document.getElementsByTagName('body')[0];
 
-
-var _prog_domain = 'webmummer';
-
-
-
-var bdy    = document.getElementsByTagName('body')[0];
-
-var win    = window,
-    doc    = document,
-    del    = doc.documentElement,
-    bdy    = doc.getElementsByTagName('body')[0],
-    wid    = win.innerWidth  || del.clientWidth  || bdy.clientWidth,
-    hei    = win.innerHeight || del.clientHeight || bdy.clientHeight;
+var win          = window,
+    doc          = document,
+    del          = doc.documentElement,
+    bdy          = doc.getElementsByTagName('body')[0],
+    wid          = win.innerWidth  || del.clientWidth  || bdy.clientWidth,
+    hei          = win.innerHeight || del.clientHeight || bdy.clientHeight;
 
 
 
 
 
-function hasStorage() {
+function hasStorage ( ) {
     try {
         var res = 'localStorage' in window && window.localStorage !== null;
         //var res = windowhasOwnProperty('localStorage') && window.localStorage !== null;
@@ -39,427 +24,8 @@ function hasStorage() {
     }
 }
 
+
 var hasstorage = hasStorage();
-
-
-/*
- * Available fields to be queried in the database
- * Used to create drop-down boxes
- */
-var opts   = {
-    'refName' : {
-        'tag'    : 'select',
-        'options': _refsNames,
-        'alt'    : 'Select Reference'
-    },
-    'refChrom': {
-        'tag'    : 'select',
-        'options': _refsChroms,
-        'alt'    : 'Select Reference Chromosome'
-    },
-    'tgtName' : {
-        'tag'    : 'select',
-        'options': _tgtsNames ,
-        'alt'    : 'Select Target'
-    },
-    'tgtChrom': {
-        'tag'    : 'select',
-        'options': _tgtsChroms,
-        'alt'    : 'Select Target Chromosome'
-    },
-    'status'  : {
-        'tag'    : 'select',
-        'options': _statuses  ,
-        'alt'    : 'Select Status'
-    }
-};
-
-
-
-var chartSizes = [
-        ['chartfull' , 'Full Page'   ],
-        ['chartpart' , 'Half Page'   ],
-        ['chartquart', 'Quarter Page']
-]
-
-
-var sizes = {
-    'size'                       : {
-                        'tag'    : 'select',
-                        'value'  : chartSizes[0][0],
-                        'options': chartSizes,
-                        'alt'    : 'Chart Size'
-    }
-};
-
-
-var csss = {
-    '.chart' :  {
-                    'background-color': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#FFFFFF',
-                        'alt'    : 'Chart\'s background color'
-                    }
-                },
-
-    '.grid': {
-                'font-size': {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : 0,
-                        'max'    : 100,
-                        'step'   : 0.5,
-                        'value'  : 1,
-                        'unity'  : 'em',
-                        'alt'    : 'Axis numbers font size'
-                    }
-    },
-
-    'body': {
-                'font-family': {
-                        'tag'    : 'input',
-                        'type'   : 'text',
-                        'value'  : 'sans-serif',
-                        'alt'    : 'Global font family'
-                },
-
-                'font-size': {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : 0,
-                        'max'    : 100,
-                        'step'   : 0.5,
-                        'value'  : 13,
-                        'unity'  : 'px',
-                        'alt'    : 'Global font size'
-                }
-    },
-
-    '.graph-background': {
-                'fill': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#EEEEEE',
-                        'alt'    : 'Graphic background color'
-                }
-    },
-
-    '.grid-line': {
-                'stroke': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#CCCCCC',
-                        'alt'    : 'Grid line color'
-                }
-    },
-
-    '.points': {
-                'stroke-width': {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : 0,
-                        'max'    : 100,
-                        'step'   : 0.5,
-                        'value'  : 5,
-                        'unity'  : 'px',
-                        'alt'    : 'Data line width'
-                }
-    },
-
-    '.points-f': {
-        //'fill': {
-                        //'tag'    : 'input',
-        //                'type'   : 'color',
-        //                'value'  : '#0000FF',
-        //                'alt'    : 'Forward line color'
-        //        },
-        'stroke': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#0000FF',
-                        'alt'    : 'Forward line color'
-                }
-    },
-
-    '.points-r': {
-        //'fill': {
-                        //'tag'    : 'input',
-        //                'type'   : 'color',
-        //                'value'  : '#FF3300',
-        //                'alt'    : ''
-        //        },
-        'stroke': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#FF3300',
-                        'alt'    : 'Reverse line color'
-                }
-    },
-
-    '.scaf-square': {
-        //'fill': {
-                        //'tag'    : 'input',
-        //                'type'   : 'color',
-        //                'value'  : '#33cc33',
-        //                'alt'    : 'Scaffold highligh box color'
-        //        },
-        'stroke': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#33cc33',
-                        'alt'    : 'Scaffold highligh line color'
-                },
-        'opacity': {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : 0,
-                        'max'    : 1,
-                        'step'   : 0.01,
-                        'value'  : 0.4,
-                        'alt'    : 'Scaffold highligh box opacity'
-                }
-    },
-
-    '#tipper': {
-        'fill': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#0000FF',
-                        'alt'    : 'Tooltip background color'
-                },
-        'color': {
-                        'tag'    : 'input',
-                        'type'   : 'color',
-                        'value'  : '#FFFFFF',
-                        'alt'    : 'Tooltip text color'
-                }
-    }
-};
-
-
-var positions = {
-    'xTicks'                     : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  10,
-                        'alt'    : 'Number of X ticks'
-    },
-    'yTicks'                     : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  10,
-                        'alt'    : 'Number of Y ticks'
-    },
-    'paddingTop'                 : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  40,
-                        'alt'    : 'Padding top'
-    },
-    'paddingRight'               : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  30,
-                        'alt'    : 'Padding right'
-    },
-    'paddingBottom'              : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  60,
-                        'alt'    : 'Padding bottom'
-    },
-    'paddingLeft'                : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  70,
-                        'alt'    : 'Padding left'
-    },
-    'titleDy'                    : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 0.70,
-                        'alt'    : 'Title vertical offset'
-    },
-    'xNumbersDy'                 : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 1,
-                        'alt'    : 'X axis numbers vertical offset'
-    },
-    'yNumbersDy'                 : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 0.20,
-                        'alt'    : 'Y axis numbers vertical offset'
-    },
-    'xlabelDx'                   : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 0,
-                        'alt'    : 'X axis label horizontal offset'
-    },
-    'xlabelDy'                   : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 2.3,
-                        'alt'    : 'X axis label vertical offset'
-    },
-    'ylabelX'                    : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 0,
-                        'alt'    : 'Y axis label horizontal position'
-    },
-    'ylabelY'                    : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 0,
-                        'alt'    : 'Y axis label vertical position'
-    },
-    'ylabelDx'                   : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : 0,
-                        'alt'    : 'Y axis label horizontal offset'
-    },
-    'ylabelDy'                   : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    : -10,
-                        'max'    :  10,
-                        'step'   : 0.10,
-                        'value'  : -2.3,
-                        'alt'    : 'Y axis label vertical position'
-    },
-    'downloadIconMaxSize'        : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  20,
-                        'alt'    : 'Download icon max size'
-    },
-    'closeIconMaxSize'           : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  20,
-                        'alt'    : 'Close icon max size'
-    },
-    'padlockIconMaxSize'         : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  20,
-                        'alt'    : 'Padlock icon max size'
-    },
-    'compassMaxSize'             : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  75,
-                        'alt'    : 'Compass max size'
-    },
-    'compassMinSize'             : {
-                        'tag'    : 'input',
-                        'type'   : 'range',
-                        'min'    :   0,
-                        'max'    : 100,
-                        'step'   :   1,
-                        'value'  :  20,
-                        'alt'    : 'Compass min size'
-    }
-};
-
-
-var syncFields = {
-    'sync': {
-                'tag'    : 'input',
-                'type'   : 'checkbox',
-                'value'  :  true,
-                'alt'    : 'Synchronize Movement'
-    },
-    'resizeX': {
-                'tag'    : 'input',
-                'type'   : 'checkbox',
-                'value'  :  true,
-                'alt'    : 'Resize X'
-    },
-    'resizeY': {
-                'tag'    : 'input',
-                'type'   : 'checkbox',
-                'value'  :  false,
-                'alt'    : 'Resize Y'
-    },
-    'horizontal': {
-                'tag'    : 'input',
-                'type'   : 'checkbox',
-                'value'  :  false,
-                'alt'    : 'Horizontal visualization'
-    },
-    'crosshair': {
-                'tag'    : 'input',
-                'type'   : 'checkbox',
-                'value'  :  false,
-                'alt'    : 'Show crosshair'
-    }
-};
-
-
-
-
-
-
 
 
 
@@ -514,7 +80,7 @@ function start () {
     document.body.addEventListener( 'd3SyncChanged' , updateQuery, false );
 
 
-    getQueryString();
+    //getQueryString();
 
 
     if ( false ) {
@@ -540,172 +106,12 @@ function start () {
 
 
 
-
-function encodeStr ( json ) {
-    return btoa( RawDeflate.deflate( json ) );
-}
-
-
-function decodeStr ( b64 ) {
-    return RawDeflate.inflate( atob( b64 ) );
-}
-
-
-function encodeObj ( obj ) {
-    return encodeStr( JSON.stringify( obj ) );
-}
-
-
-function decodeObj ( str ){
-    return JSON.parse( decodeStr( str ) );
-}
-
-
-function getQueryString () {
-    console.group('getQueryString');
-    console.timeStamp('begin getQueryString');
-    console.time('getQueryString');
-
-    var parsed = parseUri(document.URL);
-    var anchor = parsed.anchor;
-    var dbnfo  = '|' + _db_domain + '|';
-
-    
-    if ( anchor.indexOf(dbnfo) !== 0 ) {
-        //console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
-        //console.log( anchor.indexOf(dbnfo) );
-        return null;
-    } else {
-        //console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
-        anchor = anchor.substring(dbnfo.length, anchor.length);
-        //console.log( 'anchor ' + anchor);
-    }
-
-
-    if (anchor !== '') {
-        //console.log('has anchor');
-        var data64 = null;
-        try {
-            data64 = decodeStr( anchor );
-        } catch(e) {
-            console.log('invalid 64');
-            console.log(anchor      );
-            return null;
-        }
-
-        var data = null;
-        try {
-            data   = JSON.parse( data64 );
-        } catch(e) {
-            console.log('invalid JSON');
-            console.log(data64        );
-            return null;
-        }
-
-        //console.log('replacing preferences with ' + data64);
-        localStorage[_db_domain] = data64;
-
-        redoQueries();
-    }
-
-    console.timeStamp('end getQueryString');
-    console.timeEnd('getQueryString');
-    console.groupEnd('getQueryString');
-};
-
-
-function setQueryString () {
-    console.group('setQueryString');
-    console.timeStamp('begin setQueryString');
-    console.time('setQueryString');
-
-    var data_db = getDataDb('_queries');
-    
-    var parsed = parseUri(document.URL);
-    var anchor = parsed.anchor;
-
-    if ( data_db.length === 0 ) {
-        console.log('nothing to save');
-        return null;
-    }
-
-    var data64 = encodeObj( data_db );
-
-    var dbnfo  = '|' + _db_domain + '|';
-    var nurl   = dbnfo + data64;
-
-    if ( anchor != nurl) {
-        console.log( 'current url and current config differ');
-        //console.log(anchor);
-        //console.log(data64);
-        //console.log(nurl);
-        window.location.hash = nurl;
-        //console.log(data64.length);
-    } else {
-        console.log( 'current url and current config are equal');
-        //console.log(anchor.length);
-    }
-
-    console.timeStamp('end setQueryString');
-    console.timeEnd('setQueryString');
-    console.groupEnd('setQueryString');
-};
-
-
-function redoQueries () {
-    console.group('redoQueries');
-    console.timeStamp('begin redoQueries');
-    console.time('redoQueries');
-
-    var qries = getOpt('_queries', '_queries', null);
-    console.log( qries );
-    // TURN OFF PREFERENCES
-
-    if (qries) {
-        for ( var d = 0; d < qries.length; d++ ) {
-            var data = qries[d];
-            var qid = data[ 0 ];
-            var cfg = data[ 1 ];
-            console.log( qid );
-            console.log( cfg );
-            var vals = decodeObj( qid );
-            console.log( vals );
-            processVals( vals );
-        }
-    }
-    // TURN PREFERENCES BACK ON
-
-    console.timeStamp('end redoQueries');
-    console.timeEnd('redoQueries');
-    console.groupEnd('redoQueries');
-};
-
-
-
-
-
-
-function copyKeys ( obj ) {
-    var str = JSON.stringify( obj );
-    var res = JSON.parse(     str );
-    return res;
-}
-
-
-function joinVals ( vals ) {
-    var res = vals.filter(function(elem, pos) {
-        return vals.indexOf(elem) == pos;
-    });
-
-    if (res.length == 1) {
-        return res.join('+');
-    } else {
-        return '(' + res.join('+') + ')';
-    }
-};
-
-
-function addPicker (el, id, cls, nfo, callback, opts) {
+/*
+ *
+ * PAGE CREATOR
+ *
+ */
+function addPicker ( el, id, cls, nfo, callback, opts ) {
     var addlbls = true;
     var addlbl1 = true;
     var addlbl2 = true;
@@ -786,7 +192,7 @@ function addPicker (el, id, cls, nfo, callback, opts) {
 }
 
 
-function createCsss (el) {
+function createCsss ( el ) {
     console.group('createCsss %o', el);
     console.timeStamp('begin createCsss');
     console.time('createCsss');
@@ -815,7 +221,7 @@ function createCsss (el) {
         var val   = getFieldValue( id );
 
         console.log('changing obj ' + obj + ' property ' + prop + ' value ' + val);
-        saveOpt( 'css', id, val );
+        localDb.saveOpt( 'css', id, val );
         changecss(obj, prop, val);
 
         var lbl = document.getElementById( id + '_label' );
@@ -847,7 +253,7 @@ function createCsss (el) {
 
             nfo.obj      = obj;
             nfo.prop     = prop;
-            nfo.value    = getOpt( 'css', id, nfo.value );
+            nfo.value    = localDb.getOpt( 'css', id, nfo.value );
 
             if ( nfo.value !== valueDfl ) {
                 var val   = nfo.value;
@@ -869,7 +275,7 @@ function createCsss (el) {
 };
 
 
-function createPositions (el) {
+function createPositions ( el ) {
     console.group('createPositions %o', el);
     console.timeStamp('begin createPositions');
     console.time('createPositions');
@@ -896,7 +302,7 @@ function createPositions (el) {
 
         console.log('changing property ' + id + ' value ' + val);
 
-        saveOpt( 'positions', id, val );
+        localDb.saveOpt( 'positions', id, val );
 
         var lbl = document.getElementById( id + '_label' );
         if (lbl) {
@@ -911,7 +317,7 @@ function createPositions (el) {
         var tr     = tbl .appendChild( document.createElement('tr'   ) );
         var id     = posK[idN];
         var nfo    = copyKeys( positions[id] );
-        nfo.value  = getOpt( 'positions', id, nfo.value );
+        nfo.value  = localDb.getOpt( 'positions', id, nfo.value );
         addPicker(tr, id, 'positions', nfo, callback);
     }
     
@@ -923,7 +329,7 @@ function createPositions (el) {
 };
 
 
-function createOptions () {
+function createOptions ( ) {
     console.group('createOptions');
     console.timeStamp('begin createOptions');
     console.time('createOptions');
@@ -961,27 +367,27 @@ function createOptions () {
     createCsss(trD22);
 
     var clsBtnS       = document.createElement('button');
-    clsBtnS.onclick   = function(e) { if (hasStorage) { alert('Cleaning Sync preferences'); clearDb('syncs'); location.reload(); } };
+    clsBtnS.onclick   = function(e) { if (hasStorage) { alert('Cleaning Sync preferences'); localDb.clearDb('syncs'); location.reload(); } };
     clsBtnS.innerHTML = 'Clear Syncs';
 
     divH.appendChild( clsBtnS );
 
     var clsBtnP       = document.createElement('button');
-    clsBtnP.onclick   = function(e) { if (hasStorage) { alert('Cleaning Positions preferences'); clearDb('positions'); location.reload(); } };
+    clsBtnP.onclick   = function(e) { if (hasStorage) { alert('Cleaning Positions preferences'); localDb.clearDb('positions'); location.reload(); } };
     clsBtnP.innerHTML = 'Clear Positions';
 
     divH.appendChild( clsBtnP );
 
     
     var clsBtnC       = document.createElement('button');
-    clsBtnC.onclick   = function(e) { if (hasStorage) { alert('Cleaning CSS preferences'); clearDb('css'); location.reload(); } };
+    clsBtnC.onclick   = function(e) { if (hasStorage) { alert('Cleaning CSS preferences'); localDb.clearDb('css'); location.reload(); } };
     clsBtnC.innerHTML = 'Clear CSS';
 
     divH.appendChild( clsBtnC );
 
     
     var clsBtnA       = document.createElement('button');
-    clsBtnA.onclick   = function(e) { if (hasStorage) { alert('Cleaning ALL preferences'); clearDb('syncs'); clearDb('positions'); clearDb('css'); location.reload(); } };
+    clsBtnA.onclick   = function(e) { if (hasStorage) { alert('Cleaning ALL preferences'); localDb.clearDb('syncs'); localDb.clearDb('positions'); localDb.clearDb('css'); location.reload(); } };
     clsBtnA.innerHTML = 'Clear ALL';
 
     divH.appendChild( clsBtnA );
@@ -993,7 +399,7 @@ function createOptions () {
 }
 
 
-function createSyncs (el) {
+function createSyncs ( el ) {
     console.group('createSyncs %o', el);
     console.timeStamp('begin createSyncs');
     console.time('createSyncs');
@@ -1024,7 +430,7 @@ function createSyncs (el) {
 
         console.log('changing property ' + id + ' value ' + val);
 
-        saveOpt( 'syncs', id, val );
+        localDb.saveOpt( 'syncs', id, val );
 
         var lbl = document.getElementById( id + '_label' );
         if (lbl) {
@@ -1041,7 +447,7 @@ function createSyncs (el) {
     for (var idN = 0; idN < posK.length; idN++ ) {
         var id    = posK[idN];
         var nfo   = syncFields[id];
-        nfo.value = getOpt( 'syncs', id, nfo.value );
+        nfo.value = localDb.getOpt( 'syncs', id, nfo.value );
 
         addPicker(tr, id, 'syncs', nfo, callback);
     }
@@ -1058,7 +464,7 @@ function createSyncs (el) {
 
             if (tgt) {
                 var id = tgt.id;
-                saveOpt( 'syncs', id, getFieldValue( id ) );
+                localDb.saveOpt( 'syncs', id, getFieldValue( id ) );
             }
         };
 
@@ -1071,7 +477,7 @@ function createSyncs (el) {
 };
 
 
-function genSelectorsOpts (obj, refSel, dflt) {
+function genSelectorsOpts ( obj, refSel, dflt ) {
     /*
      * Generate drop-down lists options base on "opts"
      */
@@ -1095,7 +501,7 @@ function genSelectorsOpts (obj, refSel, dflt) {
 };
 
 
-function genSelectors (sels) {
+function genSelectors ( sels ) {
     /*
      * Generate "select" elements. Calls genOpts to read options
      * If only one option available, adds a label field, otherwise, adds a drop-down menu.
@@ -1118,7 +524,7 @@ function genSelectors (sels) {
 
             if (tgt) {
                 var id = tgt.id;
-                saveOpt( 'selectors', id, getFieldValue( id ) );
+                localDb.saveOpt( 'selectors', id, getFieldValue( id ) );
             }
         };
 
@@ -1159,7 +565,7 @@ function genSelectors (sels) {
             optVar2.push( [ '*all*', 'All' ] );
 
             opt2.options = optVar2;
-            opt2.value   = getOpt( 'selectors', optName, opt2.value );
+            opt2.value   = localDb.getOpt( 'selectors', optName, opt2.value );
 
             addPicker(tbl, optName, 'selectors', opt2, callback, {addlbls: false} );
         }
@@ -1190,7 +596,729 @@ function genSelectors (sels) {
 
 
 
+/*
+ *
+ *PROCESSING FUNCTIONS
+ *
+ */
+processVals = function ( vals, cfg ){
+    console.group('processVals %o', vals);
+    console.timeStamp('begin processVals');
+    console.time('processVals');
+    console.log('begin processVals %o', vals);
 
+    var self           = this;
+    self.vals          = vals;
+    self.cfg           = cfg;
+
+    
+    self.horizontal    = getFieldValue( 'horizontal' );
+    self.size          = getFieldValue( 'size' );
+    self.tipId         = 'tipper';
+
+    
+    self.getRegister();
+    
+    if ( !self.regs ) {
+        return;
+    }
+    if ( self.regs.length === 0 ) {
+        console.log('no reg');
+        return;
+    }
+
+    console.log('end processVals %o', self.vals);
+    console.timeStamp('end processVals');
+    console.timeEnd('processVals');
+    console.groupEnd('processVals %o', self.vals);
+};
+
+
+processVals.prototype.getRegister = function ( ) {
+    var self = this;
+    console.group('processVals.getRegister %o', self.vals);
+    console.timeStamp('begin processVals.getRegister');
+    console.time('processVals.getRegister');
+    console.log('begin processVals.getRegister %o', self.vals);
+
+    var self           = this;
+    self.dvals         = {};
+    self.evals         = [];
+
+    for ( var key in opts ) {
+        var val         = self.vals[key];
+        self.dvals[key] = [];
+        
+        if ( val == '*all*' ) {
+            opts[key].options.map( function(oval) {
+                self.dvals[key].push( oval );
+            });
+        } else {
+            self.dvals[key].push( val );
+        }
+    }
+
+    //console.log( dvals );
+
+
+
+
+    if (self.horizontal) {
+        if ( self.dvals.refName.length != 1 ) {
+            alert( 'more than one reference while using horizontal graph '  + self.dvals.refName.length  + ' ' + self.dvals.refName );
+            return null;
+        }
+
+        if ( self.dvals.refChrom.length != 1 ) {
+            alert( 'more than one chromosome while using horizontal graph ' + self.dvals.refChrom.length + ' ' + self.dvals.refChrom);
+            return null;
+        }
+    }
+
+    var qid = encodeObj(self.vals);
+
+    self.dvals.refName.map( function(refName) {
+        self.dvals.refChrom.map( function(refChrom) {
+            self.dvals.tgtName.map( function(tgtName) {
+                self.dvals.tgtChrom.map( function(tgtChrom) {
+                    self.dvals.status.map( function(status) {
+                        //console.log(ref + ' ' + refChrom + ' ' + tgtName + ' ' + status);
+                        var reg = {
+                            refName  : refName,
+                            refChrom : refChrom,
+                            tgtName  : tgtName,
+                            tgtChrom : tgtChrom,
+                            status   : status
+                        };
+                        self.evals.push( reg );
+                    });
+                });
+            });
+        });
+    });
+
+    self.evals.qid = qid;
+
+    console.log('end processVals.getRegister %o >> %o', self.vals, self.evals);
+    console.timeStamp('end processVals.getRegister');
+    console.timeEnd('processVals.getRegister');
+    console.groupEnd('processVals.getRegister %o', self.vals);
+
+    self.parseRegisters( );
+};
+
+
+processVals.prototype.parseRegisters = function ( ) {
+    var self           = this;
+
+    console.group('processVals.parseRegisters %o', self.evals);
+    console.timeStamp('begin processVals.parseRegisters');
+    console.time('processVals.parseRegisters');
+    console.log('begin processVals.parseRegisters %o', self.evals);
+    
+    self.regs          = [];
+
+    for ( var e = 0; e < self.evals.length; e++ ) {
+        var vals = self.evals[e];
+        var reg  = {
+                qry: vals,
+                res: {},
+                nfo: {},
+                cfg: {}
+            };
+
+        var regD = null;
+        try {
+            regD = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
+        }
+        catch(err) {
+            console.error('combination does not exists for:');
+            console.error( vals );
+            continue;
+        }
+
+        for ( var k in regD ) {
+            reg.res[k] = regD[k];
+        }
+
+        
+        var uid            = Object.keys( vals ).map( function(d) { return vals[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+        reg.nfo.uid        = uid;
+        reg.nfo.qid        = self.evals.qid;
+        reg.nfo.chartClass = self.size;
+        reg.nfo.tipId      = self.tipId;
+        reg.nfo.filepath   = datafolder + reg.res.filename;
+        reg.nfo.scriptid   = 'script_'  + reg.nfo.uid;
+
+        if ( reg.nfo.chartClass === null ) { reg.nfo.chartClass = Object.keys( sizes )[0]; };
+
+        self.regs.push( reg );
+    }
+
+
+    if (self.regs.length === 0) {
+        return null;
+    }
+
+    console.log('end processVals.parseRegisters %o >> %o', self.evals, self.regs);
+    console.timeStamp('end processVals.parseRegisters');
+    console.timeEnd('processVals.parseRegisters');
+    console.groupEnd('processVals.parseRegisters %o', self.evals);
+
+    self.send();
+};
+
+
+processVals.prototype.send = function ( ) {
+    var self          = this;
+
+    console.group('processVals.send %o', self.regs);
+    console.timeStamp('begin processVals.send');
+    console.time('processVals.send');
+    console.log('begin processVals.send %o', self.regs);
+
+    self.size         = 0;
+    self.received     = 0;
+    self.sentData     = [];
+    self.receivedData = [];
+
+    self.regs.map( function(reg) {
+        var file  = reg.res.filename;
+        if (file) {
+            self.size += 1;
+        }
+    });
+
+
+    if (self.size === 0) {
+        console.log('nothing to plot');
+        console.log(self.regs);
+        return;
+    }
+
+    var count = 0;
+    var func  = function(sregv) { loadScript( sregv, self.receive() ); };
+
+    self.regs.map( function(reg) {
+        var file   = reg.res.filename;
+        self.sentData.push( file );
+        if (file) {
+            console.log( 'sending ' + file );
+            //setTimeout( func(reg), (count * 1000));
+            func(reg);
+            count += 1;
+        }
+    });
+
+    console.log('end processVals.send %o', self.regs);
+    console.timeStamp('end processVals.send');
+    console.timeEnd('processVals.send');
+    console.groupEnd('processVals.send %o', self.regs);
+};
+
+
+processVals.prototype.receive = function ( ) {
+    var self = this;
+
+    return function( reg ) {
+        console.group('processVals.receive %o', reg);
+        console.timeStamp('begin processVals.receive');
+        console.time('processVals.receive');
+        console.log('begin processVals.receive %o', reg);
+
+        self.received += 1;
+
+        var dataPos = self.sentData.indexOf( reg.res.filename );
+
+        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.res.filename + ' pos ' + dataPos );
+
+        var res = _filelist[ reg.qry.refName ][ reg.qry.refChrom ][ reg.qry.tgtName ][ reg.qry.tgtChrom ][ reg.qry.status ];
+
+        reg.res = JSON.parse(JSON.stringify(res));
+
+        self.receivedData[ dataPos ] = reg;
+
+        delete res.points;
+        delete res.tgts;
+
+        var script = document.getElementById( reg.nfo.scriptid );
+
+        if ( script ) {
+            document.getElementById( scriptHolder ).removeChild( script );
+        }
+
+        if ( self.received == self.size ) {
+            //console.log( self.receivedData );
+            self.loadGraph();
+        }
+
+        console.log('end processVals.receive %o >> %o', reg, self.receivedData);
+        console.timeStamp('end processVals.receive');
+        console.timeEnd('processVals.receive');
+        console.groupEnd('processVals.receive %o', reg);
+    };
+};
+
+
+processVals.prototype.loadGraph = function ( ) {
+    /*
+     * Deletes the <script> tag to release the memory in the DOM.
+     * Clears chart
+     * Create event listener to add tipsy (tip creator)
+     * Initialize SimpleGraph
+     * Deletes from register
+     */
+
+    //reg.qry.refName
+    //reg.qry.refChrom
+    //reg.qry.tgtName
+    //reg.qry.tgtChrom
+    //reg.qry.status
+    //
+    //reg.res.filename
+    //reg.res.title
+    //reg.res.xlabel
+    //reg.res.ylabel
+    //reg.res.points
+    //reg.res.xmin
+    //reg.res.xmax
+    //reg.res.ymin
+    //reg.res.ymax
+    //reg.res.tgts
+    //
+    //reg.nfo.uid
+    //reg.nfo.chartClass
+    //reg.nfo.tipId
+    //reg.nfo.filepath
+    //reg.nfo.scriptid
+    //
+    //reg.cfg
+    var self = this;
+
+    console.group('processVals.loadGraph %o', self.receivedData);
+    console.timeStamp('begin processVals.loadGraph');
+    console.time('processVals.loadGraph');
+    console.log('begin processVals.loadGraph %o', self.receivedData);
+
+
+    if (self.horizontal) {
+        self.mergeregs( self.receivedData );
+        self.hreg.parallel      = true;
+        //self.hreg.cfg.initState = getInitState( self.hreg.qid );
+
+        console.log( self.hreg );
+        graphdb.add(chartName, self.hreg);
+
+    } else {
+        self.receivedData.map( function(reg) {
+            var sreg           = self.simplifyReg( reg );
+            //sreg.cfg.initState = getInitState( sreg.qid );
+            console.log( sreg );
+            graphdb.add(chartName, sreg);
+        });
+    }
+    
+    
+    setQueryString();
+
+    console.log('end processVals.loadGraph %o', self.receivedData);
+    console.timeStamp('end processVals.loadGraph');
+    console.timeEnd('processVals.loadGraph');
+    console.groupEnd('processVals.loadGraph %o', self.receivedData);
+};
+
+
+processVals.prototype.mergeregs = function ( ) {
+    var self = this;
+    console.group('processVals.mergeregs %o', self.receivedData);
+    console.timeStamp('begin processVals.mergeregs');
+    console.time('processVals.mergeregs');
+    console.timeStamp('begin processVals.mergeregs %o', self.receivedData);
+
+
+    self.hreg = {
+        qry: {},
+        res: {},
+        nfo: {},
+        cfg: {}
+    };
+    
+    var yTicksLabels = [];
+
+
+    //console.log(regs);
+
+
+    for ( var r = 0; r < self.receivedData.length; r++ ) {
+        var reg = self.receivedData[r];
+        yTicksLabels[r] = [];
+        
+        for ( var cls in reg ) {
+            for ( var k in reg[cls] ) {
+                if (!self.hreg[cls][k]) {
+                    self.hreg[cls][k] = [];
+                }
+                var val = reg[cls][k];
+                self.hreg[cls][k].push( val );
+            }
+        }
+    }
+
+
+    //console.log(hreg);
+
+
+    var sreg = self.simplifyReg( hreg );
+
+
+    //console.log(sreg);
+
+
+    for ( var v in sreg.res ) {
+        var vals = sreg.res[v];
+        var uniqueArray = vals.filter(function(elem, pos) {
+            return vals.indexOf(elem) == pos;
+        });
+
+        if (uniqueArray.length == 1) {
+            if (['tgts', 'points'].indexOf(v) == -1) {
+                sreg.res[v] = vals[0];
+            }
+        }
+    }
+
+
+    for ( var v in sreg.cfg ) {
+        var vals = sreg.cfg[v];
+        var uniqueArray = vals.filter(function(elem, pos) {
+            return vals.indexOf(elem) == pos;
+        });
+
+        if (uniqueArray.length == 1) {
+            sreg.cfg[v] = vals[0];
+        }
+    }
+
+
+    //console.log(sreg);
+
+
+    for ( var v in sreg.qry ) {
+        var vals        = sreg.qry[v];
+        var uniqueArray = vals.filter(function(elem, pos) {
+            return vals.indexOf(elem) == pos;
+        });
+        //console.log(vals);
+        //console.log(uniqueArray);
+
+        if (uniqueArray.length != 1) {
+            for ( var h = 0; h < sreg.qry[v].length; h++) {
+                var val = sreg.qry[v][h];
+                //console.log ( val );
+                yTicksLabels[h].push( val );
+            }
+        }
+    }
+
+
+    //console.log(yTicksLabels);
+    //console.log(sreg);
+
+
+    for ( var r = 0; r < yTicksLabels.length; r++ ) {
+        yTicksLabels[r] = joinVals( yTicksLabels[r] );
+    }
+
+
+    //console.log(yTicksLabels);
+    //console.log(sreg);
+    
+
+    var rKeys = ['xmax', 'ymax', 'xmin', 'ymin'];
+    for ( var r = 0; r < rKeys.length; r++ ) {
+        var key = rKeys[r];
+        var res = [];
+        //console.log( key );
+        
+        for ( var k = 0; k < sreg[ key ].length; k++ ) {
+            res.push( sreg[ key ][ k ] );
+        }
+        sreg[ key ] = Math.max.apply(null, res);
+    }
+
+
+    //console.log(sreg);
+
+
+    var refs    = joinVals( sreg.qry.refName  );
+    var refsCr  = joinVals( sreg.qry.refChrom );
+    var tgts    = joinVals( sreg.qry.tgtName  );
+    var tgtsCr  = joinVals( sreg.qry.tgtChrom );
+    var sts     = joinVals( sreg.qry.status   );
+    var ylabel  = joinVals( sreg.ylabel       );
+    var xlabel  = joinVals( sreg.xlabel       );
+
+
+    sreg.title        = refs + ' #' + refsCr + ' vs ' + tgts  + ' #' + tgtsCr + ' - Status ' + sts;
+    sreg.ylabel       = ylabel;
+    sreg.xlabel       = xlabel;
+    sreg.yTicksLabels = yTicksLabels;
+    sreg.tipId        = sreg.tipId[0];
+    sreg.chartClass   = sreg.chartClass[0];
+
+    
+    sreg.qid          = sreg.qid[0];
+
+
+    var qry           = decodeObj( sreg.qid );
+    
+    sreg.uid          = Object.keys( qry ).map( function(d) { return qry[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
+
+
+    //console.log(sreg);
+
+
+    console.log('end processVals.mergeregs %o >> %o', regs, sreg);
+    console.timeStamp('end processVals.mergeregs');
+    console.timeEnd('processVals.mergeregs');
+    console.groupEnd('processVals.mergeregs %o', regs);
+
+    return sreg;
+};
+
+
+processVals.prototype.simplifyReg = function ( reg ) {
+    var self = this;
+    console.group('processVals.simplifyReg %o', reg);
+    console.timeStamp('begin processVals.simplifyReg');
+    console.time('processVals.simplifyReg');
+    console.log('begin processVals.simplifyReg %o', reg);
+
+    
+    var res  = [];
+    var keys = ['res', 'nfo'];
+    for ( var c in keys ) {
+        var cls = keys[c];
+        for ( var k in reg[cls] ) {
+            res[k] = reg[cls][k];
+        }
+    }
+    res.qry = reg.qry;
+    res.cfg = reg.cfg;
+    res.uid = reg.nfo.uid;
+    
+
+    console.log('end processVals.simplifyReg %o >> %o', reg, res);
+    console.timeStamp('end processVals.simplifyReg');
+    console.timeEnd('processVals.simplifyReg');
+    console.groupEnd('processVals.simplifyReg %o', reg);
+
+    return res;
+}
+
+
+
+
+/*
+ *
+ *ACTIONS
+ *
+ */
+function selclick ( ) {
+    console.group('selclick');
+    console.timeStamp('begin selclick');
+    console.time('selclick');
+
+    var vals = getVals();
+
+    if (!vals) {
+        console.log('no vals');
+        return;
+    }
+
+    //console.log( vals );
+    var cfg = getCfg();
+    
+    if (!cfg) {
+        return;
+    }
+    
+    new processVals( vals, cfg );
+
+    console.timeStamp('end selclick');
+    console.timeEnd('selclick');
+    console.groupEnd('selclick');
+};
+
+
+function getVals ( ) {
+    console.group('getVals');
+    console.timeStamp('begin getVals');
+    console.time('getVals');
+
+    var vals = {};
+
+    for ( var optName in opts ) {
+        var val      = getFieldValue( optName );
+
+        if ( val === null ) {
+            console.log( 'value ' + optName + ' not defined' );
+            vals = null;
+            break;
+        } else {
+            //console.log( 'appending ' + optName + ' = '+ val );
+            vals[ optName ] = val;
+        }
+    }
+
+    console.log('end getVals >> %o', vals);
+    console.timeStamp('end getVals');
+    console.timeEnd('getVals');
+    console.groupEnd('getVals');
+
+    return vals;
+}
+
+
+function getCfg ( ) {
+    console.group('getCfg');
+    console.timeStamp('begin getCfg');
+    console.time('getCfg');
+
+    var posK = Object.keys( positions );
+        posK.sort();
+
+    var cfg   = {};
+    
+    for (var idN = 0; idN < posK.length; idN++ ) {
+        var id    = posK[idN];
+        var nfo   = positions[id];
+        var dfl   = nfo.value;
+        var curr  = getFieldValue( id );
+
+        if ( dfl != curr ) {
+            console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
+            console.log( nfo );
+            cfg[id] = curr;
+            
+        } else {
+            if (cfg[id]) {
+                delete cfg[id];
+            }
+        }
+    }
+
+    console.log('end getCfg >> %o', cfg);
+    console.timeStamp('end getCfg');
+    console.timeEnd('getCfg');
+    console.groupEnd('getCfg');
+
+    return cfg;
+}
+
+
+
+
+/*
+ *
+ *TOOLS
+ *
+ */
+function clearPics ( ) {
+    console.log('cleaning');
+    //console.log(graphdb);
+    graphdb.clear();
+}
+
+
+function getFieldValue ( fieldId ) {
+    var field = document.getElementById( fieldId );
+
+    //console.log('getting ' + fieldId);
+    if (field) {
+        var val   = null;
+
+        if ( field.localName == 'select' ) {
+            //console.log('getting ' + fieldId + ' select');
+            var sel = field.selectedIndex;
+            //console.log('getting ' + fieldId + ' select index ' + sel);
+            if ( sel == -1 ) {
+                sel = null;
+            } else {
+                var fio = field.options[ sel ];
+                val     = fio.value;
+            }
+        } else {
+            //console.log('getting ' + fieldId + ' !select');
+            if ( field.type == 'checkbox' ) {
+                //console.log('getting ' + fieldId + ' !select CHECKBOX');
+                val = field.checked;
+            } else {
+                //console.log('getting ' + fieldId + ' !select !CHECKBOX');
+                val = field.value;
+            }
+        }
+
+        if (val == 'null') {
+            val = null;
+        }
+
+        //console.log('getting ' + fieldId + ' VAL ' + val);
+        return val;
+    } else {
+        //console.log('getting ' + fieldId + ' NO SUCH FIELD');
+        return null;
+    }
+};
+
+
+function obj2str ( obj ) {
+    var res = "";
+    for (var k in obj ) {
+        res += '<b>' + k + "</b>: " + obj[k] + ", ";
+    }
+    return res;
+}
+
+
+function copyKeys ( obj ) {
+    var str = JSON.stringify( obj );
+    var res = JSON.parse(     str );
+    return res;
+}
+
+
+function joinVals ( vals ) {
+    var res = vals.filter(function(elem, pos) {
+        return vals.indexOf(elem) == pos;
+    });
+
+    if (res.length == 1) {
+        return res.join('+');
+    } else {
+        return '(' + res.join('+') + ')';
+    }
+};
+
+
+function encodeStr ( json ) {
+    return btoa( RawDeflate.deflate( json ) );
+}
+
+
+function decodeStr ( b64 ) {
+    return RawDeflate.inflate( atob( b64 ) );
+}
+
+
+function encodeObj ( obj ) {
+    return encodeStr( JSON.stringify( obj ) );
+}
+
+
+function decodeObj ( str ) {
+    return JSON.parse( decodeStr( str ) );
+}
 
 
 function loadScript ( reg, callback ) {
@@ -1232,637 +1360,28 @@ function loadScript ( reg, callback ) {
 };
 
 
-function mergeregs ( regs ) {
-    console.group('mergeregs %o', regs);
-    console.timeStamp('begin mergeregs');
-    console.time('mergeregs');
-    console.timeStamp('begin mergeregs %o', regs);
 
 
-    var hreg = {
-        qry: {},
-        res: {},
-        nfo: {},
-        cfg: {}
-    };
-    var yTicksLabels = [];
-
-
-    //console.log(regs);
-
-
-    for ( var r = 0; r < regs.length; r++ ) {
-        var reg = regs[r];
-        yTicksLabels[r] = [];
-        for ( var cls in reg ) {
-            for ( var k in reg[cls] ) {
-                if (!hreg[cls][k]) {
-                    hreg[cls][k] = [];
-                }
-                var val = reg[cls][k];
-                hreg[cls][k].push( val );
-            }
-        }
-    }
-
-
-    //console.log(hreg);
-
-
-    var sreg = simplifyReg( hreg );
-
-
-    //console.log(sreg);
-
-
-    for ( var v in sreg.res ) {
-        var vals = sreg.res[v];
-        var uniqueArray = vals.filter(function(elem, pos) {
-            return vals.indexOf(elem) == pos;
-        });
-
-        if (uniqueArray.length == 1) {
-            if (['tgts', 'points'].indexOf(v) == -1) {
-                sreg.res[v] = vals[0];
-            }
-        }
-    }
-
-
-    for ( var v in sreg.cfg ) {
-        var vals = sreg.cfg[v];
-        var uniqueArray = vals.filter(function(elem, pos) {
-            return vals.indexOf(elem) == pos;
-        });
-
-        if (uniqueArray.length == 1) {
-            sreg.cfg[v] = vals[0];
-        }
-    }
-
-
-    //console.log(sreg);
-
-
-    for ( var v in sreg.qry ) {
-        var vals = sreg.qry[v];
-        var uniqueArray = vals.filter(function(elem, pos) {
-            return vals.indexOf(elem) == pos;
-        });
-        //console.log(vals);
-        //console.log(uniqueArray);
-
-        if (uniqueArray.length != 1) {
-            for ( var h = 0; h < sreg.qry[v].length; h++) {
-                var val = sreg.qry[v][h];
-                //console.log ( val );
-                yTicksLabels[h].push( val );
-            }
-        }
-    }
-
-
-    //console.log(yTicksLabels);
-    //console.log(sreg);
-
-
-    for ( var r = 0; r < yTicksLabels.length; r++ ) {
-        yTicksLabels[r] = joinVals( yTicksLabels[r] );
-    }
-
-
-    //console.log(yTicksLabels);
-    //console.log(sreg);
-    
-
-    var rKeys = ['xmax', 'ymax', 'xmin', 'ymin'];
-    for ( var r = 0; r < rKeys.length; r++ ) {
-        var key = rKeys[r];
-        var res = [];
-        //console.log( key );
-        for ( var k = 0; k < sreg[ key ].length; k++ ) {
-            res.push( sreg[ key ][ k ] );
-        }
-        sreg[ key ] = Math.max.apply(null, res);
-    }
-
-
-    //console.log(sreg);
-
-
-    var refs    = joinVals( sreg.qry.refName  );
-    var refsCr  = joinVals( sreg.qry.refChrom );
-    var tgts    = joinVals( sreg.qry.tgtName  );
-    var tgtsCr  = joinVals( sreg.qry.tgtChrom );
-    var sts     = joinVals( sreg.qry.status   );
-    var ylabel  = joinVals( sreg.ylabel       );
-    var xlabel  = joinVals( sreg.xlabel       );
-
-
-    sreg.title        = refs + ' #' + refsCr + ' vs ' + tgts  + ' #' + tgtsCr + ' - Status ' + sts;
-    sreg.ylabel       = ylabel;
-    sreg.xlabel       = xlabel;
-    sreg.yTicksLabels = yTicksLabels;
-    sreg.tipId        = sreg.tipId[0];
-    sreg.chartClass   = sreg.chartClass[0];
-
-    
-    sreg.qid          = sreg.qid[0];
-
-
-    var qry           = decodeObj( sreg.qid );
-    
-    sreg.uid          = Object.keys( qry ).map( function(d) { return qry[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
-
-
-    //console.log(sreg);
-
-
-    console.log('end mergeregs %o >> %o', regs, sreg);
-    console.timeStamp('end mergeregs');
-    console.timeEnd('mergeregs');
-    console.groupEnd('mergeregs %o', regs);
-
-    return sreg;
+/*
+ *
+ *DB FUNCTIONS
+ *
+ */
+LocalStorageDb = function ( prog_domain, db_domain) {
+    this.progDomain = prog_domain;
+    this.dbDomain   = db_domain;
 };
 
 
-function simplifyReg ( reg ) {
-    console.group('simplifyReg %o', reg);
-    console.timeStamp('begin simplifyReg');
-    console.time('simplifyReg');
-    console.log('begin simplifyReg %o', reg);
-
-    
-    var res  = [];
-    var keys = ['res', 'nfo'];
-    for ( var c in keys ) {
-        var cls = keys[c];
-        for ( var k in reg[cls] ) {
-            res[k] = reg[cls][k];
-        }
-    }
-    res.qry = reg.qry;
-    res.cfg = reg.cfg;
-    res.uid = reg.nfo.uid;
-    
-
-    console.log('end simplifyReg %o >> %o', reg, res);
-    console.timeStamp('end simplifyReg');
-    console.timeEnd('simplifyReg');
-    console.groupEnd('simplifyReg %o', reg);
-
-    return res;
-}
-
-
-function loadGraph ( regs ) {
-    /*
-     * Deletes the <script> tag to release the memory in the DOM.
-     * Clears chart
-     * Create event listener to add tipsy (tip creator)
-     * Initialize SimpleGraph
-     * Deletes from register
-     */
-
-    //reg.qry.refName
-    //reg.qry.refChrom
-    //reg.qry.tgtName
-    //reg.qry.tgtChrom
-    //reg.qry.status
-    //
-    //reg.res.filename
-    //reg.res.title
-    //reg.res.xlabel
-    //reg.res.ylabel
-    //reg.res.points
-    //reg.res.xmin
-    //reg.res.xmax
-    //reg.res.ymin
-    //reg.res.ymax
-    //reg.res.tgts
-    //
-    //reg.nfo.uid
-    //reg.nfo.chartClass
-    //reg.nfo.tipId
-    //reg.nfo.filepath
-    //reg.nfo.scriptid
-    //
-    //reg.cfg
-
-    console.group('loadGraph %o', regs);
-    console.timeStamp('begin loadGraph');
-    console.time('loadGraph');
-    console.log('begin loadGraph %o', regs);
-
-
-    var horizontal = getFieldValue( 'horizontal' );
-
-    if (horizontal) {
-        var hreg           = mergeregs( regs );
-        hreg.parallel      = true;
-        hreg.cfg.initState = getInitState( hreg.qid );
-
-        //console.log( hreg );
-        graphdb.add(chartName, hreg);
-
-    } else {
-        regs.map( function(reg) {
-            var sreg           = simplifyReg( reg );
-            sreg.cfg.initState = getInitState( sreg.qid );
-            graphdb.add(chartName, sreg);
-        });
-    }
-    
-    setQueryString();
-
-    console.log('end loadGraph %o', regs);
-    console.timeStamp('end loadGraph');
-    console.timeEnd('loadGraph');
-    console.groupEnd('loadGraph %o', regs);
-};
-
-
-
-
-
-
-syncLoadScript = function ( regs, callback ) {
-    var self          = this;
-    this.regs         = regs;
-    this.callback     = callback;
-    this.size         = 0;
-    this.received     = 0;
-    this.sentData     = [];
-    this.receivedData = [];
-
-    this.regs.map( function(reg) {
-        var file  = reg.res.filename;
-        if (file) {
-            self.size += 1;
-        }
-    });
-
-
-    if (this.size === 0) {
-        console.log('nothing to plot');
-        console.log(regs);
-        return;
-    }
-
-    var count = 0;
-    var func  = function(sregv) { loadScript( sregv, self.receive() ); };
-
-    regs.map( function(reg) {
-        var file   = reg.res.filename;
-        self.sentData.push( file );
-        if (file) {
-            console.log( 'sending ' + file );
-            //setTimeout( func(reg), (count * 1000));
-            func(reg);
-            count += 1;
-        }
-    });
-};
-
-
-syncLoadScript.prototype.receive = function () {
+LocalStorageDb.prototype.saveOpt = function (data_domain, key ,value) {
     var self = this;
 
-    return function( reg ) {
-        console.group('syncLoadScript.receive %o', reg);
-        console.timeStamp('begin syncLoadScript.receive');
-        console.time('syncLoadScript.receive');
-        console.log('begin syncLoadScript.receive %o', reg);
-
-        self.received += 1;
-
-        var dataPos = self.sentData.indexOf( reg.res.filename );
-
-        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.res.filename + ' pos ' + dataPos );
-
-        var res = _filelist[ reg.qry.refName ][ reg.qry.refChrom ][ reg.qry.tgtName ][ reg.qry.tgtChrom ][ reg.qry.status ];
-
-        reg.res = JSON.parse(JSON.stringify(res));
-
-        self.receivedData[ dataPos ] = reg;
-
-        delete res.points;
-        delete res.tgts;
-
-        var script = document.getElementById( reg.nfo.scriptid );
-
-        if ( script ) {
-            document.getElementById( scriptHolder ).removeChild( script );
-        }
-
-        if ( self.received == self.size ) {
-            //console.log( self.receivedData );
-            self.callback( self.receivedData );
-        }
-
-        console.log('end syncLoadScript.receive %o', reg);
-        console.timeStamp('end syncLoadScript.receive');
-        console.timeEnd('syncLoadScript.receive');
-        console.groupEnd('syncLoadScript.receive %o', reg);
-    };
-};
-
-
-
-
-
-
-
-function selclick () {
-    console.group('selclick');
-    console.timeStamp('begin selclick');
-    console.time('selclick');
-
-    var vals = getVals();
-
-    if (!vals) {
-        console.log('no vals');
-        return;
-    }
-
-    //console.log( vals );
+    console.group('LocalStorageDb.saveOpt data_domain "%s" key "%s" value %o', data_domain, key, value);
+    console.timeStamp('begin LocalStorageDb.saveOpt');
+    console.time('LocalStorageDb.saveOpt');
+    console.log('begin LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
     
-    processVals( vals );
-
-    console.timeStamp('end selclick');
-    console.timeEnd('selclick');
-    console.groupEnd('selclick');
-};
-
-
-function processVals( vals ){
-    console.group('processVals %o', vals);
-    console.timeStamp('begin processVals');
-    console.time('processVals');
-    console.log('begin processVals %o', vals);
-
-    var regs  = getRegister( vals );
-    if ( !regs ) {
-        return;
-    }
-    if ( regs.length === 0 ) {
-        console.log('no reg');
-        return;
-    }
-
-    new syncLoadScript( regs, loadGraph );
-
-    console.log('end processVals %o', vals);
-    console.timeStamp('end processVals');
-    console.timeEnd('processVals');
-    console.groupEnd('processVals %o', vals);
-};
-
-
-function clearPics () {
-    console.log('cleaning');
-    //console.log(graphdb);
-    graphdb.clear();
-}
-
-
-function getFieldValue (fieldId) {
-    var field = document.getElementById( fieldId );
-
-    //console.log('getting ' + fieldId);
-    if (field) {
-        var val   = null;
-
-        if ( field.localName == 'select' ) {
-            //console.log('getting ' + fieldId + ' select');
-            var sel = field.selectedIndex;
-            //console.log('getting ' + fieldId + ' select index ' + sel);
-            if ( sel == -1 ) {
-                sel = null;
-            } else {
-                var fio = field.options[ sel ];
-                val     = fio.value;
-            }
-        } else {
-            //console.log('getting ' + fieldId + ' !select');
-            if ( field.type == 'checkbox' ) {
-                //console.log('getting ' + fieldId + ' !select CHECKBOX');
-                val = field.checked;
-            } else {
-                //console.log('getting ' + fieldId + ' !select !CHECKBOX');
-                val = field.value;
-            }
-        }
-
-        if (val == 'null') {
-            val = null;
-        }
-
-        //console.log('getting ' + fieldId + ' VAL ' + val);
-        return val;
-    } else {
-        //console.log('getting ' + fieldId + ' NO SUCH FIELD');
-        return null;
-    }
-};
-
-
-function getVals () {
-    var vals = {};
-
-    for ( var optName in opts ) {
-        var val      = getFieldValue( optName );
-
-        if ( val === null ) {
-            console.log( 'value ' + optName + ' not defined' );
-            return null;
-        }
-
-        //console.log( 'appending ' + optName + ' = '+ val );
-        vals[ optName ] = val;
-    }
-
-    return vals;
-}
-
-
-function getRegister ( gvals ) {
-    console.group('getRegister %o', gvals);
-    console.timeStamp('begin getRegister');
-    console.time('getRegister');
-    console.log('begin getRegister %o', gvals);
-
-    var dvals     = {};
-    var evals     = [];
-
-
-    for ( var key in opts ) {
-        var val    = gvals[key];
-        dvals[key] = [];
-        
-        if ( val == '*all*' ) {
-            opts[key].options.map( function(oval) {
-                dvals[key].push( oval );
-            });
-        } else {
-            dvals[key].push( val );
-        }
-    }
-
-
-    //console.log( dvals );
-
-
-    var horizontal = getFieldValue( 'horizontal' );
-
-
-    if (horizontal) {
-        if ( dvals.refName.length != 1 ) {
-            alert( 'more than one reference while using horizontal graph '  + dvals.refName.length  + ' ' + dvals.refName );
-            return null;
-        }
-
-        if ( dvals.refChrom.length != 1 ) {
-            alert( 'more than one chromosome while using horizontal graph ' + dvals.refChrom.length + ' ' + dvals.refChrom);
-            return null;
-        }
-    }
-
-    var qid = encodeObj(gvals);
-
-    dvals.refName.map( function(refName) {
-        dvals.refChrom.map( function(refChrom) {
-            dvals.tgtName.map( function(tgtName) {
-                dvals.tgtChrom.map( function(tgtChrom) {
-                    dvals.status.map( function(status) {
-                        //console.log(ref + ' ' + refChrom + ' ' + tgtName + ' ' + status);
-                        var reg = {
-                            refName  : refName,
-                            refChrom : refChrom,
-                            tgtName  : tgtName,
-                            tgtChrom : tgtChrom,
-                            status   : status
-                        };
-                        evals.push( reg );
-                    });
-                });
-            });
-        });
-    });
-
-    evals.qid = qid;
-
-    console.log('end getRegister %o >> %o', gvals, evals);
-    console.timeStamp('end getRegister');
-    console.timeEnd('getRegister');
-    console.groupEnd('getRegister %o', gvals);
-
-    return parseRegisters( evals );
-}
-
-
-function parseRegisters (evals) {
-    console.group('parseRegisters %o', evals);
-    console.timeStamp('begin parseRegisters');
-    console.time('parseRegisters');
-    console.log('begin parseRegisters %o', evals);
-    
-    var regs       = [];
-
-    for ( var e = 0; e < evals.length; e++ ) {
-        var vals = evals[e];
-        var reg  = {
-                qry: vals,
-                res: {},
-                nfo: {},
-                cfg: {}
-            };
-
-        var regD = null;
-        try {
-            regD = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
-        }
-        catch(err) {
-            console.error('combination does not exists for:');
-            console.error( vals );
-            continue;
-        }
-
-        for ( var k in regD ) {
-            reg.res[k] = regD[k];
-        }
-
-        var uid            = Object.keys( vals ).map( function(d) { return vals[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
-
-        reg.nfo.uid        = uid;
-        reg.nfo.qid        = evals.qid;
-        reg.nfo.chartClass = getFieldValue( 'size' );
-        reg.nfo.tipId      = 'tipper';
-        reg.nfo.filepath   = datafolder + reg.res.filename;
-        reg.nfo.scriptid   = 'script_'  + reg.nfo.uid;
-
-        if ( reg.nfo.chartClass === null ) { reg.nfo.chartClass = Object.keys( sizes )[0]; };
-
-
-        var posK = Object.keys( positions );
-            posK.sort();
-
-        for (var idN = 0; idN < posK.length; idN++ ) {
-            var id    = posK[idN];
-            var nfo   = positions[id];
-            var dfl   = nfo.value;
-            var curr  = getFieldValue( id );
-
-
-            if ( dfl != curr ) {
-                console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
-                console.log( nfo );
-                reg.cfg[id] = curr;
-            } else {
-                if (reg.cfg[id]) {
-                    delete reg.cfg[id];
-                }
-            }
-        }
-        regs.push( reg );
-    }
-
-
-    if (regs.length === 0) {
-        return null;
-    }
-
-    console.log('end parseRegisters %o >> %o', evals, regs);
-    console.timeStamp('end parseRegisters');
-    console.timeEnd('parseRegisters');
-    console.groupEnd('parseRegisters %o', evals);
-    
-    return regs;
-}
-
-
-function obj2str(obj) {
-    var res = "";
-    for (var k in obj ) {
-        res += '<b>' + k + "</b>: " + obj[k] + ", ";
-    }
-    return res;
-}
-
-
-
-
-
-
-
-function saveOpt (data_domain, key ,value) {
-    console.group('saveOpt data_domain "%s" key "%s" value %o', data_domain, key, value);
-    console.timeStamp('begin saveOpt');
-    console.time('saveOpt');
-    console.log('begin saveOpt "%s" key "%s" value %o', data_domain, key, value);
-    
-    var data_db = getDataDb( data_domain );
+    var data_db = self.getDataDb( data_domain );
 
     if (data_db) {
         if ( value === null ) {
@@ -1874,19 +1393,159 @@ function saveOpt (data_domain, key ,value) {
             data_db[key] = value;
         }
         
-        saveDataDb(data_domain, data_db);
+        self.saveDataDb(data_domain, data_db);
         
         setQueryString();
     }
 
-    console.log('end saveOpt "%s" key "%s" value %o', data_domain, key, value);
-    console.timeStamp('end saveOpt');
-    console.timeEnd('saveOpt');
-    console.groupEnd('saveOpt "%s" key "%s" value %o', data_domain, key, value);
+    console.log('end LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
+    console.timeStamp('end LocalStorageDb.saveOpt');
+    console.timeEnd('LocalStorageDb.saveOpt');
+    console.groupEnd('LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
 };
 
 
+LocalStorageDb.prototype.getOpt = function (data_domain, key, dflt) {
+    var self = this;
+
+    console.group('LocalStorageDb.getOpt data_domain "%s" key "%s" default %o', data_domain, key, data_domain);
+    console.timeStamp('begin LocalStorageDb.getOpt');
+    console.time('LocalStorageDb.getOpt');
+    console.log('begin LocalStorageDb.getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
+
+    var val     = dflt;
+    var data_db = self.getDataDb( data_domain );
+
+    if ( data_db ) {
+        var res = data_db[key];
+        if ( res !== null && res !== undefined ) {
+            val = res;
+        }
+    }
+
+    //console.log( 'returning ' + val );
+
+    console.log('end LocalStorageDb.getOpt "%s" key "%s" default %o >> %o', data_domain, key, data_domain, val);
+    console.timeStamp('end LocalStorageDb.getOpt');
+    console.timeEnd('LocalStorageDb.getOpt');
+    console.groupEnd('LocalStorageDb.getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
+    
+    return val;
+};
+
+
+LocalStorageDb.prototype.getDataDb = function ( data_domain ){
+    var self = this;
+
+    console.group('LocalStorageDb.getDataDb data_domain "%s"', data_domain);
+    console.timeStamp('begin LocalStorageDb.getDataDb');
+    console.time('LocalStorageDb.getDataDb');
+    console.log('begin LocalStorageDb.getDataDb data_domain "%s"', data_domain);
+
+    var data_db = {};
+    if ( hasstorage ) {
+        if ( self.progDomain ) {
+            if ( self.dbDomain ) {
+                var db_key  = self.progDomain + self.dbDomain + data_domain;
+                var data    = localStorage[ db_key ];
+                if ( data ) {
+                    try {
+                        data_db = JSON.parse( data );
+                    } catch(e) {
+                    }
+                }
+            }
+        }
+    }
+    
+    console.log('end LocalStorageDb.getDataDb data_domain "%s" >> %o', data_domain, data_db);
+    console.timeStamp('end LocalStorageDb.getDataDb');
+    console.timeEnd('LocalStorageDb.getDataDb');
+    console.groupEnd('LocalStorageDb.getDataDb data_domain "%s"', data_domain);
+    return data_db;
+};
+
+
+LocalStorageDb.prototype.saveDataDb = function (data_domain, data_db) {
+    var self = this;
+
+    console.group('LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+    console.timeStamp('begin LocalStorageDb.saveDataDb');
+    console.time('LocalStorageDb.saveDataDb');
+    console.log('begin LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+
+    if ( hasstorage ) {
+        if ( self.progDomain ) {
+            if ( self.dbDomain ) {
+                var db_key  = self.progDomain + self.dbDomain + data_domain;
+                var data    = {};
+                if (data_db !== null) {
+                    data = data_db;
+                }
+                
+                var jso     = JSON.stringify( data );
+                localStorage[db_key] = jso;
+            }
+        }
+    }
+    
+    console.log('end LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+    console.timeStamp('end LocalStorageDb.saveDataDb');
+    console.timeEnd('LocalStorageDb.saveDataDb');
+    console.groupEnd('LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+};
+
+
+LocalStorageDb.prototype.clearDb = function (data_domain) {
+    var self = this;
+
+    self.saveDataDb(data_domain, null);
+    
+    setQueryString();
+};
+
+
+LocalStorageDb.prototype.getDb = function () {
+    var self = this;
+    
+    console.group('LocalStorageDb.getDb');
+    console.timeStamp('begin LocalStorageDb.getDb');
+    console.time('LocalStorageDb.getDb');
+    console.log('begin LocalStorageDb.getDb');
+
+    var res = null;
+    
+    if ( hasstorage ) {
+        if ( self.dbDomain ) {
+            var data = localStorage[ self.dbDomain ];
+            
+            if ( data ) {
+                try {
+                    //console.log('getting ' + k);
+                    res = JSON.parse( data );
+                } catch(e) {
+                }
+            }
+        }
+    }
+
+    console.log('end LocalStorageDb.getDb >> %o', res);
+    console.timeStamp('end LocalStorageDb.getDb');
+    console.timeEnd('LocalStorageDb.getDb');
+    console.groupEnd('LocalStorageDb.getDb');
+    
+    return res;
+};
+
+
+
+
+
+
+
+
 function updateQuery (e) {
+    var self = this;
     console.group('updateQuery %o', e);
     console.timeStamp('begin updateQuery');
     console.time('updateQuery');
@@ -1897,7 +1556,7 @@ function updateQuery (e) {
     var qries = e.detail.el;
     //console.log( qries );
     
-    saveOpt('_queries', '_queries', qries);
+    localDb.saveOpt('_queries', '_queries', qries);
 
     console.log('end updateQuery %o', e);
     console.timeStamp('end updateQuery');
@@ -1906,127 +1565,7 @@ function updateQuery (e) {
 }
 
 
-function getOpt (data_domain, key, dflt) {
-    console.group('getOpt data_domain "%s" key "%s" default %o', data_domain, key, data_domain);
-    console.timeStamp('begin getOpt');
-    console.time('getOpt');
-    console.log('begin getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
-
-    var val     = dflt;
-    var data_db = getDataDb( data_domain );
-
-    if (data_db) {
-        var res = data_db[key];
-        if (res !== null && res !== undefined) {
-            val = res;
-        }
-    }
-
-    //console.log( 'returning ' + val );
-
-    console.log('end getOpt "%s" key "%s" default %o >> %o', data_domain, key, data_domain, val);
-    console.timeStamp('end getOpt');
-    console.timeEnd('getOpt');
-    console.groupEnd('getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
-    
-    return val;
-};
-
-
-function getDataDb (data_domain){
-    console.group('getDataDb data_domain "%s"', data_domain);
-    console.timeStamp('begin getDataDb');
-    console.time('getDataDb');
-    console.log('begin getDataDb data_domain "%s"', data_domain);
-
-    var data_db = {};
-    if ( hasstorage ) {
-        if (_prog_domain) {
-            if ( _db_domain ) {
-                var db_key  = _prog_domain + _db_domain + data_domain;
-                if ( localStorage[db_key] ) {
-                    try {
-                        data_db = JSON.parse( localStorage[db_key] );
-                    } catch(e) {
-                    }
-                }
-            }
-        }
-    }
-    
-    console.log('end getDataDb data_domain "%s" >> %o', data_domain, data_db);
-    console.timeStamp('end getDataDb');
-    console.timeEnd('getDataDb');
-    console.groupEnd('getDataDb data_domain "%s"', data_domain);
-    return data_db;
-};
-
-
-function saveDataDb (data_domain, data_db) {
-    console.group('saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-    console.timeStamp('begin saveDataDb');
-    console.time('saveDataDb');
-    console.log('begin saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-
-    if ( hasstorage ) {
-        if (_prog_domain) {
-            if ( _db_domain ) {
-                var db_key  = _prog_domain + _db_domain + data_domain;
-                if (data_db === null) {
-                    localStorage[db_key] = JSON.stringify( {} );
-                } else {
-                    var jso     = JSON.stringify( data_db );
-                    localStorage[db_key] = jso;
-                }
-            }
-        }
-    }
-    
-    console.log('end saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-    console.timeStamp('end saveDataDb');
-    console.timeEnd('saveDataDb');
-    console.groupEnd('saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-};
-
-
-function clearDb (data_domain) {
-    saveDataDb(data_domain, null);
-    setQueryString();
-};
-
-
-function getDb () {
-    console.group('getDb');
-    console.timeStamp('begin getDb');
-    console.time('getDb');
-    console.log('begin getDb');
-
-    var res = null;
-    
-    if ( hasstorage ) {
-        if ( _db_domain ) {
-            if ( localStorage[_db_domain] ) {
-                try {
-                    //console.log('getting ' + k);
-                    var jso = localStorage[_db_domain];
-                    //console.log( jso );
-                    res = JSON.parse( jso );
-                } catch(e) {
-                }
-            }
-        }
-    }
-
-    console.log('end getDb >> %o', res);
-    console.timeStamp('end getDb');
-    console.timeEnd('getDb');
-    console.groupEnd('getDb');
-    
-    return res;
-};
-
-
-function getCurrQueries () {
+function getCurrQueries ( ) {
     console.group('getCurrQueries');
     console.timeStamp('begin getCurrQueries');
     console.time('getCurrQueries');
@@ -2043,14 +1582,132 @@ function getCurrQueries () {
 };
 
 
-function getInitState (qid) {
+
+
+/*
+ *
+ *URL FUNCTIONS
+ *
+ */
+function getQueryString ( ) {
+    console.group('getQueryString');
+    console.timeStamp('begin getQueryString');
+    console.time('getQueryString');
+
+    
+    var parsed = parseUri(document.URL);
+    var anchor = parsed.anchor;
+    var dbnfo  = '|' + _db_domain + '|';
+
+    
+    if ( anchor.indexOf(dbnfo) !== 0 ) {
+        //console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
+        //console.log( anchor.indexOf(dbnfo) );
+        return null;
+    } else {
+        //console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
+        anchor = anchor.substring(dbnfo.length, anchor.length);
+        //console.log( 'anchor ' + anchor);
+    }
+
+
+    if (anchor !== '') {
+        //console.log('has anchor');
+        var data64 = null;
+        try {
+            data64 = decodeObj( anchor );
+        } catch(e) {
+            console.log('invalid 64');
+            console.log(anchor      );
+            return null;
+        }
+
+        console.log('replacing preferences with %o', data64);
+        //localDb.saveDataDb('_queries_redo', data64);
+
+        redoQueries(data64);
+    }
+
+    console.timeStamp('end getQueryString');
+    console.timeEnd('getQueryString');
+    console.groupEnd('getQueryString');
+};
+
+
+function setQueryString ( ) {
+    console.group('setQueryString');
+    console.timeStamp('begin setQueryString');
+    console.time('setQueryString');
+
+    var data_db = localDb.getDataDb('_queries');
+    
+    var parsed = parseUri(document.URL);
+    var anchor = parsed.anchor;
+
+    if ( data_db.length === 0 ) {
+        console.log('nothing to save');
+        return null;
+    }
+
+    var data64 = encodeObj( data_db );
+
+    var dbnfo  = '|' + _db_domain + '|';
+    var nurl   = dbnfo + data64;
+
+    if ( anchor != nurl) {
+        console.log( 'current url and current config differ');
+        //console.log(anchor);
+        //console.log(data64);
+        //console.log(nurl);
+        window.location.hash = nurl;
+        //console.log(data64.length);
+    } else {
+        console.log( 'current url and current config are equal');
+        //console.log(anchor.length);
+    }
+
+    console.timeStamp('end setQueryString');
+    console.timeEnd('setQueryString');
+    console.groupEnd('setQueryString');
+};
+
+
+function redoQueries ( qries ) {
+    console.group('redoQueries %o', qries);
+    console.timeStamp('begin redoQueries');
+    console.time('redoQueries');
+
+    console.log( qries );
+    // TURN OFF PREFERENCES
+
+    if (qries) {
+        for ( var d = 0; d < qries.length; d++ ) {
+            var data = qries[d];
+            var qid  = data[ 0 ];
+            var cfg  = data[ 1 ];
+            var vals = decodeObj( qid );
+            console.log( 'qid  %s', qid  );
+            console.log( 'cfg  %s', cfg  );
+            console.log( 'vals %o', vals );
+            processVals( vals, cfg );
+        }
+    }
+    // TURN PREFERENCES BACK ON
+
+    console.timeStamp('end redoQueries');
+    console.timeEnd('redoQueries');
+    console.groupEnd('redoQueries');
+};
+
+
+function getInitState ( qid ) {
     console.group('getInitState qid "%s"', qid);
     console.timeStamp('begin getInitState');
     console.time('getInitState');
     console.log('begin getInitState qid "%s"', qid);
 
     var res   = null;
-    var qries = getOpt( '_queries', '_queries', null );
+    var qries = localDb.getOpt( '_queries', '_queries', null );
     
     //console.log('getting init state '+qid);
     //console.log(qries);
@@ -2095,7 +1752,7 @@ function getInitState (qid) {
 
 
 //http://stackoverflow.com/questions/799981/document-ready-equivalent-without-jquery
-document.addEventListener('DOMContentLoaded', start );
+//document.addEventListener('DOMContentLoaded', start );
 
 
 

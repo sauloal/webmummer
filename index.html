@@ -252,7 +252,8 @@
 
     <!--<link rel="stylesheet" type="text/css" href="css/tipsy.css" />-->
   </head>
-  <body>
+  <body onload="start()">
+
     <script type="text/javascript" src="js/d3.v3.3.9.js"></script>
     <script type="text/javascript" src="js/parseUri.js"></script>
     <script type="text/javascript" src="js/base64.js"></script>
@@ -260,12 +261,33 @@
     <script type="text/javascript" src="js/public_smo_scripts.js"></script>
 
     <script type="text/javascript" src="js/simple-graph.js"></script>
-    <script type="text/javascript" src="data/list.js"></script> <!--list has to be loaded before setup-->
     <script type="text/javascript" src="js/setup.js"></script>
+    
+	<script type="text/javascript" src="data/list.js"></script> <!--list has to be loaded before setup-->
 
     <!--<script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>-->
     <!--<script type="text/javascript" src="js/jquery.tipsy.js"></script>-->
 
+
+
+	<script type="text/javascript">
+	  var datafolder   = 'data/';
+	  /*
+	  * Folder where the databases resides
+	  */
+	  var chartName    = 'chart1';
+	  /*
+	  * Div where to draw graphs
+	  */
+	  var scriptHolder = 'scriptholder';
+	  
+	  var _prog_domain = 'webmummer';
+
+	  var localDb      = new LocalStorageDb( _prog_domain, _db_domain);
+	</script>
+
+
+    <script type="text/javascript" src="js/menus.js"></script>
 
 
     <script>
