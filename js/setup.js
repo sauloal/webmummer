@@ -9,6 +9,9 @@ var chartName  = 'chart1';
 var scriptHolder = 'scriptholder';
 
 
+var _prog_domain = 'webmummer';
+
+
 
 var bdy    = document.getElementsByTagName('body')[0];
 
@@ -38,7 +41,6 @@ function hasStorage() {
 
 var hasstorage = hasStorage();
 
-initDb();
 
 /*
  * Available fields to be queried in the database
@@ -74,7 +76,7 @@ var opts   = {
 
 
 
-chartSizes = [
+var chartSizes = [
         ['chartfull' , 'Full Page'   ],
         ['chartpart' , 'Half Page'   ],
         ['chartquart', 'Quarter Page']
@@ -462,11 +464,13 @@ var syncFields = {
 
 
 
-function start() {
+function start () {
     /*
     * Creates page elements
     */
-
+    console.group('start');
+    console.timeStamp('begin start');
+    console.time('start');
 
     var sels = document.createElement('span');
     sels.id  = 'selectors';
@@ -527,6 +531,9 @@ function start() {
     }
 
     //document.getElementById('okb').onclick();
+    console.timeStamp('end start');
+    console.timeEnd('start');
+    console.groupEnd('start');
 };
 
 
@@ -555,119 +562,137 @@ function decodeObj ( str ){
 
 
 function getQueryString () {
-    if ( hasstorage ) {
-        if ( _db_domain ) {
-            var parsed = parseUri(document.URL);
-            var anchor = parsed.anchor;
-            var dbnfo  = '|' + _db_domain + '|';
+    console.group('getQueryString');
+    console.timeStamp('begin getQueryString');
+    console.time('getQueryString');
 
+    var parsed = parseUri(document.URL);
+    var anchor = parsed.anchor;
+    var dbnfo  = '|' + _db_domain + '|';
 
-            if ( anchor.indexOf(dbnfo) !== 0 ) {
-                //console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
-                //console.log( anchor.indexOf(dbnfo) );
-                return null;
-            } else {
-                //console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
-                anchor = anchor.substring(dbnfo.length, anchor.length);
-                //console.log( 'anchor ' + anchor);
-            }
-
-
-            if (anchor !== '') {
-                //console.log('has anchor');
-                var data64 = null;
-                try {
-                    data64 = decodeStr( anchor );
-                } catch(e) {
-                    console.log('invalid 64');
-                    console.log(anchor      );
-                    return null;
-                }
-
-                var data = null;
-                try {
-                    data   = JSON.parse( data64 );
-                } catch(e) {
-                    console.log('invalid JSON');
-                    console.log(data64        );
-                    return null;
-                }
-
-                //console.log('replacing preferences with ' + data64);
-                localStorage[_db_domain] = data64;
-
-                redoQueries();
-                //clearDb();
-
-                //for (var k in data) {
-                //    saveOpt(k, data[k]);
-                //}
-            }
-        }
+    
+    if ( anchor.indexOf(dbnfo) !== 0 ) {
+        //console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
+        //console.log( anchor.indexOf(dbnfo) );
+        return null;
+    } else {
+        //console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
+        anchor = anchor.substring(dbnfo.length, anchor.length);
+        //console.log( 'anchor ' + anchor);
     }
-}
+
+
+    if (anchor !== '') {
+        //console.log('has anchor');
+        var data64 = null;
+        try {
+            data64 = decodeStr( anchor );
+        } catch(e) {
+            console.log('invalid 64');
+            console.log(anchor      );
+            return null;
+        }
+
+        var data = null;
+        try {
+            data   = JSON.parse( data64 );
+        } catch(e) {
+            console.log('invalid JSON');
+            console.log(data64        );
+            return null;
+        }
+
+        //console.log('replacing preferences with ' + data64);
+        localStorage[_db_domain] = data64;
+
+        redoQueries();
+    }
+
+    console.timeStamp('end getQueryString');
+    console.timeEnd('getQueryString');
+    console.groupEnd('getQueryString');
+};
 
 
 function setQueryString () {
-    if ( hasstorage ) {
-        if ( _db_domain ) {
-            var parsed = parseUri(document.URL);
-            var anchor = parsed.anchor;
+    console.group('setQueryString');
+    console.timeStamp('begin setQueryString');
+    console.time('setQueryString');
 
-            if ( localStorage[_db_domain].length === 0 ) {
-                console.log('nothing to save');
-                return null;
-            }
+    var data_db = getDataDb('_queries');
+    
+    var parsed = parseUri(document.URL);
+    var anchor = parsed.anchor;
 
-            //console.log( localStorage[_db_domain] );
+    if ( data_db.length === 0 ) {
+        console.log('nothing to save');
+        return null;
+    }
 
-            var data64 = encodeStr( localStorage[_db_domain] );
+    var data64 = encodeObj( data_db );
 
-            var dbnfo  = '|' + _db_domain + '|';
-            var nurl   = dbnfo + data64;
+    var dbnfo  = '|' + _db_domain + '|';
+    var nurl   = dbnfo + data64;
 
-            if ( anchor != nurl) {
-                //console.log( 'current url and current config differ');
-                //console.log(anchor);
-                //console.log(data64);
-                //console.log(nurl);
-                window.location.hash = nurl;
-                //console.log(data64.length);
-            } else {
-                //console.log( 'current url and current config are equal');
-                //console.log(anchor.length);
-            }
+    if ( anchor != nurl) {
+        console.log( 'current url and current config differ');
+        //console.log(anchor);
+        //console.log(data64);
+        //console.log(nurl);
+        window.location.hash = nurl;
+        //console.log(data64.length);
+    } else {
+        console.log( 'current url and current config are equal');
+        //console.log(anchor.length);
+    }
+
+    console.timeStamp('end setQueryString');
+    console.timeEnd('setQueryString');
+    console.groupEnd('setQueryString');
+};
+
+
+function redoQueries () {
+    console.group('redoQueries');
+    console.timeStamp('begin redoQueries');
+    console.time('redoQueries');
+
+    var qries = getOpt('_queries', '_queries', null);
+    console.log( qries );
+    // TURN OFF PREFERENCES
+
+    if (qries) {
+        for ( var d = 0; d < qries.length; d++ ) {
+            var data = qries[d];
+            var qid = data[ 0 ];
+            var cfg = data[ 1 ];
+            console.log( qid );
+            console.log( cfg );
+            var vals = decodeObj( qid );
+            console.log( vals );
+            processVals( vals );
         }
     }
+    // TURN PREFERENCES BACK ON
+
+    console.timeStamp('end redoQueries');
+    console.timeEnd('redoQueries');
+    console.groupEnd('redoQueries');
+};
+
+
+
+
+
+
+function copyKeys ( obj ) {
+    var str = JSON.stringify( obj );
+    var res = JSON.parse(     str );
+    return res;
 }
 
 
-
-function redoQueries() {
-    var qries = getOpt('_queries', null);
-    console.log( qries );
-    for ( var d = 0; d < qries.length; d++ ) {
-        var data = qries[d];
-        var qid = data[ 0 ];
-        var cfg = data[ 1 ];
-        console.log( qid );
-        console.log( cfg );
-        var vals = decodeObj( qid );
-        console.log( vals );
-        // TURN OFF PREFERENCES
-        // TODO: PROCESS VALS
-        //processVals( vals );
-        // TURN PREFERENCES BACK ON
-    }
-}
-
-
-
-
-
-function joinVals( vals ) {
-    var res = []
-
+function joinVals ( vals ) {
     var res = vals.filter(function(elem, pos) {
         return vals.indexOf(elem) == pos;
     });
@@ -680,7 +705,7 @@ function joinVals( vals ) {
 };
 
 
-function addPicker(el, id, cls, nfo, callback, opts) {
+function addPicker (el, id, cls, nfo, callback, opts) {
     var addlbls = true;
     var addlbl1 = true;
     var addlbl2 = true;
@@ -761,7 +786,12 @@ function addPicker(el, id, cls, nfo, callback, opts) {
 }
 
 
-function createCsss(el) {
+function createCsss (el) {
+    console.group('createCsss %o', el);
+    console.timeStamp('begin createCsss');
+    console.time('createCsss');
+    console.log('begin createCsss %o', el);
+
     var tbl       = el  .appendChild( document.createElement('table') );
     tbl.className = 'setuptable';
 
@@ -785,7 +815,7 @@ function createCsss(el) {
         var val   = getFieldValue( id );
 
         console.log('changing obj ' + obj + ' property ' + prop + ' value ' + val);
-        saveOpt( id, val );
+        saveOpt( 'css', id, val );
         changecss(obj, prop, val);
 
         var lbl = document.getElementById( id + '_label' );
@@ -817,7 +847,7 @@ function createCsss(el) {
 
             nfo.obj      = obj;
             nfo.prop     = prop;
-            nfo.value    = getOpt( id, nfo.value );
+            nfo.value    = getOpt( 'css', id, nfo.value );
 
             if ( nfo.value !== valueDfl ) {
                 var val   = nfo.value;
@@ -831,10 +861,20 @@ function createCsss(el) {
             addPicker(tr, id, 'csss', nfo, callback);
         }
     }
+
+    console.log('end createCsss %o', el);
+    console.timeStamp('end createCsss');
+    console.timeEnd('createCsss');
+    console.groupEnd('createCsss %o', el);
 };
 
 
-function createPositions(el) {
+function createPositions (el) {
+    console.group('createPositions %o', el);
+    console.timeStamp('begin createPositions');
+    console.time('createPositions');
+    console.log('begin createPositions %o', el);
+
     var tbl       = el  .appendChild( document.createElement('table') );
     tbl.className = 'setuptable';
 
@@ -856,7 +896,7 @@ function createPositions(el) {
 
         console.log('changing property ' + id + ' value ' + val);
 
-        saveOpt( id, val );
+        saveOpt( 'positions', id, val );
 
         var lbl = document.getElementById( id + '_label' );
         if (lbl) {
@@ -871,20 +911,23 @@ function createPositions(el) {
         var tr     = tbl .appendChild( document.createElement('tr'   ) );
         var id     = posK[idN];
         var nfo    = copyKeys( positions[id] );
-        nfo.value  = getOpt( id, nfo.value );
+        nfo.value  = getOpt( 'positions', id, nfo.value );
         addPicker(tr, id, 'positions', nfo, callback);
     }
+    
+
+    console.log('end createPositions %o', el);
+    console.timeStamp('end createPositions');
+    console.timeEnd('createPositions');
+    console.groupEnd('createPositions %o', el);
 };
 
 
-function copyKeys( obj ) {
-    var str = JSON.stringify( obj );
-    var res = JSON.parse(     str )
-    return res;
-}
+function createOptions () {
+    console.group('createOptions');
+    console.timeStamp('begin createOptions');
+    console.time('createOptions');
 
-
-function createOptions(){
     var divH = bdy.appendChild( document.createElement('div') );
     divH.className   = 'htmlDiv';
 
@@ -917,15 +960,45 @@ function createOptions(){
 
     createCsss(trD22);
 
-    var clsBtn       = document.createElement('button');
-    clsBtn.onclick   = function(e) { if (hasStorage) { alert('cleaning all preferences'); clearDb(); location.reload(); } };
-    clsBtn.innerHTML = 'Clear';
+    var clsBtnS       = document.createElement('button');
+    clsBtnS.onclick   = function(e) { if (hasStorage) { alert('Cleaning Sync preferences'); clearDb('syncs'); location.reload(); } };
+    clsBtnS.innerHTML = 'Clear Syncs';
 
-    divH.appendChild( clsBtn );
+    divH.appendChild( clsBtnS );
+
+    var clsBtnP       = document.createElement('button');
+    clsBtnP.onclick   = function(e) { if (hasStorage) { alert('Cleaning Positions preferences'); clearDb('positions'); location.reload(); } };
+    clsBtnP.innerHTML = 'Clear Positions';
+
+    divH.appendChild( clsBtnP );
+
+    
+    var clsBtnC       = document.createElement('button');
+    clsBtnC.onclick   = function(e) { if (hasStorage) { alert('Cleaning CSS preferences'); clearDb('css'); location.reload(); } };
+    clsBtnC.innerHTML = 'Clear CSS';
+
+    divH.appendChild( clsBtnC );
+
+    
+    var clsBtnA       = document.createElement('button');
+    clsBtnA.onclick   = function(e) { if (hasStorage) { alert('Cleaning ALL preferences'); clearDb('syncs'); clearDb('positions'); clearDb('css'); location.reload(); } };
+    clsBtnA.innerHTML = 'Clear ALL';
+
+    divH.appendChild( clsBtnA );
+
+    
+    console.timeStamp('end createOptions');
+    console.timeEnd('createOptions');
+    console.groupEnd('createOptions');
 }
 
 
-function createSyncs(el) {
+function createSyncs (el) {
+    console.group('createSyncs %o', el);
+    console.timeStamp('begin createSyncs');
+    console.time('createSyncs');
+    console.log('begin createSyncs %o', el);
+
     var span = el.appendChild( document.createElement('span') );
     span.style.display = "inline-block";
 
@@ -951,7 +1024,7 @@ function createSyncs(el) {
 
         console.log('changing property ' + id + ' value ' + val);
 
-        saveOpt( id, val );
+        saveOpt( 'syncs', id, val );
 
         var lbl = document.getElementById( id + '_label' );
         if (lbl) {
@@ -968,9 +1041,9 @@ function createSyncs(el) {
     for (var idN = 0; idN < posK.length; idN++ ) {
         var id    = posK[idN];
         var nfo   = syncFields[id];
-        nfo.value = getOpt( id, nfo.value );
+        nfo.value = getOpt( 'syncs', id, nfo.value );
 
-        addPicker(tr, id, 'positions', nfo, callback);
+        addPicker(tr, id, 'syncs', nfo, callback);
     }
 
 
@@ -985,15 +1058,20 @@ function createSyncs(el) {
 
             if (tgt) {
                 var id = tgt.id;
-                saveOpt( id, getFieldValue( id ) );
+                saveOpt( 'syncs', id, getFieldValue( id ) );
             }
         };
 
     addPicker( tr, 'size', 'sizes', sizes['size'], callback2);
-}
+
+    console.log('end createSyncs %o', el);
+    console.timeStamp('end createSyncs');
+    console.timeEnd('createSyncs');
+    console.groupEnd('createSyncs %o', el);
+};
 
 
-function genSelectorsOpts(obj, refSel, dflt){
+function genSelectorsOpts (obj, refSel, dflt) {
     /*
      * Generate drop-down lists options base on "opts"
      */
@@ -1014,14 +1092,20 @@ function genSelectorsOpts(obj, refSel, dflt){
 
         refSel.appendChild( op );
     }
-}
+};
 
 
-function genSelectors(sels){
+function genSelectors (sels) {
     /*
      * Generate "select" elements. Calls genOpts to read options
      * If only one option available, adds a label field, otherwise, adds a drop-down menu.
      */
+
+    console.group('genSelectors %o', sels);
+    console.timeStamp('begin genSelectors');
+    console.time('genSelectors');
+    console.log('begin genSelectors %o', sels);
+
 
     var callback = function(e) {
             var tgt = null;
@@ -1034,7 +1118,7 @@ function genSelectors(sels){
 
             if (tgt) {
                 var id = tgt.id;
-                saveOpt( id, getFieldValue( id ) );
+                saveOpt( 'selectors', id, getFieldValue( id ) );
             }
         };
 
@@ -1075,7 +1159,7 @@ function genSelectors(sels){
             optVar2.push( [ '*all*', 'All' ] );
 
             opt2.options = optVar2;
-            opt2.value   = getOpt( optName, opt2.value );
+            opt2.value   = getOpt( 'selectors', optName, opt2.value );
 
             addPicker(tbl, optName, 'selectors', opt2, callback, {addlbls: false} );
         }
@@ -1096,7 +1180,12 @@ function genSelectors(sels){
         clb.onclick   = clearPics;
         clb.innerHTML = 'Clear';
     tbl.appendChild( document.createElement('td').appendChild( clb ) );
-}
+
+    console.log('end genSelectors %o', sels);
+    console.timeStamp('end genSelectors');
+    console.timeEnd('genSelectors');
+    console.groupEnd('genSelectors %o', sels);
+};
 
 
 
@@ -1104,7 +1193,7 @@ function genSelectors(sels){
 
 
 
-function loadScript( reg, callback ){
+function loadScript ( reg, callback ) {
     /*
      * Adds a <script> tag to load the database
      * This is needed to circunvent the security measures which forbids
@@ -1114,6 +1203,10 @@ function loadScript( reg, callback ){
      * (both to be forwarded to "loadGraph"), creates the script and add
      * loadgraph as callback to its "onload".
      */
+    console.group('loadScript %o', reg);
+    console.timeStamp('begin loadScript');
+    console.time('loadScript');
+    console.log('begin loadScript %o', reg);
 
     var filepath  = reg.nfo.filepath;
     var scriptId  = reg.nfo.scriptid;
@@ -1131,10 +1224,21 @@ function loadScript( reg, callback ){
     script.onload = function() { callback( reg ); };
 
     document.getElementById( scriptHolder ).appendChild( script );
-}
+
+    console.log('end loadScript %o', reg);
+    console.timeStamp('end loadScript');
+    console.timeEnd('loadScript');
+    console.groupEnd('loadScript %o', reg);
+};
 
 
-function mergeregs( regs ) {
+function mergeregs ( regs ) {
+    console.group('mergeregs %o', regs);
+    console.timeStamp('begin mergeregs');
+    console.time('mergeregs');
+    console.timeStamp('begin mergeregs %o', regs);
+
+
     var hreg = {
         qry: {},
         res: {},
@@ -1273,11 +1377,23 @@ function mergeregs( regs ) {
 
     //console.log(sreg);
 
+
+    console.log('end mergeregs %o >> %o', regs, sreg);
+    console.timeStamp('end mergeregs');
+    console.timeEnd('mergeregs');
+    console.groupEnd('mergeregs %o', regs);
+
     return sreg;
 };
 
 
-function simplifyReg( reg ) {
+function simplifyReg ( reg ) {
+    console.group('simplifyReg %o', reg);
+    console.timeStamp('begin simplifyReg');
+    console.time('simplifyReg');
+    console.log('begin simplifyReg %o', reg);
+
+    
     var res  = [];
     var keys = ['res', 'nfo'];
     for ( var c in keys ) {
@@ -1289,11 +1405,18 @@ function simplifyReg( reg ) {
     res.qry = reg.qry;
     res.cfg = reg.cfg;
     res.uid = reg.nfo.uid;
+    
+
+    console.log('end simplifyReg %o >> %o', reg, res);
+    console.timeStamp('end simplifyReg');
+    console.timeEnd('simplifyReg');
+    console.groupEnd('simplifyReg %o', reg);
+
     return res;
 }
 
 
-function loadGraph( regs ) {
+function loadGraph ( regs ) {
     /*
      * Deletes the <script> tag to release the memory in the DOM.
      * Clears chart
@@ -1327,6 +1450,12 @@ function loadGraph( regs ) {
     //
     //reg.cfg
 
+    console.group('loadGraph %o', regs);
+    console.timeStamp('begin loadGraph');
+    console.time('loadGraph');
+    console.log('begin loadGraph %o', regs);
+
+
     var horizontal = getFieldValue( 'horizontal' );
 
     if (horizontal) {
@@ -1346,6 +1475,11 @@ function loadGraph( regs ) {
     }
     
     setQueryString();
+
+    console.log('end loadGraph %o', regs);
+    console.timeStamp('end loadGraph');
+    console.timeEnd('loadGraph');
+    console.groupEnd('loadGraph %o', regs);
 };
 
 
@@ -1353,7 +1487,7 @@ function loadGraph( regs ) {
 
 
 
-syncLoadScript = function( regs, callback ) {
+syncLoadScript = function ( regs, callback ) {
     var self          = this;
     this.regs         = regs;
     this.callback     = callback;
@@ -1392,10 +1526,15 @@ syncLoadScript = function( regs, callback ) {
 };
 
 
-syncLoadScript.prototype.receive = function( ) {
+syncLoadScript.prototype.receive = function () {
     var self = this;
 
     return function( reg ) {
+        console.group('syncLoadScript.receive %o', reg);
+        console.timeStamp('begin syncLoadScript.receive');
+        console.time('syncLoadScript.receive');
+        console.log('begin syncLoadScript.receive %o', reg);
+
         self.received += 1;
 
         var dataPos = self.sentData.indexOf( reg.res.filename );
@@ -1421,6 +1560,11 @@ syncLoadScript.prototype.receive = function( ) {
             //console.log( self.receivedData );
             self.callback( self.receivedData );
         }
+
+        console.log('end syncLoadScript.receive %o', reg);
+        console.timeStamp('end syncLoadScript.receive');
+        console.timeEnd('syncLoadScript.receive');
+        console.groupEnd('syncLoadScript.receive %o', reg);
     };
 };
 
@@ -1430,7 +1574,11 @@ syncLoadScript.prototype.receive = function( ) {
 
 
 
-function selclick() {
+function selclick () {
+    console.group('selclick');
+    console.timeStamp('begin selclick');
+    console.time('selclick');
+
     var vals = getVals();
 
     if (!vals) {
@@ -1441,10 +1589,19 @@ function selclick() {
     //console.log( vals );
     
     processVals( vals );
+
+    console.timeStamp('end selclick');
+    console.timeEnd('selclick');
+    console.groupEnd('selclick');
 };
 
 
 function processVals( vals ){
+    console.group('processVals %o', vals);
+    console.timeStamp('begin processVals');
+    console.time('processVals');
+    console.log('begin processVals %o', vals);
+
     var regs  = getRegister( vals );
     if ( !regs ) {
         return;
@@ -1455,17 +1612,22 @@ function processVals( vals ){
     }
 
     new syncLoadScript( regs, loadGraph );
+
+    console.log('end processVals %o', vals);
+    console.timeStamp('end processVals');
+    console.timeEnd('processVals');
+    console.groupEnd('processVals %o', vals);
 };
 
 
-function clearPics() {
+function clearPics () {
     console.log('cleaning');
     //console.log(graphdb);
     graphdb.clear();
 }
 
 
-function getFieldValue(fieldId) {
+function getFieldValue (fieldId) {
     var field = document.getElementById( fieldId );
 
     //console.log('getting ' + fieldId);
@@ -1506,7 +1668,7 @@ function getFieldValue(fieldId) {
 };
 
 
-function getVals() {
+function getVals () {
     var vals = {};
 
     for ( var optName in opts ) {
@@ -1525,7 +1687,12 @@ function getVals() {
 }
 
 
-function getRegister( gvals ) {
+function getRegister ( gvals ) {
+    console.group('getRegister %o', gvals);
+    console.timeStamp('begin getRegister');
+    console.time('getRegister');
+    console.log('begin getRegister %o', gvals);
+
     var dvals     = {};
     var evals     = [];
 
@@ -1586,11 +1753,21 @@ function getRegister( gvals ) {
 
     evals.qid = qid;
 
+    console.log('end getRegister %o >> %o', gvals, evals);
+    console.timeStamp('end getRegister');
+    console.timeEnd('getRegister');
+    console.groupEnd('getRegister %o', gvals);
+
     return parseRegisters( evals );
 }
 
 
-function parseRegisters(evals) {
+function parseRegisters (evals) {
+    console.group('parseRegisters %o', evals);
+    console.timeStamp('begin parseRegisters');
+    console.time('parseRegisters');
+    console.log('begin parseRegisters %o', evals);
+    
     var regs       = [];
 
     for ( var e = 0; e < evals.length; e++ ) {
@@ -1656,6 +1833,11 @@ function parseRegisters(evals) {
         return null;
     }
 
+    console.log('end parseRegisters %o >> %o', evals, regs);
+    console.timeStamp('end parseRegisters');
+    console.timeEnd('parseRegisters');
+    console.groupEnd('parseRegisters %o', evals);
+    
     return regs;
 }
 
@@ -1673,90 +1855,152 @@ function obj2str(obj) {
 
 
 
-function saveOpt (k ,v) {
-    if ( hasstorage ) {
-        if ( _db_domain ) {
-            if ( localStorage[_db_domain] ) {
-                if ( v === null ) {
-                    delete localStorage[_db_domain][k];
-                } else {
-                    //console.log('saving k "' + k + '" v "' + v + '"');
-                    var jso = localStorage[_db_domain];
-                    //console.log( jso );
-                    var val = JSON.parse( jso );
-                    //console.log( val );
-                    val[k] = v;
-                    
-                    jso = JSON.stringify( val );
-                    //console.log( jso );
-                    localStorage[_db_domain] = jso;
-                    
-                    setQueryString();
-                }
+
+function saveOpt (data_domain, key ,value) {
+    console.group('saveOpt data_domain "%s" key "%s" value %o', data_domain, key, value);
+    console.timeStamp('begin saveOpt');
+    console.time('saveOpt');
+    console.log('begin saveOpt "%s" key "%s" value %o', data_domain, key, value);
+    
+    var data_db = getDataDb( data_domain );
+
+    if (data_db) {
+        if ( value === null ) {
+            if ( data_db[key] ) {
+                delete data_db[key];
             }
+        } else {
+            console.log('saving domain "' +data_domain+ '" k "' + key + '" v "' + value + '"');
+            data_db[key] = value;
         }
+        
+        saveDataDb(data_domain, data_db);
+        
+        setQueryString();
     }
+
+    console.log('end saveOpt "%s" key "%s" value %o', data_domain, key, value);
+    console.timeStamp('end saveOpt');
+    console.timeEnd('saveOpt');
+    console.groupEnd('saveOpt "%s" key "%s" value %o', data_domain, key, value);
 };
 
 
 function updateQuery (e) {
-    //console.log( 'getting queries ');
+    console.group('updateQuery %o', e);
+    console.timeStamp('begin updateQuery');
+    console.time('updateQuery');
+    console.log('begin updateQuery %o', e);
 
+    //console.log( new Error().stack );
     //console.log( e );
     var qries = e.detail.el;
     //console.log( qries );
     
-    saveOpt('_queries', qries);
+    saveOpt('_queries', '_queries', qries);
+
+    console.log('end updateQuery %o', e);
+    console.timeStamp('end updateQuery');
+    console.timeEnd('updateQuery');
+    console.groupEnd('updateQuery %o', e);
 }
 
 
-function getOpt(k, d) {
-    var val = d;
+function getOpt (data_domain, key, dflt) {
+    console.group('getOpt data_domain "%s" key "%s" default %o', data_domain, key, data_domain);
+    console.timeStamp('begin getOpt');
+    console.time('getOpt');
+    console.log('begin getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
 
-    if ( hasstorage ) {
-        if ( _db_domain ) {
-            if ( localStorage[_db_domain] ) {
-                try {
-                    //console.log('getting ' + k);
-                    var jso = localStorage[_db_domain];
-                    //console.log( jso );
-                    var res = JSON.parse( jso );
-                    //console.log( res );
-                    val = res[k];
-                    //console.log( val );
-                } catch(e) {
-                }
-            }
+    var val     = dflt;
+    var data_db = getDataDb( data_domain );
+
+    if (data_db) {
+        var res = data_db[key];
+        if (res !== null && res !== undefined) {
+            val = res;
         }
     }
 
-    if (val === undefined) {
-        val = d;
-    }
-
     //console.log( 'returning ' + val );
+
+    console.log('end getOpt "%s" key "%s" default %o >> %o', data_domain, key, data_domain, val);
+    console.timeStamp('end getOpt');
+    console.timeEnd('getOpt');
+    console.groupEnd('getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
+    
     return val;
 };
 
 
-function clearDb () {
-    if (_db_domain) {
-        localStorage[_db_domain] = JSON.stringify( new Object() );
-        setQueryString();
+function getDataDb (data_domain){
+    console.group('getDataDb data_domain "%s"', data_domain);
+    console.timeStamp('begin getDataDb');
+    console.time('getDataDb');
+    console.log('begin getDataDb data_domain "%s"', data_domain);
+
+    var data_db = {};
+    if ( hasstorage ) {
+        if (_prog_domain) {
+            if ( _db_domain ) {
+                var db_key  = _prog_domain + _db_domain + data_domain;
+                if ( localStorage[db_key] ) {
+                    try {
+                        data_db = JSON.parse( localStorage[db_key] );
+                    } catch(e) {
+                    }
+                }
+            }
+        }
     }
+    
+    console.log('end getDataDb data_domain "%s" >> %o', data_domain, data_db);
+    console.timeStamp('end getDataDb');
+    console.timeEnd('getDataDb');
+    console.groupEnd('getDataDb data_domain "%s"', data_domain);
+    return data_db;
 };
 
 
-function initDb () {
-    if (_db_domain) {
-        if ( !localStorage[_db_domain] ) {
-            localStorage[_db_domain] = JSON.stringify( new Object() );
+function saveDataDb (data_domain, data_db) {
+    console.group('saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+    console.timeStamp('begin saveDataDb');
+    console.time('saveDataDb');
+    console.log('begin saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+
+    if ( hasstorage ) {
+        if (_prog_domain) {
+            if ( _db_domain ) {
+                var db_key  = _prog_domain + _db_domain + data_domain;
+                if (data_db === null) {
+                    localStorage[db_key] = JSON.stringify( {} );
+                } else {
+                    var jso     = JSON.stringify( data_db );
+                    localStorage[db_key] = jso;
+                }
+            }
         }
     }
+    
+    console.log('end saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+    console.timeStamp('end saveDataDb');
+    console.timeEnd('saveDataDb');
+    console.groupEnd('saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+};
+
+
+function clearDb (data_domain) {
+    saveDataDb(data_domain, null);
+    setQueryString();
 };
 
 
 function getDb () {
+    console.group('getDb');
+    console.timeStamp('begin getDb');
+    console.time('getDb');
+    console.log('begin getDb');
+
     var res = null;
     
     if ( hasstorage ) {
@@ -1772,19 +2016,41 @@ function getDb () {
             }
         }
     }
+
+    console.log('end getDb >> %o', res);
+    console.timeStamp('end getDb');
+    console.timeEnd('getDb');
+    console.groupEnd('getDb');
     
     return res;
 };
 
 
 function getCurrQueries () {
-    return graphdb.getQueries();
-}
+    console.group('getCurrQueries');
+    console.timeStamp('begin getCurrQueries');
+    console.time('getCurrQueries');
+    console.log('begin getCurrQueries');
+
+    var q = graphdb.getQueries();
+
+    console.log('end getCurrQueries >> %o', q);
+    console.timeStamp('end getCurrQueries');
+    console.timeEnd('getCurrQueries');
+    console.groupEnd('getCurrQueries');
+
+    return q;
+};
 
 
 function getInitState (qid) {
+    console.group('getInitState qid "%s"', qid);
+    console.timeStamp('begin getInitState');
+    console.time('getInitState');
+    console.log('begin getInitState qid "%s"', qid);
+
     var res   = null;
-    var qries = getOpt( '_queries', null );
+    var qries = getOpt( '_queries', '_queries', null );
     
     //console.log('getting init state '+qid);
     //console.log(qries);
@@ -1805,6 +2071,11 @@ function getInitState (qid) {
     } else {
         //console.log( 'no init state')
     }
+
+    console.log('end getInitState qid "%s" >> %o', qid, res);
+    console.timeStamp('getInitState');
+    console.timeEnd('getInitState');
+    console.groupEnd('getInitState qid "%s"', qid);
     
     return res;
 }

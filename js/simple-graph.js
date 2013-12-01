@@ -488,7 +488,7 @@ SimpleGraph.prototype.draw = function () {
         var iState  = this.options.initState;
         var cX      = iState.cX;
         var cY      = iState.cY;
-        console.warn( JSON.stringify( iState ) );
+        //console.warn( JSON.stringify( iState ) );
 
         this.cx     = cX;
         this.cy     = cY;
@@ -737,12 +737,12 @@ SimpleGraph.prototype.draw = function () {
 
 
     if (this.options.initState) {
-        console.warn('applying initial state');
-        console.warn( JSON.stringify( this.getCurrStatus() )   );
+        //console.warn('applying initial state');
+        //console.warn( JSON.stringify( this.getCurrStatus() )   );
 
         var iState  = this.options.initState;
 
-        console.warn( JSON.stringify( iState ) );
+        //console.warn( JSON.stringify( iState ) );
         
         var z       = iState.currScale;
 
@@ -764,10 +764,9 @@ SimpleGraph.prototype.draw = function () {
         self.y.domain( domainY );
         self.y.range ( rangeY  );
     
-        console.warn( JSON.stringify( this.getCurrStatus() ) );
+        //console.warn( JSON.stringify( this.getCurrStatus() ) );
 
         this.redraw()();
-
     }
     
 };
