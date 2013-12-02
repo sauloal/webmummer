@@ -1025,12 +1025,12 @@ processVals.prototype.loadGraph = function ( ) {
 
 
     if (self.cfg.horizontal) {
-        var hreg = self.mergeregs( );
+        var hreg           = self.mergeregs( );
 
         hreg.cfg           = self.cfg;
         hreg.cfg.initState = self.initState;
 
-        console.log( 'plotting register %o', self.hreg );
+        console.log( 'plotting register %o', hreg );
 
         graphdb.add(chartName, hreg);
 
@@ -1066,12 +1066,7 @@ processVals.prototype.mergeregs = function ( ) {
     console.timeStamp(     'begin processVals.mergeregs %o', self.receivedData);
 
 
-    var hreg = {
-        qry: {},
-        res: {},
-        nfo: {},
-    };
-
+    var hreg         = {};
     var yTicksLabels = [];
 
 
@@ -1080,15 +1075,24 @@ processVals.prototype.mergeregs = function ( ) {
 
     for ( var r = 0; r < self.receivedData.length; r++ ) {
         var reg = self.receivedData[r];
+
         yTicksLabels[r] = [];
 
         for ( var cls in reg ) {
-            for ( var k in reg[cls] ) {
-                if (!self.hreg[cls][k]) {
-                    self.hreg[cls][k] = [];
+            if ( !hreg[cls] ) {
+                hreg[cls] = {};
+            }
+
+            for ( var scls in reg[cls] ) {
+                var val = reg[cls][scls];
+
+                if ( !hreg[cls][scls] ) {
+                    hreg[cls][scls] = [];
                 }
-                var val = reg[cls][k];
-                self.hreg[cls][k].push( val );
+
+                if ( hreg[cls][scls].indexOf( val ) == -1 ) {
+                    hreg[cls][scls].push( val );
+                }
             }
         }
     }
@@ -1103,15 +1107,21 @@ processVals.prototype.mergeregs = function ( ) {
     //console.log(sreg);
 
 
-    for ( var v in sreg.res ) {
-        var vals = sreg.res[v];
-        var uniqueArray = vals.filter(function(elem, pos) {
-            return vals.indexOf(elem) == pos;
-        });
+    for ( var cls in sreg ) {
+        var vals = sreg[ cls ];
 
-        if (uniqueArray.length == 1) {
-            if (['tgts', 'points'].indexOf(v) == -1) {
-                sreg.res[v] = vals[0];
+        if ( vals ) {
+
+            if ( Object.prototype.toString.call( vals ) === '[object Array]' ) {
+                var uniqueArray = vals.filter(function(elem, pos) {
+                    return vals.indexOf(elem) == pos;
+                });
+
+                if (uniqueArray.length == 1) {
+                    if (['tgts', 'points'].indexOf(v) == -1) {
+                        sreg[ cls ] = vals[0];
+                    }
+                }
             }
         }
     }
@@ -1120,6 +1130,7 @@ processVals.prototype.mergeregs = function ( ) {
     //console.log(sreg);
 
 
+    sreg.uid = [];
     for ( var v in sreg.qry ) {
         var vals        = sreg.qry[v];
         var uniqueArray = vals.filter(function(elem, pos) {
@@ -1132,10 +1143,14 @@ processVals.prototype.mergeregs = function ( ) {
             for ( var h = 0; h < sreg.qry[v].length; h++) {
                 var val = sreg.qry[v][h];
                 //console.log ( val );
+                sreg.uid.push(val);
                 yTicksLabels[h].push( val );
             }
+        } else {
+            sreg.uid.push(uniqueArray[0]);
         }
     }
+    sreg.uid          = sreg.uid.join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
 
 
     //console.log(yTicksLabels);
@@ -1175,25 +1190,22 @@ processVals.prototype.mergeregs = function ( ) {
     var ylabel        = joinVals( sreg.ylabel       );
     var xlabel        = joinVals( sreg.xlabel       );
 
+    sreg.cfg          = self.cfg;
+    sreg.pid          = self.qid;
 
     sreg.title        = refs + ' #' + refsCr + ' vs ' + tgts  + ' #' + tgtsCr + ' - Status ' + sts;
     sreg.ylabel       = ylabel;
     sreg.xlabel       = xlabel;
     sreg.yTicksLabels = yTicksLabels;
-    sreg.tipId        = sreg.tipId[0];
-    sreg.chartClass   = sreg.chartClass[0];
-
-
-    sreg.uid          = Object.keys( self.vals ).map( function(d) { return qry[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
 
 
     //console.log(sreg);
 
 
-    console.log(      'end processVals.mergeregs %o >> %o', regs, sreg);
+    console.log(      'end processVals.mergeregs %o >> %o', self.receivedData, sreg);
     console.timeStamp('end processVals.mergeregs');
     console.timeEnd(  'processVals.mergeregs');
-    console.groupEnd( 'processVals.mergeregs %o', regs);
+    console.groupEnd( 'processVals.mergeregs %o', self.receivedData);
 
     return sreg;
 };
@@ -1211,9 +1223,9 @@ processVals.prototype.simplifyReg = function ( reg ) {
     var res  = [];
     var keys = ['res', 'nfo'];
     for ( var c in keys ) {
-        var cls = keys[c];
-        for ( var k in reg[cls] ) {
-            res[k] = reg[cls][k];
+        var cls = keys[ c ];
+        for ( var k in reg[ cls ] ) {
+            res[ k ] = reg[ cls ][ k ];
         }
     }
 
@@ -1434,7 +1446,7 @@ function updateQuery ( e ) {
             var outp  = {
                 'status' : setup.status,
                 'options': setup.options,
-                'vals'   : dpid
+                'vals'   : dpid.vals
                 };
 
             console.log( 'qid %s pid %s dqid %o dpid %o setup %o out %o', qid, pid, dqid, dpid, setup, outp );
@@ -1533,14 +1545,18 @@ function copyKeys ( obj ) {
 
 
 function joinVals ( vals ) {
-    var res = vals.filter(function(elem, pos) {
-        return vals.indexOf(elem) == pos;
-    });
+    if ( Object.prototype.toString.call( vals ) === '[object Array]' ) {
+        var res = vals.filter(function(elem, pos) {
+            return vals.indexOf(elem) == pos;
+        });
 
-    if (res.length == 1) {
-        return res.join('+');
+        if (res.length == 1) {
+            return res.join('+');
+        } else {
+            return '(' + res.join('+') + ')';
+        }
     } else {
-        return '(' + res.join('+') + ')';
+        return vals;
     }
 };
 
@@ -1711,7 +1727,7 @@ function redoQueries ( qries ) {
 
     if (qries) {
         for ( var d = 0; d < qries.length; d++ ) {
-            var data = qries[d];
+            var data   = qries[d];
             var opts   = data[ 'options' ];
             var status = data[ 'status'  ];
             var vals   = data[ 'vals'    ];

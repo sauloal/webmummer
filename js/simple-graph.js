@@ -404,7 +404,7 @@ SimpleGraph = function (chartHolder, options) {
     this.options.title               = options.title                   || 'no title';
     this.options.yTicksLabels        = options.yTicksLabels;
 
-    this.options.parallel            = options.cfg.parallel === null ? isArray( this.points[0] ) : options.cfg.parallel;
+    this.options.horizontal          = options.cfg.horizontal === null ? isArray( this.points[0] ) : options.cfg.horizontal;
     this.options.labelId             = options.cfg.labelId             || null;
     this.options.tipId               = options.cfg.tipId               || null;
     this.options.xTicks              = options.cfg.xTicks              || 5;
@@ -431,6 +431,7 @@ SimpleGraph = function (chartHolder, options) {
     this.options.initState           = options.cfg.initState           || null;
     //this.options.radius         = options.radius         || 5.0;
 
+    console.log( this.options );
 
     var requireds = [ 'tgts', 'points' ];
     for ( var r = 0; r < requireds.length; r++ ) {
@@ -481,7 +482,8 @@ SimpleGraph = function (chartHolder, options) {
 
 
 
-    if  ( this.options.parallel ) {
+    if  ( this.options.horizontal ) {
+        console.log( 'RUNNING HORIZONTALLY' );
         this.options.ymin   = 0;
         this.options.ymax   = this.points.length + 1;
         this.options.yTicks = this.points.length + 1;
@@ -644,7 +646,7 @@ SimpleGraph.prototype.draw = function () {
 
     this.zoom  = d3.behavior.zoom();
 
-    if (this.options.parallel) {
+    if (this.options.horizontal) {
         this.vis.call( self.zoomC = this.zoom.x(this.x).on("zoom", this.redraw()));
     } else {
         this.vis.call( self.zoomC = this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
@@ -842,7 +844,7 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
             var stVal      = { x: vars.x1, y: vars.y1 };
             var ndVal      = { x: vars.x2, y: vars.y2 };
 
-            if ( self.options.parallel ) {
+            if ( self.options.horizontal ) {
                 stVal.y = linenum + 1;
                 ndVal.y = linenum + 1;
             }
@@ -893,7 +895,7 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
             var stVal      = { x: vars.x1, y: vars.y1 };
             var ndVal      = { x: vars.x2, y: vars.y2 };
 
-            if ( self.options.parallel ) {
+            if ( self.options.horizontal ) {
                 stVal.y = linenum + 1;
                 ndVal.y = linenum + 1;
             }
@@ -1015,7 +1017,7 @@ SimpleGraph.prototype.highlight = function( el ) {
         var y1   = self.y( vars.y1 );
         var y2   = self.y( vars.y2 );
 
-        if ( self.options.parallel ) {
+        if ( self.options.horizontal ) {
             y1 = self.y( k + 1 + 0.5 );
             y2 = self.y( k + 1 - 0.5 );
         }
@@ -1058,7 +1060,7 @@ SimpleGraph.prototype.highlight = function( el ) {
                         .style("stroke-width", greenWidth    )
                         ;
 
-            if ( ! self.options.parallel ) {
+            if ( ! self.options.horizontal ) {
                 self.greenbox.append( "rect" )
                             .attr( "class"       , "scaf-square" )
                             .attr( "x"           , 0  )
@@ -1538,7 +1540,7 @@ SimpleGraph.prototype.redraw = function () {
 
 
 
-    if ( self.options.parallel ) {
+    if ( self.options.horizontal ) {
         if  (self.options.yTicksLabels) {
             fy = function (d) {
                 if ( d > 0 && d <= self.options.yTicksLabels.length ) {
@@ -1609,7 +1611,7 @@ SimpleGraph.prototype.redraw = function () {
     }
 
 
-    if (self.options.parallel) {
+    if (self.options.horizontal) {
         self.vis.selectAll('.grid-num-y').each( function(d,i) {
             //console.log(this);
             //console.log(d3.select(this).text());
