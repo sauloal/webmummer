@@ -276,14 +276,15 @@
     <script type="text/javascript" src="js/public_smo_scripts.js"></script>
 
     <script type="text/javascript" src="js/simple-graph.js"></script>
-    <script type="text/javascript" src="js/setup.js"></script>
-
-	<script type="text/javascript" src="data/list.js"></script> <!--list has to be loaded before setup-->
 
     <!--<script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>-->
     <!--<script type="text/javascript" src="js/jquery.tipsy.js"></script>-->
 
+	<script type="text/javascript" src="data/list.js"></script> <!--list has to be loaded before setup-->
 
+    <script type="text/javascript" src="js/menus.js"></script>
+
+    <script type="text/javascript" src="js/setup.js"></script>
 
 	<script type="text/javascript">
 	  var datafolder   = 'data/';
@@ -298,11 +299,11 @@
 
 	  var _prog_domain = 'webmummer';
 
-	  var localDb      = new LocalStorageDb( _prog_domain, _db_domain);
+	  var localDb      = new LocalStorageDb( _prog_domain, _db_domain );
+
+	  webmummer_debug  = false;
 	</script>
 
-
-    <script type="text/javascript" src="js/menus.js"></script>
 
 
     <script>

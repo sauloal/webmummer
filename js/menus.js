@@ -38,17 +38,6 @@ var chartSizes = [
 ]
 
 
-var sizes = {
-    'size'                       : {
-                        'tag'    : 'select',
-                        //'value'  : chartSizes[0][0],
-                        'options': chartSizes,
-                        'alt'    : 'Chart Size'
-    }
-};
-
-
-
 var positions = {
     'xTicks'                     : {
                         'tag'    : 'input',
@@ -234,6 +223,12 @@ var positions = {
 
 
 var syncFields = {
+    'chartClass': {
+                        'tag'    : 'select',
+                        //'value'  : chartSizes[0][0],
+                        'options': chartSizes,
+                        'alt'    : 'Chart Size'
+    },
     'sync': {
                 'tag'    : 'input',
                 'type'   : 'checkbox',

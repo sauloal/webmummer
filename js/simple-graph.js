@@ -125,9 +125,10 @@ SyncSimpleGraph.prototype.getVar = function ( vari ) {
 
 
 SyncSimpleGraph.prototype.clear = function () {
+    var self = this;
     for ( var uid in this.db ) {
         console.log( 'cleaning ' + uid );
-        this.deleteUid(uid);
+        self.deleteUid(uid);
     }
 
     this.db      = {};
@@ -254,15 +255,21 @@ SyncSimpleGraph.prototype.getQueries = function() {
 
 
 SyncSimpleGraph.prototype.deleteUid = function (uid) {
-    if (this.db[uid]) {
+    var self = this;
+    
+    if ( self.db[uid] ) {
         //console.log('has uid ' + uid + ' ' + this.db[uid]);
-        var el = this.db[uid];
+        var el = self.db[uid];
+        
         el.close();
-        delete this.db[uid];
+        
+        delete self.db[uid];
         //console.log( 'B ' + JSON.stringify( this.bd ) );
-        delete this.bd[ this.bd.indexOf(uid) ];
+        
+        delete self.bd[ self.bd.indexOf(uid) ];
         //console.log( 'D ' + JSON.stringify( this.bd ) );
-        this.bd = this.bd.filter( function (v) { if (v !== null) { return v; } } );
+        
+        self.bd = self.bd.filter( function (v) { if (v !== null) { return v; } } );
         //console.log( 'A ' + JSON.stringify( this.bd ) );
         //console.log(this.db);
 
@@ -398,13 +405,13 @@ SimpleGraph = function (chartHolder, options) {
     this.options.ymax                = options.ymax;
     this.options.ymin                = options.ymin;
 
-    this.options.chartClass          = options.chartClass              || 'chartpart';
     this.options.xlabel              = options.xlabel                  || 'x';
     this.options.ylabel              = options.ylabel                  || 'y';
     this.options.title               = options.title                   || 'no title';
     this.options.yTicksLabels        = options.yTicksLabels;
 
     this.options.horizontal          = options.cfg.horizontal === null ? isArray( this.points[0] ) : options.cfg.horizontal;
+    this.options.chartClass          = options.cfg.chartClass          || 'chartpart';
     this.options.labelId             = options.cfg.labelId             || null;
     this.options.tipId               = options.cfg.tipId               || null;
     this.options.xTicks              = options.cfg.xTicks              || 5;

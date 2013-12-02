@@ -9,8 +9,6 @@ var win          = window,
 
 
 
-
-
 function hasStorage ( ) {
     try {
         var res = 'localStorage' in window && window.localStorage !== null;
@@ -37,6 +35,19 @@ function start () {
     /*
     * Creates page elements
     */
+
+
+    if ( !webmummer_debug ) {
+        function dumper () {};
+        console.log            = dumper;
+        console.timeStamp      = dumper;
+        console.time           = dumper;
+        console.groupCollapsed = dumper;
+        console.timeEnd        = dumper;
+        console.groupEnd       = dumper;
+    };
+
+
     console.groupCollapsed('start');
     console.timeStamp(     'begin start');
     console.time(          'start');
@@ -85,19 +96,6 @@ function start () {
 
     getQueryString();
 
-
-    if ( false ) {
-        // automatically select the last option in all fields
-        for ( var optName in opts ) {
-            var field = document.getElementById( optName );
-            if ( field.localName == 'select' ) {
-                //console.log( field.lastChild.previousSibling );
-                field.lastChild.previousSibling.selected = true;
-            } else {
-                //console.log('not select');
-            }
-        }
-    }
 
     //document.getElementById('okb').onclick();
     console.timeStamp('end start');
@@ -477,21 +475,21 @@ function createSyncs ( el ) {
 
 
 
-    var callback2 = function(e) {
-            var tgt = null
-            try {
-                tgt = e.srcElement;
-            } catch(e) {
-                tgt = e.target; //Firefox
-            }
-
-            if (tgt) {
-                var id = tgt.id;
-                localDb.saveOpt( 'syncs', id, getFieldValue( id ) );
-            }
-        };
-
-    addPicker( tr, 'size', 'sizes', sizes.size, callback2, {addlblA: false});
+    //var callback2 = function(e) {
+    //        var tgt = null
+    //        try {
+    //            tgt = e.srcElement;
+    //        } catch(e) {
+    //            tgt = e.target; //Firefox
+    //        }
+    //
+    //        if (tgt) {
+    //            var id = tgt.id;
+    //            localDb.saveOpt( 'syncs', id, getFieldValue( id ) );
+    //        }
+    //    };
+    //
+    //addPicker( tr, 'size', 'sizes', sizes.size, callback2, {addlblA: false});
 
     console.log(      'end createSyncs %o', el);
     console.timeStamp('end createSyncs');
@@ -647,7 +645,7 @@ function selclick ( ) {
         return;
     }
 
-    cfg.horizontal = getFieldValue( 'horizontal' );
+    //cfg.horizontal = getFieldValue( 'horizontal' );
     cfg.tipId      = 'tipper';
     cfg.labelId    = null;
 
@@ -694,14 +692,15 @@ function getCfg ( ) {
     console.time(          'getCfg');
 
     var optdbs = {
-        'positions' : positions,
-        'sizes'     : sizes,
-        'syncFields': syncFields
+        'positions' : [positions , false],
+        'syncFields': [syncFields, true ]
     };
 
     for ( optName in optdbs ) {
         console.log('checking '+ optName);
-        var optdb = optdbs[ optName ];
+        var optdb = optdbs[ optName ][0];
+        var compu = optdbs[ optName ][1];
+        
         var posK  = Object.keys( optdb );
             posK.sort();
 
@@ -717,7 +716,7 @@ function getCfg ( ) {
             console.log('checking '+ optName + ' option ' + id + ' default ' + dfl + ' current ' + curr);
 
 
-            if ( ( dfl === null ) || ( tpy == 'checkbox' ) || ( dfl != curr ) ) {
+            if ( ( compu ) || ( dfl === null ) || ( tpy == 'checkbox' ) || ( dfl != curr ) ) {
                 console.log('  changing');
                 console.log( nfo );
                 cfg[id] = curr;
@@ -766,16 +765,6 @@ processVals = function ( vals, cfg, initState ){
 
     self.getRegister();
 
-    if ( !self.regs ) {
-        console.log('error acquiring registers');
-        return;
-    }
-
-    if ( self.regs.length === 0 ) {
-        console.log('no register');
-        return;
-    }
-
     console.log(      'end processVals qid %s', self.qid);
     console.timeStamp('end processVals');
     console.timeEnd(  'processVals');
@@ -796,7 +785,7 @@ processVals.prototype.getRegister = function ( ) {
     self.evals         = [];
 
     for ( var key in opts ) {
-        var val         = self.vals[key];
+        var val         = self.vals[ key ];
         self.dvals[key] = [];
 
         if ( val == '*all*' ) {
@@ -1251,13 +1240,13 @@ processVals.prototype.simplifyReg = function ( reg ) {
  *DB FUNCTIONS
  *
  */
-LocalStorageDb = function ( prog_domain, db_domain) {
+LocalStorageDb = function ( prog_domain, db_domain ) {
     this.progDomain = prog_domain;
     this.dbDomain   = db_domain;
 };
 
 
-LocalStorageDb.prototype.saveOpt = function (data_domain, key ,value) {
+LocalStorageDb.prototype.saveOpt = function ( data_domain, key , value ) {
     var self = this;
 
     console.groupCollapsed('LocalStorageDb.saveOpt data_domain "%s" key "%s" value %o', data_domain, key, value);
@@ -1287,7 +1276,7 @@ LocalStorageDb.prototype.saveOpt = function (data_domain, key ,value) {
 };
 
 
-LocalStorageDb.prototype.getOpt = function (data_domain, key, dflt) {
+LocalStorageDb.prototype.getOpt = function ( data_domain, key, dflt ) {
     var self = this;
 
     console.groupCollapsed('LocalStorageDb.getOpt data_domain "%s" key "%s" default %o', data_domain, key, data_domain);
@@ -1348,7 +1337,7 @@ LocalStorageDb.prototype.getDataDb = function ( data_domain ){
 };
 
 
-LocalStorageDb.prototype.saveDataDb = function (data_domain, data_db) {
+LocalStorageDb.prototype.saveDataDb = function ( data_domain, data_db ) {
     var self = this;
 
     console.groupCollapsed('LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
@@ -1378,14 +1367,14 @@ LocalStorageDb.prototype.saveDataDb = function (data_domain, data_db) {
 };
 
 
-LocalStorageDb.prototype.clearDb = function (data_domain) {
+LocalStorageDb.prototype.clearDb = function ( data_domain ) {
     var self = this;
 
     self.saveDataDb(data_domain, null);
 };
 
 
-LocalStorageDb.prototype.getDb = function () {
+LocalStorageDb.prototype.getDb = function ( ) {
     var self = this;
 
     console.groupCollapsed('LocalStorageDb.getDb');
@@ -1436,20 +1425,22 @@ function updateQuery ( e ) {
     for ( var qid in qries ) {
         var dqid  = decodeObj( qid );
         var subq  = qries[ qid ];
-        console.log( 'qid %o dqid %o subq %o', qid, dqid, subq );
+        console.log( 'qid %o\n\tdqid %o\n\tsubq %o', qid, dqid, subq );
 
         for ( var pid in subq ) {
             var dpid  = decodeObj( pid );
+            
+            console.log( 'pid %s \tdpid %o', pid, dpid );
 
             var setup = subq[ pid ];
 
             var outp  = {
-                'status' : setup.status,
-                'options': setup.options,
-                'vals'   : dpid.vals
+                    'status' : setup.status,
+                    'options': setup.options,
+                    'vals'   : dpid
                 };
 
-            console.log( 'qid %s pid %s dqid %o dpid %o setup %o out %o', qid, pid, dqid, dpid, setup, outp );
+            console.log( 'qid %s\n\tpid %s\n\tdqid %o\n\tdpid %o\n\tsetup %o\n\tout %o', qid, pid, dqid, dpid, setup, outp );
             res.push( outp );
         }
     }
@@ -1462,7 +1453,7 @@ function updateQuery ( e ) {
     console.timeStamp('end updateQuery');
     console.timeEnd(  'updateQuery');
     console.groupEnd( 'updateQuery %o', e);
-}
+};
 
 
 
@@ -1638,27 +1629,25 @@ function setQueryString ( data ) {
     console.time(          'setQueryString');
 
 
-    if ( Object.keys(data).length > 0 ) {
-        var parsed  = parseUri( document.URL );
-        var anchor  = parsed.anchor;
+    var parsed  = parseUri( document.URL );
+    var anchor  = parsed.anchor;
 
-        var data64  = encodeObj( data );
+    var data64  = encodeObj( data );
 
-        var dbnfo   = '|' + _db_domain + '|';
-        var nurl    = dbnfo + data64;
+    var dbnfo   = '|' + _db_domain + '|';
+    var nurl    = dbnfo + data64;
 
-        if ( anchor != nurl) {
-            console.log( 'current url and current config differ');
-            //console.log(anchor);
-            //console.log(data64);
-            //console.log(nurl);
-            console.log( 'setting url %s', nurl);
-            window.location.hash = nurl;
-            //console.log(data64.length);
-        } else {
-            console.log( 'current url and current config are equal');
-            //console.log(anchor.length);
-        }
+    if ( anchor != nurl) {
+        console.log( 'current url and current config differ');
+        //console.log(anchor);
+        //console.log(data64);
+        //console.log(nurl);
+        console.log( 'setting url %s', nurl);
+        window.location.hash = nurl;
+        //console.log(data64.length);
+    } else {
+        console.log( 'current url and current config are equal');
+        //console.log(anchor.length);
     }
 
     console.timeStamp('end setQueryString');
@@ -1732,9 +1721,9 @@ function redoQueries ( qries ) {
             var status = data[ 'status'  ];
             var vals   = data[ 'vals'    ];
 
-            console.log( '%d opts   %o', d, opts   );
-            console.log( '%d status %o', d, status );
-            console.log( '%d vals   %o', d, vals   );
+            console.log( 'd %d opts   %o', d, opts   );
+            console.log( 'd %d status %o', d, status );
+            console.log( 'd %d vals   %o', d, vals   );
 
             new processVals( vals, opts, status );
         }
