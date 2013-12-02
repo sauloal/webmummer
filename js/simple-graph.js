@@ -204,30 +204,72 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
     this.bd.push( uid );
     this.db[ uid ]     = new SimpleGraph(chartHolder, options);
     this.db[ uid ].qid = options.qid;
-    
-    self.dispatchChangedEvent();
+    this.db[ uid ].pid = options.pid;
+
+    self.dispatchChangedEvent('add');
 };
 
 
 
 
 SyncSimpleGraph.prototype.getQueries = function() {
-    var res = [];
-    //console.log( 'getting current queries');
+    var res = {};
+    console.log( 'getting current queries');
+
     for ( var u = 0; u < this.bd.length; u++ ) {
-        var uid        = this.bd[u];
+        //console.log( 'getting current queries: U %d', u);
+        var uid        = this.bd[u  ];
+        //console.log( 'getting current queries: U %d UID %s', u, uid);
         var sgo        = this.db[uid];
+        //console.log( 'getting current queries: U %d UID %s SGO %o', u, uid, sgo);
+
         if ( sgo ) {
+            //console.log( 'getting current queries: U %d UID %s SGO %o. HAS UID', u, uid, sgo);
             var qid        = sgo.qid;
+            var pid        = sgo.pid;
             var currStatus = sgo.getCurrStatus();
-            
+            //console.log( 'getting current queries: U %d UID %s SGO %o. HAS UID. QID %s PID %s STATUS %o', u, uid, sgo, qid, pid, currStatus);
+
             if (qid) {
-                res.push( [qid, currStatus] );
+                console.log( 'getting current queries: U %d UID %s SGO %o. HAS UID. QID %s PID %s STATUS %o. HAS QID', u, uid, sgo, qid, pid, currStatus);
+                if ( !res[ qid ] ) {
+                    res[ qid ] = {};
+                }
+
+                res[ qid ][ pid ] = currStatus;
+            } else {
+                //console.log( 'getting current queries: U %d UID %s SGO %o. HAS UID. QID %s STATUS %o. NO QID', u, uid, sgo, qid, currStatus);
             }
+        } else {
+            //console.log( 'getting current queries: U %d UID %s SGO %o. NO UID', u, uid, sgo);
         }
     }
-    
+
+    console.log( 'getting current queries. returning %o', res);
+
     return res;
+};
+
+
+
+
+SyncSimpleGraph.prototype.deleteUid = function (uid) {
+    if (this.db[uid]) {
+        //console.log('has uid ' + uid + ' ' + this.db[uid]);
+        var el = this.db[uid];
+        el.close();
+        delete this.db[uid];
+        //console.log( 'B ' + JSON.stringify( this.bd ) );
+        delete this.bd[ this.bd.indexOf(uid) ];
+        //console.log( 'D ' + JSON.stringify( this.bd ) );
+        this.bd = this.bd.filter( function (v) { if (v !== null) { return v; } } );
+        //console.log( 'A ' + JSON.stringify( this.bd ) );
+        //console.log(this.db);
+
+        this.dispatchChangedEvent('delete');
+    } else {
+        console.log('uid '+uid+' not present');
+    }
 };
 
 
@@ -279,32 +321,9 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
         //console.log('only one graph');
         //console.log(Object.keys(this.db).length);
     }
-    
-    self.dispatchChangedEvent();
+
+    self.dispatchChangedEvent('zoom');
 };
-
-
-
-
-SyncSimpleGraph.prototype.deleteUid = function (uid) {
-    if (this.db[uid]) {
-        //console.log('has uid ' + uid + ' ' + this.db[uid]);
-        var el = this.db[uid];
-        el.close();
-        delete this.db[uid];
-        //console.log( 'B ' + JSON.stringify( this.bd ) );
-        delete this.bd[ this.bd.indexOf(uid) ];
-        //console.log( 'D ' + JSON.stringify( this.bd ) );
-        this.bd = this.bd.filter( function (v) { if (v !== null) { return v; } } );
-        //console.log( 'A ' + JSON.stringify( this.bd ) );
-        //console.log(this.db);
-    } else {
-        console.log('uid '+uid+' not present');
-    }
-    
-    this.dispatchChangedEvent();
-};
-
 
 
 
@@ -321,9 +340,11 @@ SyncSimpleGraph.prototype.d3closed = function (e) {
 
 
 
-SyncSimpleGraph.prototype.dispatchChangedEvent = function () {
+SyncSimpleGraph.prototype.dispatchChangedEvent = function ( source ) {
     var self = this;
-    
+
+    console.log( 'dispatchChangedEvent ' + source );
+
     var d3eventChange = new CustomEvent(
                 "d3SyncChanged",
                 {
@@ -331,15 +352,23 @@ SyncSimpleGraph.prototype.dispatchChangedEvent = function () {
                         message: 'd3 sync has changed',
                         self   : self,
                         el     : self.getQueries(),
+                        src    : source,
                         time   : new Date()
                     },
                     bubbles   : true,
                     cancelable: true
                 }
             );
-    
+
     document.body.dispatchEvent( d3eventChange );
 };
+
+
+
+
+
+
+
 
 
 
@@ -351,6 +380,8 @@ SyncSimpleGraph.prototype.dispatchChangedEvent = function () {
 // SimpleGraph
 /////////////////////////////////////
 SimpleGraph = function (chartHolder, options) {
+    console.log('SimpleGraph %o', options);
+
     this.uid                         = options.uid === null ? 'uid_' + new Date() : options.uid;
 
     this.options                     = {};
@@ -361,15 +392,11 @@ SimpleGraph = function (chartHolder, options) {
                                                                    //  x1   y1 x2 y2 scaf 0/1 q
     this.points                      = options.points; //[0 , 0, 0, 0, 0,   0,  0.0];
 
-    this.parallel                    = options.parallel === null ? isArray( this.points[0] ) : options.parallel;
-    
+
     this.options.xmax                = options.xmax;
     this.options.xmin                = options.xmin;
     this.options.ymax                = options.ymax;
     this.options.ymin                = options.ymin;
-
-    this.options.labelId             = options.labelId;
-    this.options.tipId               = options.tipId;
 
     this.options.chartClass          = options.chartClass              || 'chartpart';
     this.options.xlabel              = options.xlabel                  || 'x';
@@ -377,6 +404,9 @@ SimpleGraph = function (chartHolder, options) {
     this.options.title               = options.title                   || 'no title';
     this.options.yTicksLabels        = options.yTicksLabels;
 
+    this.options.parallel            = options.cfg.parallel === null ? isArray( this.points[0] ) : options.cfg.parallel;
+    this.options.labelId             = options.cfg.labelId             || null;
+    this.options.tipId               = options.cfg.tipId               || null;
     this.options.xTicks              = options.cfg.xTicks              || 5;
     this.options.yTicks              = options.cfg.yTicks              || 5;
     this.options.paddingTop          = options.cfg.paddingTop          || 40;
@@ -451,10 +481,11 @@ SimpleGraph = function (chartHolder, options) {
 
 
 
-    if  ( this.parallel ) {
+    if  ( this.options.parallel ) {
         this.options.ymin   = 0;
         this.options.ymax   = this.points.length + 1;
         this.options.yTicks = this.points.length + 1;
+
     } else {
         this.numRegs        = [ (this.points.length / this.regSize) ];
         this.tgts           = [ this.tgts   ];
@@ -484,16 +515,18 @@ SimpleGraph.prototype.draw = function () {
     this.cy  = this.chart.clientHeight;
 
 
-    if (this.options.initState) {
+    if ( this.options.initState ) {
         var iState  = this.options.initState;
+
+        console.log('APPLYING INIT STATE %o', iState);
+
         var cX      = iState.cX;
         var cY      = iState.cY;
-        //console.warn( JSON.stringify( iState ) );
 
         this.cx     = cX;
         this.cy     = cY;
     }
-    
+
     this.chart.innerHTML = '';
 
     this.padding = {
@@ -611,7 +644,7 @@ SimpleGraph.prototype.draw = function () {
 
     this.zoom  = d3.behavior.zoom();
 
-    if (this.parallel) {
+    if (this.options.parallel) {
         this.vis.call( self.zoomC = this.zoom.x(this.x).on("zoom", this.redraw()));
     } else {
         this.vis.call( self.zoomC = this.zoom.x(this.x).y(this.y).on("zoom", this.redraw()));
@@ -721,7 +754,7 @@ SimpleGraph.prototype.draw = function () {
     this.currScale        = 1;
     this.currTranslationX = 0;
     this.currTranslationY = 0;
-    
+
     this.redraw()();
 
     this.addCompass();
@@ -743,7 +776,7 @@ SimpleGraph.prototype.draw = function () {
         var iState  = this.options.initState;
 
         //console.warn( JSON.stringify( iState ) );
-        
+
         var z       = iState.currScale;
 
         var tX      = iState.currTranslationX;
@@ -754,7 +787,7 @@ SimpleGraph.prototype.draw = function () {
 
         var rangeX  = iState.rangeX;
         var rangeY  = iState.rangeY;
-    
+
         this.applyZoom( z, tX, tY );
 
         this.redraw()();
@@ -763,12 +796,12 @@ SimpleGraph.prototype.draw = function () {
         self.x.range ( rangeX  );
         self.y.domain( domainY );
         self.y.range ( rangeY  );
-    
+
         //console.warn( JSON.stringify( this.getCurrStatus() ) );
 
         this.redraw()();
     }
-    
+
 };
 
 
@@ -777,13 +810,13 @@ SimpleGraph.prototype.draw = function () {
 SimpleGraph.prototype.getCurrStatus = function( ) {
     var val = {
         'currScale'       : this.currScale,
-        
+
         'currTranslationX': this.currTranslationX,
         'currTranslationY': this.currTranslationY,
-        
+
         'domainX'         : this.x.domain(),
         'domainY'         : this.y.domain(),
-        
+
         'rangeX'          : this.x.range(),
         'rangeY'          : this.y.range(),
 
@@ -791,7 +824,7 @@ SimpleGraph.prototype.getCurrStatus = function( ) {
         'cY'              : this.cy
     };
 
-    return val;
+    return { 'status': val, 'options': this.options };
 };
 
 
@@ -809,7 +842,7 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
             var stVal      = { x: vars.x1, y: vars.y1 };
             var ndVal      = { x: vars.x2, y: vars.y2 };
 
-            if ( self.parallel ) {
+            if ( self.options.parallel ) {
                 stVal.y = linenum + 1;
                 ndVal.y = linenum + 1;
             }
@@ -860,7 +893,7 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
             var stVal      = { x: vars.x1, y: vars.y1 };
             var ndVal      = { x: vars.x2, y: vars.y2 };
 
-            if ( self.parallel ) {
+            if ( self.options.parallel ) {
                 stVal.y = linenum + 1;
                 ndVal.y = linenum + 1;
             }
@@ -982,7 +1015,7 @@ SimpleGraph.prototype.highlight = function( el ) {
         var y1   = self.y( vars.y1 );
         var y2   = self.y( vars.y2 );
 
-        if ( self.parallel ) {
+        if ( self.options.parallel ) {
             y1 = self.y( k + 1 + 0.5 );
             y2 = self.y( k + 1 - 0.5 );
         }
@@ -1025,7 +1058,7 @@ SimpleGraph.prototype.highlight = function( el ) {
                         .style("stroke-width", greenWidth    )
                         ;
 
-            if ( ! self.parallel ) {
+            if ( ! self.options.parallel ) {
                 self.greenbox.append( "rect" )
                             .attr( "class"       , "scaf-square" )
                             .attr( "x"           , 0  )
@@ -1435,7 +1468,7 @@ SimpleGraph.prototype.applyZoom = function(z, x, y){
     var self = this;
 
     console.log( 'applying zoom z: ' + z + ' x: ' + x + ' y: ' + y);
-    
+
     if (z || x || y) {
         self.vis.call( self.zoomC = self.zoom.scale( z ).translate( [ x, y ] ) );
         //.center([self.size.width/2, self.size.height/2])
@@ -1505,7 +1538,7 @@ SimpleGraph.prototype.redraw = function () {
 
 
 
-    if ( self.parallel ) {
+    if ( self.options.parallel ) {
         if  (self.options.yTicksLabels) {
             fy = function (d) {
                 if ( d > 0 && d <= self.options.yTicksLabels.length ) {
@@ -1556,12 +1589,12 @@ SimpleGraph.prototype.redraw = function () {
 
             var scale             = d3.event.scale;
             var translate         = d3.event.translate;
-            
+
             self.zoomCscale       = scale;
             self.zoomCtranslate   = translate;
-            
+
             console.log( 'scale ' + scale + ' trans ' + translate );
-            
+
             self.updateCurrentZoom( scale, translate );
         }
     }
@@ -1576,7 +1609,7 @@ SimpleGraph.prototype.redraw = function () {
     }
 
 
-    if (self.parallel) {
+    if (self.options.parallel) {
         self.vis.selectAll('.grid-num-y').each( function(d,i) {
             //console.log(this);
             //console.log(d3.select(this).text());
@@ -1619,10 +1652,10 @@ SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
 
     var currRangeX        = self.x.range();
     var currRangeY        = self.y.range();
-    
+
     console.log('current scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY + ' domain X ' + JSON.stringify(currDomainX) + ' domain Y ' + JSON.stringify(currDomainY) + ' range X ' + currRangeX + ' range Y ' + currRangeY );
     console.log('correct scale ' +          scale + ' translation X ' +          translationX + ' translation Y ' +          translationY + ' reset ' + reset);
-    
+
     if ( reset ) {
         self.currScale        = 1;
         self.currTranslationX = 0;
@@ -1689,11 +1722,6 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
     self.downy = self.y.invert(p[1]);
   };
 };
-
-
-
-
-
 
 
 

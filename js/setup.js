@@ -28,15 +28,18 @@ function hasStorage ( ) {
 var hasstorage = hasStorage();
 
 
-
-
+/*
+ *
+ * START function
+ *
+ */
 function start () {
     /*
     * Creates page elements
     */
-    console.group('start');
-    console.timeStamp('begin start');
-    console.time('start');
+    console.groupCollapsed('start');
+    console.timeStamp(     'begin start');
+    console.time(          'start');
 
     var sels = document.createElement('span');
     sels.id  = 'selectors';
@@ -80,7 +83,7 @@ function start () {
     document.body.addEventListener( 'd3SyncChanged' , updateQuery, false );
 
 
-    //getQueryString();
+    getQueryString();
 
 
     if ( false ) {
@@ -98,9 +101,13 @@ function start () {
 
     //document.getElementById('okb').onclick();
     console.timeStamp('end start');
-    console.timeEnd('start');
-    console.groupEnd('start');
+    console.timeEnd(  'start');
+    console.groupEnd( 'start');
 };
+
+
+
+
 
 
 
@@ -113,20 +120,23 @@ function start () {
  */
 function addPicker ( el, id, cls, nfo, callback, opts ) {
     var addlbls = true;
-    var addlbl1 = true;
-    var addlbl2 = true;
+    var addlblA = true;
+    var addlblB = true;
 
 
     if (opts) {
         if ( opts.addlbls !== undefined ) { addlbls = opts.addlbls; }
-        if ( opts.addlbl1 !== undefined ) { addlbl1 = opts.addlbl1; }
-        if ( opts.addlbl2 !== undefined ) { addlbl2 = opts.addlbl2; }
+        if ( opts.addlblA !== undefined ) { addlblA = opts.addlblA; }
+        if ( opts.addlblB !== undefined ) { addlblB = opts.addlblB; }
     }
 
 
 
-    if ( addlbls && addlbl1 ) {
+    if ( addlbls && addlblB ) {
+        console.log( 'adding label B');
         var trD1       = el  .appendChild( document.createElement('td'   ) );
+        trD1.className = 'labelB';
+
         var lbl1       = document.createElement('label');
         lbl1.htmlFor   = id;
         lbl1.id        = id + '_labelB';
@@ -144,11 +154,12 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
 
 
     var trD2       = el  .appendChild( document.createElement('td'   ) );
+    trD2.className = 'setupField';
 
     var sel        = trD2.appendChild( document.createElement(nfo.tag) );
-
     sel.id         = id;
     sel.onchange   = callback;
+
 
 
     for ( var opt in nfo ) {
@@ -162,6 +173,7 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
     }
 
 
+
     if (nfo.tag == 'select') {
         genSelectorsOpts(nfo.options, sel, nfo.value);
 
@@ -172,19 +184,22 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
 
 
 
-
-
-    if ( addlbls && addlbl1 ) {
+    if ( addlbls && addlblA ) {
+        console.log( 'adding label A');
         var trD3       = el  .appendChild( document.createElement('td'   ) );
+        trD3.className = 'labelA';
 
         var lbl2       = document.createElement('label');
         lbl2.htmlFor   = id;
         lbl2.id        = id + '_labelA';
-        lbl2.innerHTML = nfo.value;
 
-        var unity      = nfo.unity;
-        if (unity) {
-            lbl2.innerHTML = nfo.value + unity;
+        if ( nfo.value !== null && nfo.value !== undefined ) {
+            lbl2.innerHTML = nfo.value;
+
+            var unity      = nfo.unity;
+            if (unity) {
+                lbl2.innerHTML = nfo.value + unity;
+            }
         }
 
         trD3.appendChild(lbl2);
@@ -193,15 +208,16 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
 
 
 function createCsss ( el ) {
-    console.group('createCsss %o', el);
-    console.timeStamp('begin createCsss');
-    console.time('createCsss');
-    console.log('begin createCsss %o', el);
+    console.groupCollapsed('createCsss %o', el);
+    console.timeStamp(     'begin createCsss');
+    console.time(          'createCsss');
+    console.log(           'begin createCsss %o', el);
 
     var tbl       = el  .appendChild( document.createElement('table') );
     tbl.className = 'setuptable';
 
     var callback = function(e) {
+        console.log( 'CSSS CALLBACK' );
         var tgt = null
         try {
             tgt = e.srcElement;
@@ -224,7 +240,7 @@ function createCsss ( el ) {
         localDb.saveOpt( 'css', id, val );
         changecss(obj, prop, val);
 
-        var lbl = document.getElementById( id + '_label' );
+        var lbl = document.getElementById( id + '_labelA' );
         if (lbl) {
             if (unity) {
                 val += unity;
@@ -268,23 +284,24 @@ function createCsss ( el ) {
         }
     }
 
-    console.log('end createCsss %o', el);
+    console.log(      'end createCsss %o', el);
     console.timeStamp('end createCsss');
-    console.timeEnd('createCsss');
-    console.groupEnd('createCsss %o', el);
+    console.timeEnd(  'createCsss');
+    console.groupEnd( 'createCsss %o', el);
 };
 
 
 function createPositions ( el ) {
-    console.group('createPositions %o', el);
-    console.timeStamp('begin createPositions');
-    console.time('createPositions');
-    console.log('begin createPositions %o', el);
+    console.groupCollapsed('createPositions %o', el);
+    console.timeStamp(     'begin createPositions');
+    console.time(          'createPositions');
+    console.log(           'begin createPositions %o', el);
 
     var tbl       = el  .appendChild( document.createElement('table') );
     tbl.className = 'setuptable';
 
     var callback = function(e) {
+        console.log( 'POSITION CALLBACK' );
         var tgt = null
         try {
             tgt = e.srcElement;
@@ -304,7 +321,7 @@ function createPositions ( el ) {
 
         localDb.saveOpt( 'positions', id, val );
 
-        var lbl = document.getElementById( id + '_label' );
+        var lbl = document.getElementById( id + '_labelA' );
         if (lbl) {
             lbl.innerHTML = val;
         }
@@ -320,19 +337,19 @@ function createPositions ( el ) {
         nfo.value  = localDb.getOpt( 'positions', id, nfo.value );
         addPicker(tr, id, 'positions', nfo, callback);
     }
-    
 
-    console.log('end createPositions %o', el);
+
+    console.log(      'end createPositions %o', el);
     console.timeStamp('end createPositions');
-    console.timeEnd('createPositions');
-    console.groupEnd('createPositions %o', el);
+    console.timeEnd(  'createPositions');
+    console.groupEnd( 'createPositions %o', el);
 };
 
 
 function createOptions ( ) {
-    console.group('createOptions');
-    console.timeStamp('begin createOptions');
-    console.time('createOptions');
+    console.groupCollapsed('createOptions');
+    console.timeStamp(     'begin createOptions');
+    console.time(          'createOptions');
 
     var divH = bdy.appendChild( document.createElement('div') );
     divH.className   = 'htmlDiv';
@@ -378,32 +395,32 @@ function createOptions ( ) {
 
     divH.appendChild( clsBtnP );
 
-    
+
     var clsBtnC       = document.createElement('button');
     clsBtnC.onclick   = function(e) { if (hasStorage) { alert('Cleaning CSS preferences'); localDb.clearDb('css'); location.reload(); } };
     clsBtnC.innerHTML = 'Clear CSS';
 
     divH.appendChild( clsBtnC );
 
-    
+
     var clsBtnA       = document.createElement('button');
     clsBtnA.onclick   = function(e) { if (hasStorage) { alert('Cleaning ALL preferences'); localDb.clearDb('syncs'); localDb.clearDb('positions'); localDb.clearDb('css'); location.reload(); } };
     clsBtnA.innerHTML = 'Clear ALL';
 
     divH.appendChild( clsBtnA );
 
-    
+
     console.timeStamp('end createOptions');
-    console.timeEnd('createOptions');
-    console.groupEnd('createOptions');
+    console.timeEnd(  'createOptions');
+    console.groupEnd( 'createOptions');
 }
 
 
 function createSyncs ( el ) {
-    console.group('createSyncs %o', el);
-    console.timeStamp('begin createSyncs');
-    console.time('createSyncs');
-    console.log('begin createSyncs %o', el);
+    console.groupCollapsed('createSyncs %o', el);
+    console.timeStamp(     'begin createSyncs');
+    console.time(          'createSyncs');
+    console.log(           'begin createSyncs %o', el);
 
     var span = el.appendChild( document.createElement('span') );
     span.style.display = "inline-block";
@@ -413,6 +430,7 @@ function createSyncs ( el ) {
     tbl.className = 'setuptable';
 
     var callback = function(e) {
+        console.log('SYNC CALLBACK');
         var tgt = null
         try {
             tgt = e.srcElement;
@@ -432,7 +450,7 @@ function createSyncs ( el ) {
 
         localDb.saveOpt( 'syncs', id, val );
 
-        var lbl = document.getElementById( id + '_label' );
+        var lbl = document.getElementById( id + '_labelA' );
         if (lbl) {
             lbl.innerHTML = val;
         }
@@ -447,9 +465,14 @@ function createSyncs ( el ) {
     for (var idN = 0; idN < posK.length; idN++ ) {
         var id    = posK[idN];
         var nfo   = syncFields[id];
+
         nfo.value = localDb.getOpt( 'syncs', id, nfo.value );
 
-        addPicker(tr, id, 'syncs', nfo, callback);
+        if ( idN > 0 && idN % 4 == 0 ) {
+            tr = tbl .appendChild( document.createElement('tr'   ) );
+        }
+
+        addPicker(tr, id, 'syncs', nfo, callback, {addlblA: false});
     }
 
 
@@ -468,12 +491,12 @@ function createSyncs ( el ) {
             }
         };
 
-    addPicker( tr, 'size', 'sizes', sizes['size'], callback2);
+    addPicker( tr, 'size', 'sizes', sizes.size, callback2, {addlblA: false});
 
-    console.log('end createSyncs %o', el);
+    console.log(      'end createSyncs %o', el);
     console.timeStamp('end createSyncs');
-    console.timeEnd('createSyncs');
-    console.groupEnd('createSyncs %o', el);
+    console.timeEnd(  'createSyncs');
+    console.groupEnd( 'createSyncs %o', el);
 };
 
 
@@ -507,10 +530,10 @@ function genSelectors ( sels ) {
      * If only one option available, adds a label field, otherwise, adds a drop-down menu.
      */
 
-    console.group('genSelectors %o', sels);
-    console.timeStamp('begin genSelectors');
-    console.time('genSelectors');
-    console.log('begin genSelectors %o', sels);
+    console.groupCollapsed('genSelectors %o', sels);
+    console.timeStamp(     'begin genSelectors');
+    console.time(          'genSelectors');
+    console.log(           'begin genSelectors %o', sels);
 
 
     var callback = function(e) {
@@ -587,11 +610,139 @@ function genSelectors ( sels ) {
         clb.innerHTML = 'Clear';
     tbl.appendChild( document.createElement('td').appendChild( clb ) );
 
-    console.log('end genSelectors %o', sels);
+    console.log(      'end genSelectors %o', sels);
     console.timeStamp('end genSelectors');
-    console.timeEnd('genSelectors');
-    console.groupEnd('genSelectors %o', sels);
+    console.timeEnd(  'genSelectors');
+    console.groupEnd( 'genSelectors %o', sels);
 };
+
+
+
+
+
+
+
+
+/*
+ *
+ *ACTIONS
+ *
+ */
+function selclick ( ) {
+    console.groupCollapsed('selclick');
+    console.timeStamp(     'begin selclick');
+    console.time(          'selclick');
+
+    var vals = getVals();
+
+    if (!vals) {
+        console.log('no vals');
+        return;
+    }
+
+    //console.log( vals );
+    var cfg = getCfg();
+
+    if (!cfg) {
+        return;
+    }
+
+    cfg.horizontal = getFieldValue( 'horizontal' );
+    cfg.tipId      = 'tipper';
+    cfg.labelId    = null;
+
+    new processVals( vals, cfg );
+
+    console.timeStamp('end selclick');
+    console.timeEnd(  'selclick');
+    console.groupEnd( 'selclick');
+};
+
+
+function getVals ( ) {
+    console.groupCollapsed('getVals');
+    console.timeStamp(     'begin getVals');
+    console.time(          'getVals');
+
+    var vals = {};
+
+    for ( var optName in opts ) {
+        var val      = getFieldValue( optName );
+
+        if ( val === null ) {
+            console.log( 'value ' + optName + ' not defined' );
+            vals = null;
+            break;
+        } else {
+            //console.log( 'appending ' + optName + ' = '+ val );
+            vals[ optName ] = val;
+        }
+    }
+
+    console.log(      'end getVals >> %o', vals);
+    console.timeStamp('end getVals');
+    console.timeEnd(  'getVals');
+    console.groupEnd( 'getVals');
+
+    return vals;
+}
+
+
+function getCfg ( ) {
+    console.groupCollapsed('getCfg');
+    console.timeStamp(     'begin getCfg');
+    console.time(          'getCfg');
+
+    var optdbs = {
+        'positions' : positions,
+        'sizes'     : sizes,
+        'syncFields': syncFields
+    };
+
+    for ( optName in optdbs ) {
+        console.log('checking '+ optName);
+        var optdb = optdbs[ optName ];
+        var posK  = Object.keys( optdb );
+            posK.sort();
+
+        var cfg   = {};
+
+        for (var idN = 0; idN < posK.length; idN++ ) {
+            var id    = posK[idN];
+            var nfo   = optdb[id];
+            var dfl   = nfo.value;
+            var tpy   = nfo.type;
+            var curr  = getFieldValue( id );
+
+            console.log('checking '+ optName + ' option ' + id + ' default ' + dfl + ' current ' + curr);
+
+
+            if ( ( dfl === null ) || ( tpy == 'checkbox' ) || ( dfl != curr ) ) {
+                console.log('  changing');
+                console.log( nfo );
+                cfg[id] = curr;
+
+            } else {
+                console.log('  keeping');
+                if (cfg[id]) {
+                    delete cfg[id];
+                }
+            }
+        }
+    }
+
+    console.log(      'end getCfg >> %o', cfg);
+    console.timeStamp('end getCfg');
+    console.timeEnd(  'getCfg');
+    console.groupEnd( 'getCfg');
+
+    return cfg;
+}
+
+
+
+
+
 
 
 
@@ -601,45 +752,44 @@ function genSelectors ( sels ) {
  *PROCESSING FUNCTIONS
  *
  */
-processVals = function ( vals, cfg ){
-    console.group('processVals %o', vals);
-    console.timeStamp('begin processVals');
-    console.time('processVals');
-    console.log('begin processVals %o', vals);
+processVals = function ( vals, cfg, initState ){
+    console.groupCollapsed('processVals vals %o cfg %o init state %o', vals, cfg, initState);
+    console.timeStamp(     'begin processVals');
+    console.time(          'processVals');
+    console.log(           'begin processVals %o cfg %o', vals, cfg);
 
     var self           = this;
     self.vals          = vals;
     self.cfg           = cfg;
+    self.initState     = initState;
+    self.qid           = encodeObj( { 'vals': self.vals, 'cfg': self.cfg } );
 
-    
-    self.horizontal    = getFieldValue( 'horizontal' );
-    self.size          = getFieldValue( 'size' );
-    self.tipId         = 'tipper';
-
-    
     self.getRegister();
-    
+
     if ( !self.regs ) {
-        return;
-    }
-    if ( self.regs.length === 0 ) {
-        console.log('no reg');
+        console.log('error acquiring registers');
         return;
     }
 
-    console.log('end processVals %o', self.vals);
+    if ( self.regs.length === 0 ) {
+        console.log('no register');
+        return;
+    }
+
+    console.log(      'end processVals qid %s', self.qid);
     console.timeStamp('end processVals');
-    console.timeEnd('processVals');
-    console.groupEnd('processVals %o', self.vals);
+    console.timeEnd(  'processVals');
+    console.groupEnd( 'processVals vals %o cfg %o init state %o', vals, cfg, initState);
 };
 
 
 processVals.prototype.getRegister = function ( ) {
     var self = this;
-    console.group('processVals.getRegister %o', self.vals);
-    console.timeStamp('begin processVals.getRegister');
-    console.time('processVals.getRegister');
-    console.log('begin processVals.getRegister %o', self.vals);
+
+    console.groupCollapsed('processVals.getRegister %o', self.vals);
+    console.timeStamp(     'begin processVals.getRegister');
+    console.time(          'processVals.getRegister');
+    console.log(           'begin processVals.getRegister %o', self.vals);
 
     var self           = this;
     self.dvals         = {};
@@ -648,7 +798,7 @@ processVals.prototype.getRegister = function ( ) {
     for ( var key in opts ) {
         var val         = self.vals[key];
         self.dvals[key] = [];
-        
+
         if ( val == '*all*' ) {
             opts[key].options.map( function(oval) {
                 self.dvals[key].push( oval );
@@ -662,8 +812,7 @@ processVals.prototype.getRegister = function ( ) {
 
 
 
-
-    if (self.horizontal) {
+    if (self.cfg.horizontal) {
         if ( self.dvals.refName.length != 1 ) {
             alert( 'more than one reference while using horizontal graph '  + self.dvals.refName.length  + ' ' + self.dvals.refName );
             return null;
@@ -675,7 +824,7 @@ processVals.prototype.getRegister = function ( ) {
         }
     }
 
-    var qid = encodeObj(self.vals);
+
 
     self.dvals.refName.map( function(refName) {
         self.dvals.refChrom.map( function(refChrom) {
@@ -697,25 +846,13 @@ processVals.prototype.getRegister = function ( ) {
         });
     });
 
-    self.evals.qid = qid;
 
-    console.log('end processVals.getRegister %o >> %o', self.vals, self.evals);
+    console.log(      'end processVals.getRegister %o >> %o', self.vals, self.evals);
     console.timeStamp('end processVals.getRegister');
-    console.timeEnd('processVals.getRegister');
-    console.groupEnd('processVals.getRegister %o', self.vals);
-
-    self.parseRegisters( );
-};
+    console.timeEnd(  'processVals.getRegister');
+    console.groupEnd( 'processVals.getRegister %o', self.vals);
 
 
-processVals.prototype.parseRegisters = function ( ) {
-    var self           = this;
-
-    console.group('processVals.parseRegisters %o', self.evals);
-    console.timeStamp('begin processVals.parseRegisters');
-    console.time('processVals.parseRegisters');
-    console.log('begin processVals.parseRegisters %o', self.evals);
-    
     self.regs          = [];
 
     for ( var e = 0; e < self.evals.length; e++ ) {
@@ -724,7 +861,6 @@ processVals.prototype.parseRegisters = function ( ) {
                 qry: vals,
                 res: {},
                 nfo: {},
-                cfg: {}
             };
 
         var regD = null;
@@ -737,45 +873,33 @@ processVals.prototype.parseRegisters = function ( ) {
             continue;
         }
 
+
         for ( var k in regD ) {
             reg.res[k] = regD[k];
         }
 
-        
+
         var uid            = Object.keys( vals ).map( function(d) { return vals[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
         reg.nfo.uid        = uid;
-        reg.nfo.qid        = self.evals.qid;
-        reg.nfo.chartClass = self.size;
-        reg.nfo.tipId      = self.tipId;
+        reg.nfo.qid        = self.qid;
+        reg.nfo.pid        = encodeObj( vals );
         reg.nfo.filepath   = datafolder + reg.res.filename;
         reg.nfo.scriptid   = 'script_'  + reg.nfo.uid;
-
-        if ( reg.nfo.chartClass === null ) { reg.nfo.chartClass = Object.keys( sizes )[0]; };
-
         self.regs.push( reg );
     }
 
 
     if (self.regs.length === 0) {
+        console.log('nore valid register');
         return null;
     }
 
-    console.log('end processVals.parseRegisters %o >> %o', self.evals, self.regs);
+    console.log(      'end processVals.parseRegisters %o >> %o', self.evals, self.regs);
     console.timeStamp('end processVals.parseRegisters');
-    console.timeEnd('processVals.parseRegisters');
-    console.groupEnd('processVals.parseRegisters %o', self.evals);
-
-    self.send();
-};
+    console.timeEnd(  'processVals.parseRegisters');
+    console.groupEnd( 'processVals.parseRegisters %o', self.evals);
 
 
-processVals.prototype.send = function ( ) {
-    var self          = this;
-
-    console.group('processVals.send %o', self.regs);
-    console.timeStamp('begin processVals.send');
-    console.time('processVals.send');
-    console.log('begin processVals.send %o', self.regs);
 
     self.size         = 0;
     self.received     = 0;
@@ -793,27 +917,26 @@ processVals.prototype.send = function ( ) {
     if (self.size === 0) {
         console.log('nothing to plot');
         console.log(self.regs);
-        return;
+        return null;
     }
 
-    var count = 0;
-    var func  = function(sregv) { loadScript( sregv, self.receive() ); };
+    var func  = function( sregv ) { loadScript( sregv, self.receive() ); };
 
     self.regs.map( function(reg) {
         var file   = reg.res.filename;
+
         self.sentData.push( file );
+
         if (file) {
             console.log( 'sending ' + file );
-            //setTimeout( func(reg), (count * 1000));
-            func(reg);
-            count += 1;
+            func( reg );
         }
     });
 
-    console.log('end processVals.send %o', self.regs);
+    console.log(      'end processVals.send %o', self.regs);
     console.timeStamp('end processVals.send');
-    console.timeEnd('processVals.send');
-    console.groupEnd('processVals.send %o', self.regs);
+    console.timeEnd(  'processVals.send');
+    console.groupEnd( 'processVals.send %o', self.regs);
 };
 
 
@@ -821,10 +944,10 @@ processVals.prototype.receive = function ( ) {
     var self = this;
 
     return function( reg ) {
-        console.group('processVals.receive %o', reg);
-        console.timeStamp('begin processVals.receive');
-        console.time('processVals.receive');
-        console.log('begin processVals.receive %o', reg);
+        console.groupCollapsed('processVals.receive %o', reg);
+        console.timeStamp(     'begin processVals.receive');
+        console.time(          'processVals.receive');
+        console.log(           'begin processVals.receive %o', reg);
 
         self.received += 1;
 
@@ -852,10 +975,10 @@ processVals.prototype.receive = function ( ) {
             self.loadGraph();
         }
 
-        console.log('end processVals.receive %o >> %o', reg, self.receivedData);
+        console.log(      'end processVals.receive %o >> %o', reg, self.receivedData);
         console.timeStamp('end processVals.receive');
-        console.timeEnd('processVals.receive');
-        console.groupEnd('processVals.receive %o', reg);
+        console.timeEnd(  'processVals.receive');
+        console.groupEnd( 'processVals.receive %o', reg);
     };
 };
 
@@ -895,54 +1018,60 @@ processVals.prototype.loadGraph = function ( ) {
     //reg.cfg
     var self = this;
 
-    console.group('processVals.loadGraph %o', self.receivedData);
-    console.timeStamp('begin processVals.loadGraph');
-    console.time('processVals.loadGraph');
-    console.log('begin processVals.loadGraph %o', self.receivedData);
+    console.groupCollapsed('processVals.loadGraph %o', self.receivedData);
+    console.timeStamp(     'begin processVals.loadGraph');
+    console.time(          'processVals.loadGraph');
+    console.log(           'begin processVals.loadGraph %o', self.receivedData);
 
 
-    if (self.horizontal) {
-        self.mergeregs( self.receivedData );
-        self.hreg.parallel      = true;
-        //self.hreg.cfg.initState = getInitState( self.hreg.qid );
+    if (self.cfg.horizontal) {
+        var hreg = self.mergeregs( );
 
-        console.log( self.hreg );
-        graphdb.add(chartName, self.hreg);
+        hreg.cfg           = self.cfg;
+        hreg.cfg.initState = self.initState;
+
+        console.log( 'plotting register %o', self.hreg );
+
+        graphdb.add(chartName, hreg);
 
     } else {
-        self.receivedData.map( function(reg) {
-            var sreg           = self.simplifyReg( reg );
-            //sreg.cfg.initState = getInitState( sreg.qid );
-            console.log( sreg );
+        self.receivedData.map( function( reg ) {
+            var sreg = self.simplifyReg( reg );
+
+            console.log( 'plotting register %o', sreg );
+
+            sreg.cfg           = self.cfg;
+            sreg.cfg.initState = self.initState;
+
             graphdb.add(chartName, sreg);
+
+            return null;
         });
     }
-    
-    
-    setQueryString();
 
-    console.log('end processVals.loadGraph %o', self.receivedData);
+
+    console.log(      'end processVals.loadGraph %o', self.receivedData);
     console.timeStamp('end processVals.loadGraph');
-    console.timeEnd('processVals.loadGraph');
-    console.groupEnd('processVals.loadGraph %o', self.receivedData);
+    console.timeEnd(  'processVals.loadGraph');
+    console.groupEnd( 'processVals.loadGraph %o', self.receivedData);
 };
 
 
 processVals.prototype.mergeregs = function ( ) {
     var self = this;
-    console.group('processVals.mergeregs %o', self.receivedData);
-    console.timeStamp('begin processVals.mergeregs');
-    console.time('processVals.mergeregs');
-    console.timeStamp('begin processVals.mergeregs %o', self.receivedData);
+
+    console.groupCollapsed('processVals.mergeregs %o', self.receivedData);
+    console.timeStamp(     'begin processVals.mergeregs');
+    console.time(          'processVals.mergeregs');
+    console.timeStamp(     'begin processVals.mergeregs %o', self.receivedData);
 
 
-    self.hreg = {
+    var hreg = {
         qry: {},
         res: {},
         nfo: {},
-        cfg: {}
     };
-    
+
     var yTicksLabels = [];
 
 
@@ -952,7 +1081,7 @@ processVals.prototype.mergeregs = function ( ) {
     for ( var r = 0; r < self.receivedData.length; r++ ) {
         var reg = self.receivedData[r];
         yTicksLabels[r] = [];
-        
+
         for ( var cls in reg ) {
             for ( var k in reg[cls] ) {
                 if (!self.hreg[cls][k]) {
@@ -984,18 +1113,6 @@ processVals.prototype.mergeregs = function ( ) {
             if (['tgts', 'points'].indexOf(v) == -1) {
                 sreg.res[v] = vals[0];
             }
-        }
-    }
-
-
-    for ( var v in sreg.cfg ) {
-        var vals = sreg.cfg[v];
-        var uniqueArray = vals.filter(function(elem, pos) {
-            return vals.indexOf(elem) == pos;
-        });
-
-        if (uniqueArray.length == 1) {
-            sreg.cfg[v] = vals[0];
         }
     }
 
@@ -1032,14 +1149,14 @@ processVals.prototype.mergeregs = function ( ) {
 
     //console.log(yTicksLabels);
     //console.log(sreg);
-    
+
 
     var rKeys = ['xmax', 'ymax', 'xmin', 'ymin'];
     for ( var r = 0; r < rKeys.length; r++ ) {
         var key = rKeys[r];
         var res = [];
         //console.log( key );
-        
+
         for ( var k = 0; k < sreg[ key ].length; k++ ) {
             res.push( sreg[ key ][ k ] );
         }
@@ -1050,13 +1167,13 @@ processVals.prototype.mergeregs = function ( ) {
     //console.log(sreg);
 
 
-    var refs    = joinVals( sreg.qry.refName  );
-    var refsCr  = joinVals( sreg.qry.refChrom );
-    var tgts    = joinVals( sreg.qry.tgtName  );
-    var tgtsCr  = joinVals( sreg.qry.tgtChrom );
-    var sts     = joinVals( sreg.qry.status   );
-    var ylabel  = joinVals( sreg.ylabel       );
-    var xlabel  = joinVals( sreg.xlabel       );
+    var refs          = joinVals( sreg.qry.refName  );
+    var refsCr        = joinVals( sreg.qry.refChrom );
+    var tgts          = joinVals( sreg.qry.tgtName  );
+    var tgtsCr        = joinVals( sreg.qry.tgtChrom );
+    var sts           = joinVals( sreg.qry.status   );
+    var ylabel        = joinVals( sreg.ylabel       );
+    var xlabel        = joinVals( sreg.xlabel       );
 
 
     sreg.title        = refs + ' #' + refsCr + ' vs ' + tgts  + ' #' + tgtsCr + ' - Status ' + sts;
@@ -1066,22 +1183,17 @@ processVals.prototype.mergeregs = function ( ) {
     sreg.tipId        = sreg.tipId[0];
     sreg.chartClass   = sreg.chartClass[0];
 
-    
-    sreg.qid          = sreg.qid[0];
 
-
-    var qry           = decodeObj( sreg.qid );
-    
-    sreg.uid          = Object.keys( qry ).map( function(d) { return qry[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
+    sreg.uid          = Object.keys( self.vals ).map( function(d) { return qry[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '')
 
 
     //console.log(sreg);
 
 
-    console.log('end processVals.mergeregs %o >> %o', regs, sreg);
+    console.log(      'end processVals.mergeregs %o >> %o', regs, sreg);
     console.timeStamp('end processVals.mergeregs');
-    console.timeEnd('processVals.mergeregs');
-    console.groupEnd('processVals.mergeregs %o', regs);
+    console.timeEnd(  'processVals.mergeregs');
+    console.groupEnd( 'processVals.mergeregs %o', regs);
 
     return sreg;
 };
@@ -1089,12 +1201,13 @@ processVals.prototype.mergeregs = function ( ) {
 
 processVals.prototype.simplifyReg = function ( reg ) {
     var self = this;
-    console.group('processVals.simplifyReg %o', reg);
-    console.timeStamp('begin processVals.simplifyReg');
-    console.time('processVals.simplifyReg');
-    console.log('begin processVals.simplifyReg %o', reg);
 
-    
+    console.groupCollapsed('processVals.simplifyReg %o', reg);
+    console.timeStamp(     'begin processVals.simplifyReg');
+    console.time(          'processVals.simplifyReg');
+    console.log(           'begin processVals.simplifyReg %o', reg);
+
+
     var res  = [];
     var keys = ['res', 'nfo'];
     for ( var c in keys ) {
@@ -1103,118 +1216,249 @@ processVals.prototype.simplifyReg = function ( reg ) {
             res[k] = reg[cls][k];
         }
     }
+
     res.qry = reg.qry;
     res.cfg = reg.cfg;
-    res.uid = reg.nfo.uid;
-    
 
-    console.log('end processVals.simplifyReg %o >> %o', reg, res);
+    console.log(      'end processVals.simplifyReg %o >> %o', reg, res);
     console.timeStamp('end processVals.simplifyReg');
-    console.timeEnd('processVals.simplifyReg');
-    console.groupEnd('processVals.simplifyReg %o', reg);
+    console.timeEnd(  'processVals.simplifyReg');
+    console.groupEnd( 'processVals.simplifyReg %o', reg);
 
     return res;
-}
+};
+
+
+
 
 
 
 
 /*
  *
- *ACTIONS
+ *DB FUNCTIONS
  *
  */
-function selclick ( ) {
-    console.group('selclick');
-    console.timeStamp('begin selclick');
-    console.time('selclick');
-
-    var vals = getVals();
-
-    if (!vals) {
-        console.log('no vals');
-        return;
-    }
-
-    //console.log( vals );
-    var cfg = getCfg();
-    
-    if (!cfg) {
-        return;
-    }
-    
-    new processVals( vals, cfg );
-
-    console.timeStamp('end selclick');
-    console.timeEnd('selclick');
-    console.groupEnd('selclick');
+LocalStorageDb = function ( prog_domain, db_domain) {
+    this.progDomain = prog_domain;
+    this.dbDomain   = db_domain;
 };
 
 
-function getVals ( ) {
-    console.group('getVals');
-    console.timeStamp('begin getVals');
-    console.time('getVals');
+LocalStorageDb.prototype.saveOpt = function (data_domain, key ,value) {
+    var self = this;
 
-    var vals = {};
+    console.groupCollapsed('LocalStorageDb.saveOpt data_domain "%s" key "%s" value %o', data_domain, key, value);
+    console.timeStamp(     'begin LocalStorageDb.saveOpt');
+    console.time(          'LocalStorageDb.saveOpt');
+    console.log(           'begin LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
 
-    for ( var optName in opts ) {
-        var val      = getFieldValue( optName );
+    var data_db = self.getDataDb( data_domain );
 
-        if ( val === null ) {
-            console.log( 'value ' + optName + ' not defined' );
-            vals = null;
-            break;
+    if (data_db) {
+        if ( value === null ) {
+            if ( data_db[key] ) {
+                delete data_db[key];
+            }
         } else {
-            //console.log( 'appending ' + optName + ' = '+ val );
-            vals[ optName ] = val;
+            console.log('saving domain "' +data_domain+ '" k "' + key + '" v "' + value + '"');
+            data_db[key] = value;
+        }
+
+        self.saveDataDb(data_domain, data_db);
+    }
+
+    console.log(      'end LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
+    console.timeStamp('end LocalStorageDb.saveOpt');
+    console.timeEnd(  'LocalStorageDb.saveOpt');
+    console.groupEnd( 'LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
+};
+
+
+LocalStorageDb.prototype.getOpt = function (data_domain, key, dflt) {
+    var self = this;
+
+    console.groupCollapsed('LocalStorageDb.getOpt data_domain "%s" key "%s" default %o', data_domain, key, data_domain);
+    console.timeStamp(     'begin LocalStorageDb.getOpt');
+    console.time(          'LocalStorageDb.getOpt');
+    console.log(           'begin LocalStorageDb.getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
+
+    var val     = dflt;
+    var data_db = self.getDataDb( data_domain );
+
+    if ( data_db ) {
+        var res = data_db[key];
+        if ( res !== null && res !== undefined ) {
+            val = res;
         }
     }
 
-    console.log('end getVals >> %o', vals);
-    console.timeStamp('end getVals');
-    console.timeEnd('getVals');
-    console.groupEnd('getVals');
+    //console.log( 'returning ' + val );
 
-    return vals;
-}
+    console.log(      'end LocalStorageDb.getOpt "%s" key "%s" default %o >> %o', data_domain, key, data_domain, val);
+    console.timeStamp('end LocalStorageDb.getOpt');
+    console.timeEnd(  'LocalStorageDb.getOpt');
+    console.groupEnd( 'LocalStorageDb.getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
+
+    return val;
+};
 
 
-function getCfg ( ) {
-    console.group('getCfg');
-    console.timeStamp('begin getCfg');
-    console.time('getCfg');
+LocalStorageDb.prototype.getDataDb = function ( data_domain ){
+    var self = this;
 
-    var posK = Object.keys( positions );
-        posK.sort();
+    console.groupCollapsed('LocalStorageDb.getDataDb data_domain "%s"', data_domain);
+    console.timeStamp(     'begin LocalStorageDb.getDataDb');
+    console.time(          'LocalStorageDb.getDataDb');
+    console.log(           'begin LocalStorageDb.getDataDb data_domain "%s"', data_domain);
 
-    var cfg   = {};
-    
-    for (var idN = 0; idN < posK.length; idN++ ) {
-        var id    = posK[idN];
-        var nfo   = positions[id];
-        var dfl   = nfo.value;
-        var curr  = getFieldValue( id );
-
-        if ( dfl != curr ) {
-            console.log('option ' + id + ' default ' + dfl + ' current ' + curr + ' changing');
-            console.log( nfo );
-            cfg[id] = curr;
-            
-        } else {
-            if (cfg[id]) {
-                delete cfg[id];
+    var data_db = {};
+    if ( hasstorage ) {
+        if ( self.progDomain ) {
+            if ( self.dbDomain ) {
+                var db_key  = self.progDomain + self.dbDomain + data_domain;
+                var data    = localStorage[ db_key ];
+                if ( data ) {
+                    try {
+                        data_db = JSON.parse( data );
+                    } catch(e) {
+                    }
+                }
             }
         }
     }
 
-    console.log('end getCfg >> %o', cfg);
-    console.timeStamp('end getCfg');
-    console.timeEnd('getCfg');
-    console.groupEnd('getCfg');
+    console.log(      'end LocalStorageDb.getDataDb data_domain "%s" >> %o', data_domain, data_db);
+    console.timeStamp('end LocalStorageDb.getDataDb');
+    console.timeEnd(  'LocalStorageDb.getDataDb');
+    console.groupEnd( 'LocalStorageDb.getDataDb data_domain "%s"', data_domain);
+    return data_db;
+};
 
-    return cfg;
+
+LocalStorageDb.prototype.saveDataDb = function (data_domain, data_db) {
+    var self = this;
+
+    console.groupCollapsed('LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+    console.timeStamp(     'begin LocalStorageDb.saveDataDb');
+    console.time(          'LocalStorageDb.saveDataDb');
+    console.log(           'begin LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+
+    if ( hasstorage ) {
+        if ( self.progDomain ) {
+            if ( self.dbDomain ) {
+                var db_key  = self.progDomain + self.dbDomain + data_domain;
+                var data    = {};
+                if (data_db !== null) {
+                    data = data_db;
+                }
+
+                var jso     = JSON.stringify( data );
+                localStorage[db_key] = jso;
+            }
+        }
+    }
+
+    console.log(      'end LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+    console.timeStamp('end LocalStorageDb.saveDataDb');
+    console.timeEnd(  'LocalStorageDb.saveDataDb');
+    console.groupEnd( 'LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
+};
+
+
+LocalStorageDb.prototype.clearDb = function (data_domain) {
+    var self = this;
+
+    self.saveDataDb(data_domain, null);
+};
+
+
+LocalStorageDb.prototype.getDb = function () {
+    var self = this;
+
+    console.groupCollapsed('LocalStorageDb.getDb');
+    console.timeStamp(     'begin LocalStorageDb.getDb');
+    console.time(          'LocalStorageDb.getDb');
+    console.log(           'begin LocalStorageDb.getDb');
+
+    var res = null;
+
+    if ( hasstorage ) {
+        if ( self.dbDomain ) {
+            var data = localStorage[ self.dbDomain ];
+
+            if ( data ) {
+                try {
+                    //console.log('getting ' + k);
+                    res = JSON.parse( data );
+                } catch(e) {
+                }
+            }
+        }
+    }
+
+    console.log(      'end LocalStorageDb.getDb >> %o', res);
+    console.timeStamp('end LocalStorageDb.getDb');
+    console.timeEnd(  'LocalStorageDb.getDb');
+    console.groupEnd( 'LocalStorageDb.getDb');
+
+    return res;
+};
+
+
+function updateQuery ( e ) {
+    var self = this;
+
+    console.groupCollapsed('updateQuery %o', e);
+    console.timeStamp(     'begin updateQuery');
+    console.time(          'updateQuery');
+    console.log(           'begin updateQuery %o', e);
+
+    //console.log( new Error().stack );
+    //console.log( e );
+    var qries = JSON.parse( JSON.stringify( e.detail.el ) );
+    var src   = e.detail.src;
+    console.log( 'queries %o', qries );
+
+    var res   = [];
+    for ( var qid in qries ) {
+        var dqid  = decodeObj( qid );
+        var subq  = qries[ qid ];
+        console.log( 'qid %o dqid %o subq %o', qid, dqid, subq );
+
+        for ( var pid in subq ) {
+            var dpid  = decodeObj( pid );
+
+            var setup = subq[ pid ];
+
+            var outp  = {
+                'status' : setup.status,
+                'options': setup.options,
+                'vals'   : dpid
+                };
+
+            console.log( 'qid %s pid %s dqid %o dpid %o setup %o out %o', qid, pid, dqid, dpid, setup, outp );
+            res.push( outp );
+        }
+    }
+
+    console.log( 'queries src "%s" %o', src, res );
+
+    setQueryString ( res );
+
+    console.log(      'end updateQuery %o', e);
+    console.timeStamp('end updateQuery');
+    console.timeEnd(  'updateQuery');
+    console.groupEnd( 'updateQuery %o', e);
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -1331,10 +1575,10 @@ function loadScript ( reg, callback ) {
      * (both to be forwarded to "loadGraph"), creates the script and add
      * loadgraph as callback to its "onload".
      */
-    console.group('loadScript %o', reg);
-    console.timeStamp('begin loadScript');
-    console.time('loadScript');
-    console.log('begin loadScript %o', reg);
+    console.groupCollapsed('loadScript %o', reg);
+    console.timeStamp(     'begin loadScript');
+    console.time(          'loadScript');
+    console.log(           'begin loadScript %o', reg);
 
     var filepath  = reg.nfo.filepath;
     var scriptId  = reg.nfo.scriptid;
@@ -1353,233 +1597,16 @@ function loadScript ( reg, callback ) {
 
     document.getElementById( scriptHolder ).appendChild( script );
 
-    console.log('end loadScript %o', reg);
+    console.log(      'end loadScript %o', reg);
     console.timeStamp('end loadScript');
-    console.timeEnd('loadScript');
-    console.groupEnd('loadScript %o', reg);
-};
-
-
-
-
-/*
- *
- *DB FUNCTIONS
- *
- */
-LocalStorageDb = function ( prog_domain, db_domain) {
-    this.progDomain = prog_domain;
-    this.dbDomain   = db_domain;
-};
-
-
-LocalStorageDb.prototype.saveOpt = function (data_domain, key ,value) {
-    var self = this;
-
-    console.group('LocalStorageDb.saveOpt data_domain "%s" key "%s" value %o', data_domain, key, value);
-    console.timeStamp('begin LocalStorageDb.saveOpt');
-    console.time('LocalStorageDb.saveOpt');
-    console.log('begin LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
-    
-    var data_db = self.getDataDb( data_domain );
-
-    if (data_db) {
-        if ( value === null ) {
-            if ( data_db[key] ) {
-                delete data_db[key];
-            }
-        } else {
-            console.log('saving domain "' +data_domain+ '" k "' + key + '" v "' + value + '"');
-            data_db[key] = value;
-        }
-        
-        self.saveDataDb(data_domain, data_db);
-        
-        setQueryString();
-    }
-
-    console.log('end LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
-    console.timeStamp('end LocalStorageDb.saveOpt');
-    console.timeEnd('LocalStorageDb.saveOpt');
-    console.groupEnd('LocalStorageDb.saveOpt "%s" key "%s" value %o', data_domain, key, value);
-};
-
-
-LocalStorageDb.prototype.getOpt = function (data_domain, key, dflt) {
-    var self = this;
-
-    console.group('LocalStorageDb.getOpt data_domain "%s" key "%s" default %o', data_domain, key, data_domain);
-    console.timeStamp('begin LocalStorageDb.getOpt');
-    console.time('LocalStorageDb.getOpt');
-    console.log('begin LocalStorageDb.getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
-
-    var val     = dflt;
-    var data_db = self.getDataDb( data_domain );
-
-    if ( data_db ) {
-        var res = data_db[key];
-        if ( res !== null && res !== undefined ) {
-            val = res;
-        }
-    }
-
-    //console.log( 'returning ' + val );
-
-    console.log('end LocalStorageDb.getOpt "%s" key "%s" default %o >> %o', data_domain, key, data_domain, val);
-    console.timeStamp('end LocalStorageDb.getOpt');
-    console.timeEnd('LocalStorageDb.getOpt');
-    console.groupEnd('LocalStorageDb.getOpt "%s" key "%s" default %o', data_domain, key, data_domain);
-    
-    return val;
-};
-
-
-LocalStorageDb.prototype.getDataDb = function ( data_domain ){
-    var self = this;
-
-    console.group('LocalStorageDb.getDataDb data_domain "%s"', data_domain);
-    console.timeStamp('begin LocalStorageDb.getDataDb');
-    console.time('LocalStorageDb.getDataDb');
-    console.log('begin LocalStorageDb.getDataDb data_domain "%s"', data_domain);
-
-    var data_db = {};
-    if ( hasstorage ) {
-        if ( self.progDomain ) {
-            if ( self.dbDomain ) {
-                var db_key  = self.progDomain + self.dbDomain + data_domain;
-                var data    = localStorage[ db_key ];
-                if ( data ) {
-                    try {
-                        data_db = JSON.parse( data );
-                    } catch(e) {
-                    }
-                }
-            }
-        }
-    }
-    
-    console.log('end LocalStorageDb.getDataDb data_domain "%s" >> %o', data_domain, data_db);
-    console.timeStamp('end LocalStorageDb.getDataDb');
-    console.timeEnd('LocalStorageDb.getDataDb');
-    console.groupEnd('LocalStorageDb.getDataDb data_domain "%s"', data_domain);
-    return data_db;
-};
-
-
-LocalStorageDb.prototype.saveDataDb = function (data_domain, data_db) {
-    var self = this;
-
-    console.group('LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-    console.timeStamp('begin LocalStorageDb.saveDataDb');
-    console.time('LocalStorageDb.saveDataDb');
-    console.log('begin LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-
-    if ( hasstorage ) {
-        if ( self.progDomain ) {
-            if ( self.dbDomain ) {
-                var db_key  = self.progDomain + self.dbDomain + data_domain;
-                var data    = {};
-                if (data_db !== null) {
-                    data = data_db;
-                }
-                
-                var jso     = JSON.stringify( data );
-                localStorage[db_key] = jso;
-            }
-        }
-    }
-    
-    console.log('end LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-    console.timeStamp('end LocalStorageDb.saveDataDb');
-    console.timeEnd('LocalStorageDb.saveDataDb');
-    console.groupEnd('LocalStorageDb.saveDataDb data_domain "%s" data_db %o', data_domain, data_db);
-};
-
-
-LocalStorageDb.prototype.clearDb = function (data_domain) {
-    var self = this;
-
-    self.saveDataDb(data_domain, null);
-    
-    setQueryString();
-};
-
-
-LocalStorageDb.prototype.getDb = function () {
-    var self = this;
-    
-    console.group('LocalStorageDb.getDb');
-    console.timeStamp('begin LocalStorageDb.getDb');
-    console.time('LocalStorageDb.getDb');
-    console.log('begin LocalStorageDb.getDb');
-
-    var res = null;
-    
-    if ( hasstorage ) {
-        if ( self.dbDomain ) {
-            var data = localStorage[ self.dbDomain ];
-            
-            if ( data ) {
-                try {
-                    //console.log('getting ' + k);
-                    res = JSON.parse( data );
-                } catch(e) {
-                }
-            }
-        }
-    }
-
-    console.log('end LocalStorageDb.getDb >> %o', res);
-    console.timeStamp('end LocalStorageDb.getDb');
-    console.timeEnd('LocalStorageDb.getDb');
-    console.groupEnd('LocalStorageDb.getDb');
-    
-    return res;
+    console.timeEnd(  'loadScript');
+    console.groupEnd( 'loadScript %o', reg);
 };
 
 
 
 
 
-
-
-
-function updateQuery (e) {
-    var self = this;
-    console.group('updateQuery %o', e);
-    console.timeStamp('begin updateQuery');
-    console.time('updateQuery');
-    console.log('begin updateQuery %o', e);
-
-    //console.log( new Error().stack );
-    //console.log( e );
-    var qries = e.detail.el;
-    //console.log( qries );
-    
-    localDb.saveOpt('_queries', '_queries', qries);
-
-    console.log('end updateQuery %o', e);
-    console.timeStamp('end updateQuery');
-    console.timeEnd('updateQuery');
-    console.groupEnd('updateQuery %o', e);
-}
-
-
-function getCurrQueries ( ) {
-    console.group('getCurrQueries');
-    console.timeStamp('begin getCurrQueries');
-    console.time('getCurrQueries');
-    console.log('begin getCurrQueries');
-
-    var q = graphdb.getQueries();
-
-    console.log('end getCurrQueries >> %o', q);
-    console.timeStamp('end getCurrQueries');
-    console.timeEnd('getCurrQueries');
-    console.groupEnd('getCurrQueries');
-
-    return q;
-};
 
 
 
@@ -1589,153 +1616,121 @@ function getCurrQueries ( ) {
  *URL FUNCTIONS
  *
  */
-function getQueryString ( ) {
-    console.group('getQueryString');
-    console.timeStamp('begin getQueryString');
-    console.time('getQueryString');
+function setQueryString ( data ) {
+    console.groupCollapsed('setQueryString %o', data);
+    console.timeStamp(     'begin setQueryString');
+    console.time(          'setQueryString');
 
-    
+
+    if ( Object.keys(data).length > 0 ) {
+        var parsed  = parseUri( document.URL );
+        var anchor  = parsed.anchor;
+
+        var data64  = encodeObj( data );
+
+        var dbnfo   = '|' + _db_domain + '|';
+        var nurl    = dbnfo + data64;
+
+        if ( anchor != nurl) {
+            console.log( 'current url and current config differ');
+            //console.log(anchor);
+            //console.log(data64);
+            //console.log(nurl);
+            console.log( 'setting url %s', nurl);
+            window.location.hash = nurl;
+            //console.log(data64.length);
+        } else {
+            console.log( 'current url and current config are equal');
+            //console.log(anchor.length);
+        }
+    }
+
+    console.timeStamp('end setQueryString');
+    console.timeEnd(  'setQueryString');
+    console.groupEnd( 'setQueryString');
+};
+
+
+function getQueryString ( ) {
+    console.groupCollapsed('getQueryString');
+    console.timeStamp(     'begin getQueryString');
+    console.time(          'getQueryString');
+
+
     var parsed = parseUri(document.URL);
     var anchor = parsed.anchor;
     var dbnfo  = '|' + _db_domain + '|';
 
-    
+
     if ( anchor.indexOf(dbnfo) !== 0 ) {
-        //console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
-        //console.log( anchor.indexOf(dbnfo) );
-        return null;
+        console.log( 'anchor ' + anchor + ' does not have db domain ' + dbnfo);
+        console.log( anchor.indexOf(dbnfo) );
+
+        anchor = '';
     } else {
-        //console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
+        console.log( 'anchor ' + anchor + ' has db domain ' + dbnfo);
         anchor = anchor.substring(dbnfo.length, anchor.length);
-        //console.log( 'anchor ' + anchor);
+        console.log( 'anchor ' + anchor);
     }
 
 
     if (anchor !== '') {
         //console.log('has anchor');
         var data64 = null;
+
         try {
             data64 = decodeObj( anchor );
+
         } catch(e) {
             console.log('invalid 64');
             console.log(anchor      );
-            return null;
         }
 
-        console.log('replacing preferences with %o', data64);
-        //localDb.saveDataDb('_queries_redo', data64);
+        if ( data64 ) {
+            console.log('replacing preferences with %o', data64);
 
-        redoQueries(data64);
+            redoQueries( data64 );
+        } else {
+            console.log('empty data');
+        }
+    } else {
+        console.log('empty anchor');
     }
 
     console.timeStamp('end getQueryString');
-    console.timeEnd('getQueryString');
-    console.groupEnd('getQueryString');
-};
-
-
-function setQueryString ( ) {
-    console.group('setQueryString');
-    console.timeStamp('begin setQueryString');
-    console.time('setQueryString');
-
-    var data_db = localDb.getDataDb('_queries');
-    
-    var parsed = parseUri(document.URL);
-    var anchor = parsed.anchor;
-
-    if ( data_db.length === 0 ) {
-        console.log('nothing to save');
-        return null;
-    }
-
-    var data64 = encodeObj( data_db );
-
-    var dbnfo  = '|' + _db_domain + '|';
-    var nurl   = dbnfo + data64;
-
-    if ( anchor != nurl) {
-        console.log( 'current url and current config differ');
-        //console.log(anchor);
-        //console.log(data64);
-        //console.log(nurl);
-        window.location.hash = nurl;
-        //console.log(data64.length);
-    } else {
-        console.log( 'current url and current config are equal');
-        //console.log(anchor.length);
-    }
-
-    console.timeStamp('end setQueryString');
-    console.timeEnd('setQueryString');
-    console.groupEnd('setQueryString');
+    console.timeEnd(  'getQueryString');
+    console.groupEnd( 'getQueryString');
 };
 
 
 function redoQueries ( qries ) {
-    console.group('redoQueries %o', qries);
-    console.timeStamp('begin redoQueries');
-    console.time('redoQueries');
+    console.groupCollapsed('redoQueries %o', qries);
+    console.timeStamp(     'begin redoQueries');
+    console.time(          'redoQueries');
 
-    console.log( qries );
-    // TURN OFF PREFERENCES
 
     if (qries) {
         for ( var d = 0; d < qries.length; d++ ) {
             var data = qries[d];
-            var qid  = data[ 0 ];
-            var cfg  = data[ 1 ];
-            var vals = decodeObj( qid );
-            console.log( 'qid  %s', qid  );
-            console.log( 'cfg  %s', cfg  );
-            console.log( 'vals %o', vals );
-            processVals( vals, cfg );
+            var opts   = data[ 'options' ];
+            var status = data[ 'status'  ];
+            var vals   = data[ 'vals'    ];
+
+            console.log( '%d opts   %o', d, opts   );
+            console.log( '%d status %o', d, status );
+            console.log( '%d vals   %o', d, vals   );
+
+            new processVals( vals, opts, status );
         }
     }
-    // TURN PREFERENCES BACK ON
+
 
     console.timeStamp('end redoQueries');
-    console.timeEnd('redoQueries');
-    console.groupEnd('redoQueries');
+    console.timeEnd(  'redoQueries');
+    console.groupEnd( 'redoQueries');
 };
 
 
-function getInitState ( qid ) {
-    console.group('getInitState qid "%s"', qid);
-    console.timeStamp('begin getInitState');
-    console.time('getInitState');
-    console.log('begin getInitState qid "%s"', qid);
-
-    var res   = null;
-    var qries = localDb.getOpt( '_queries', '_queries', null );
-    
-    //console.log('getting init state '+qid);
-    //console.log(qries);
-    
-    if (qries) {
-        //console.log('there are initial states');
-        for ( var q = 0; q < qries.length; q++ ) {
-            var data = qries[ q ];
-            var vqid = data[0];
-            var vval = data[1];
-            //console.log( 'db qid ' + vqid + ' val ' + vval);
-            if ( vqid == qid ) {
-                res = vval;
-                //console.log( 'qid ' + qid + ' has initial value: ' + JSON.stringify( vval ) );
-                break;
-            }
-        }
-    } else {
-        //console.log( 'no init state')
-    }
-
-    console.log('end getInitState qid "%s" >> %o', qid, res);
-    console.timeStamp('getInitState');
-    console.timeEnd('getInitState');
-    console.groupEnd('getInitState qid "%s"', qid);
-    
-    return res;
-}
 
 
 
