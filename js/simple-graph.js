@@ -256,19 +256,19 @@ SyncSimpleGraph.prototype.getQueries = function() {
 
 SyncSimpleGraph.prototype.deleteUid = function (uid) {
     var self = this;
-    
+
     if ( self.db[uid] ) {
         //console.log('has uid ' + uid + ' ' + this.db[uid]);
         var el = self.db[uid];
-        
+
         el.close();
-        
+
         delete self.db[uid];
         //console.log( 'B ' + JSON.stringify( this.bd ) );
-        
+
         delete self.bd[ self.bd.indexOf(uid) ];
         //console.log( 'D ' + JSON.stringify( this.bd ) );
-        
+
         self.bd = self.bd.filter( function (v) { if (v !== null) { return v; } } );
         //console.log( 'A ' + JSON.stringify( this.bd ) );
         //console.log(this.db);
@@ -638,7 +638,6 @@ SimpleGraph.prototype.draw = function () {
 
 
 
-
     this.plot = this.vis.append("rect")
         .attr( "class"          , 'graph-background' )
         .attr( "id"             , 'rect_'+this.uid   )
@@ -674,7 +673,7 @@ SimpleGraph.prototype.draw = function () {
 
     // Add the x-axis label
     if (this.options.xlabel) {
-        this.vis.append("text")
+        this.xlabelText = this.vis.append("text")
             .attr(  "class", "axis axis-xlabel"        )
             .attr(  "x" , this.size.width/2            )
             .attr(  "y" , this.size.height             )
@@ -687,14 +686,14 @@ SimpleGraph.prototype.draw = function () {
 
     // add y-axis label
     if (this.options.ylabel) {
-        this.vis.append("text")
+        this.ylabelText = this.vis.append("text")
             .attr(  "class"       , "axis axis-ylabel"           )
             .attr(  "x"           , this.options.ylabelX         )
             .attr(  "y"           , this.options.ylabelY         )
             .attr(  "dy"          , this.options.ylabelDy + 'em' )
             .attr(  "dx"          , this.options.ylabelDx + 'em' )
-            .style( "text-anchor","middle"                       )
             .attr(  "transform"   ,"translate(" + -40 + ", " + this.size.height/2+") rotate(-90)")
+            .style( "text-anchor","middle"                       )
             .text(  this.options.ylabel                          );
     }
 
@@ -764,15 +763,9 @@ SimpleGraph.prototype.draw = function () {
     this.currTranslationX = 0;
     this.currTranslationY = 0;
 
+    this.addBtns();
+
     this.redraw()();
-
-    this.addCompass();
-
-    this.addCloseIcon();
-
-    this.addDownloadIcon();
-
-    this.addPadLockIcon();
 
     this.chart.focus();
 
@@ -807,6 +800,8 @@ SimpleGraph.prototype.draw = function () {
         self.y.range ( rangeY  );
 
         //console.warn( JSON.stringify( this.getCurrStatus() ) );
+
+        this.options.initState = null;
 
         this.redraw()();
     }
@@ -861,13 +856,13 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
             var senseclass = sense ? 'points-r' : 'points-f';
 
             self.lines.append( "path" )
-                        .attr("class"    , "points " + senseclass                          )
-                        .attr("d"        , line                                            )
-                        .attr("k"        , linenum                                         )
-                        .attr("j"        , j                                               )
-                        .attr("scaf"     , vars.nameNum                                    )
-                        .on(  "mouseover", function(d) { self.highlight( this          ); })
-                        .on(  "mouseout" , function(d) { self.downlight( this          ); })
+                        .attr("class"    , "points " + senseclass                 )
+                        .attr("d"        , line                                   )
+                        .attr("k"        , linenum                                )
+                        .attr("j"        , j                                      )
+                        .attr("scaf"     , vars.nameNum                           )
+                        .on(  "mouseover", function(d) { self.highlight( this ); })
+                        .on(  "mouseout" , function(d) { self.downlight( this ); })
                         ;
 
             //coords[ coords.length ] = stVal;
@@ -1206,13 +1201,41 @@ SimpleGraph.prototype.plot_drag = function () {
 
 
 SimpleGraph.prototype.updatePos = function (){
-    if (this.options.labelId){
+    var groups = [
+        [this.xlabelText, this.options.xlabel, this.x.domain()                         , true  ],
+        [this.ylabelText, this.options.ylabel, [this.y.domain()[1], this.y.domain()[0]], false ]
+    ];
 
-        var text   = ' - <b>Zoom:</b> ' + toFixed(this.currScale,1) + 'X - ';
-            text  += '<b>Pos:</b> <i>min X</i> '  + Math.floor(this.x.invert(this.currTranslationX)) + ' <i>max Y</i> ' + Math.floor(this.y.invert(this.currTranslationY));
+    for ( var l = 0; l < groups.length; l++ ){
+        var group   = groups[l];
+        var lbl     = group[0];
+        var txt     = group[1];
+        var dom     = group[2];
+        var dohoriz = group[3];
 
-        document.getElementById(this.options.labelId).innerHTML = text;
+        if ( lbl ) {
+            if ((!dohoriz) && this.options.horizontal) {
+                continue;
+            }
+
+            lbl.text('');
+
+            lbl
+                .append( 'tspan' )
+                    .attr( 'x', lbl.attr('x') )
+                    .text( txt                );
+
+            lbl
+                .append( 'tspan' )
+                    .attr('x' , lbl.attr('x') )
+                    .attr('dy', '1em' )
+                    .text( Math.round( dom[0] ).toLocaleString() + ' bp <> ' + Math.round( dom[1] ).toLocaleString() + ' bp' );
+        }
     }
+
+    //var text   = '<b>Zoom:</b> ' + toFixed(this.currScale,1) + 'X - ';
+        //text  += '<b>Pos:</b> <i>Reference</i> ' + this.x.domain()[0] + ' - ' + this.x.domain()[1] + ' <i>Target</i> ' + this.y.domain()[0] + ' - ' + this.y.domain()[1];
+
 };
 
 
@@ -1679,7 +1702,7 @@ SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
     console.log('result  scale ' + self.currScale + ' translation X ' + self.currTranslationX + ' translation Y ' + self.currTranslationY + ' domain X ' + JSON.stringify(currDomainX) + ' domain Y ' + JSON.stringify(currDomainY) );
     console.log('\n');
 
-    if (!self.syncing) {
+    if ((!self.syncing) && (self.shouldSync)) {
         var data = {
             'currScale'       : self.currScale,
             'currTranslationX': self.currTranslationX,
@@ -1893,11 +1916,25 @@ SimpleGraph.prototype.close = function(obj) {
 
 
 
+
+
+SimpleGraph.prototype.addBtns = function() {
+    this.addCompass();
+
+    this.addCloseIcon();
+
+    this.addDownloadIcon();
+
+    this.addPadLockIcon();
+};
+
+
+
 SimpleGraph.prototype.toggleLock = function(obj) {
     var self        = this;
     this.shouldSync = !this.shouldSync;
 
-    var padIcon = this.btns.select('#padlock-icon');
+    var padIcon     = this.btns.select('#padlock-icon');
 
     padIcon.each( function(d,i) {
         //console.log( this );

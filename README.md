@@ -141,12 +141,10 @@ _filelist[ 'ath' ][ '01' ][ 'ath' ][ '01' ][ 'Clean Dot Plot' ][ 'tgts'   ]  = [
 TODO
 --------
 ### Priority
-- [ ] add zoom and position to address bar
 - [ ] permit multiple selection
-- [ ] separate session preferences from global preferences
-- [ ] better keyboard zoom
-- [ ] sync resize axis
 - [ ] calculate maxX and maxY
+- [x] add zoom and position to address bar
+- [x] separate session preferences from global preferences
 - [x] allow parallel display
 - [x] apply sizes configuration
 - [x] allow for multiple plots
@@ -154,6 +152,8 @@ TODO
 - [x] clean out-of-graph lines
 
 ### Optional
+- [ ] better keyboard zoom
+- [ ] sync resize axis
 - [x] replace all jquery selector for d3 selector in simple-graph.js
 - [x] disable auto load
 
