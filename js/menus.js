@@ -409,3 +409,668 @@ var csss = {
                 }
     }
 };
+
+
+
+function draw() {
+    var sels = document.createElement('span');
+    sels.id  = 'selectors';
+
+    var bfc  = bdy.firstChild;
+    sels     = bdy.insertBefore( sels, bfc );
+
+
+    genSelectors(sels); // generate selectors based on "opts" variable
+
+
+    var pos = document.createElement('label');
+        pos.id = 'pos'; // creates position label
+    sels.appendChild(pos);
+
+    var tip = document.body.appendChild( document.createElement('div') );
+        tip.id             = 'tipper';
+
+
+
+    createOptions();
+
+
+    var chartDiv       = document.createElement('div');
+    chartDiv.className = 'chart';
+    chartDiv.id        = chartName;
+
+    document.body.appendChild( chartDiv );
+}
+
+
+/*
+ *
+ * PAGE CREATOR
+ *
+ */
+function addPicker ( el, id, cls, nfo, callback, opts ) {
+    var addlbls = true;
+    var addlblA = true;
+    var addlblB = true;
+
+
+    if (opts) {
+        if ( opts.addlbls !== undefined ) { addlbls = opts.addlbls; }
+        if ( opts.addlblA !== undefined ) { addlblA = opts.addlblA; }
+        if ( opts.addlblB !== undefined ) { addlblB = opts.addlblB; }
+    }
+
+
+
+    if ( addlbls && addlblB ) {
+        console.log( 'adding label B');
+        var trD1       = el  .appendChild( document.createElement('td'   ) );
+        trD1.className = 'labelB';
+
+        var lbl1       = document.createElement('label');
+        lbl1.htmlFor   = id;
+        lbl1.id        = id + '_labelB';
+        lbl1.innerHTML = "<b>" + id + "</b>";
+
+        if (nfo.alt) {
+            lbl1.innerHTML = "<b>" + nfo.alt + "</b>";
+        }
+
+        trD1.appendChild(lbl1);
+    }
+
+
+
+
+
+    var trD2       = el  .appendChild( document.createElement( 'td'    ) );
+    trD2.className = 'setupField';
+
+    var sel        = trD2.appendChild( document.createElement( nfo.tag ) );
+    sel.className  = 'setupEl';
+    sel.id         = id;
+    sel.onchange   = callback;
+
+
+
+    for ( var opt in nfo ) {
+        if (opt != 'tag') {
+            if (nfo.tag == 'select' && (opt == 'value' || opt == 'options')) {
+                continue;
+            }
+
+            sel[opt] = nfo[opt];
+        }
+    }
+
+
+
+    if (nfo.tag == 'select') {
+        genSelectorsOpts(nfo.options, sel, nfo.value);
+
+    } else if ( sel.type == 'checkbox' ) {
+        sel.checked = nfo.value;
+
+    }
+
+
+
+    if ( addlbls && addlblA ) {
+        console.log( 'adding label A');
+        var trD3       = el  .appendChild( document.createElement('td'   ) );
+        trD3.className = 'labelA';
+
+        var lbl2       = document.createElement('label');
+        lbl2.htmlFor   = id;
+        lbl2.id        = id + '_labelA';
+
+        if ( nfo.value !== null && nfo.value !== undefined ) {
+            lbl2.innerHTML = nfo.value;
+
+            var unity      = nfo.unity;
+            if (unity) {
+                lbl2.innerHTML = nfo.value + unity;
+            }
+        }
+
+        trD3.appendChild(lbl2);
+    }
+}
+
+
+function createCsss ( el ) {
+    console.groupCollapsed('createCsss %o', el);
+    console.timeStamp(     'begin createCsss');
+    console.time(          'createCsss');
+    console.log(           'begin createCsss %o', el);
+
+    var tbl       = el  .appendChild( document.createElement('table') );
+    tbl.className = 'setuptable';
+
+    var callback = function(e) {
+        console.log( 'CSSS CALLBACK' );
+        var tgt = null
+        try {
+            tgt = e.srcElement;
+        } catch(e) {
+            tgt = e.target; //Firefox
+        }
+
+        if (!tgt) {
+            return null;
+        }
+
+        var id    = tgt.id;
+        var obj   = tgt.obj;
+        var prop  = tgt.prop;
+        var unity = tgt.unity;
+
+        var val   = getFieldValue( id );
+
+        console.log('changing obj ' + obj + ' property ' + prop + ' value ' + val);
+        localDb.saveOpt( 'css', id, val );
+        changecss(obj, prop, val);
+
+        var lbl = document.getElementById( id + '_labelA' );
+        if (lbl) {
+            if (unity) {
+                val += unity;
+            }
+
+            lbl.innerHTML = val;
+        }
+    };
+
+    var csssKeys = Object.keys(csss);
+    csssKeys.sort();
+
+    for ( var objN = 0; objN < csssKeys.length; objN++ ) {
+        var obj       = csssKeys[ objN ];
+        var props     = csss[ obj ];
+        var propsKeys = Object.keys( props );
+        propsKeys.sort();
+
+        for ( var propN = 0; propN < propsKeys.length; propN++ ) {
+            var tr       = tbl .appendChild( document.createElement('tr'   ) );
+            var prop     = propsKeys[ propN ];
+            var nfo      = props[ prop ];
+            var id       = obj + prop;
+                id       = id.replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
+            var valueDfl = nfo.value;
+
+            nfo.obj      = obj;
+            nfo.prop     = prop;
+            nfo.value    = localDb.getOpt( 'css', id, nfo.value );
+
+            if ( nfo.value !== valueDfl ) {
+                var val   = nfo.value;
+                var unity = nfo.unity;
+                if (unity) {
+                    val += unity;
+                }
+                changecss(obj, prop, val);
+            }
+
+            addPicker(tr, id, 'csss', nfo, callback);
+        }
+    }
+
+    console.log(      'end createCsss %o', el);
+    console.timeStamp('end createCsss');
+    console.timeEnd(  'createCsss');
+    console.groupEnd( 'createCsss %o', el);
+};
+
+
+function createPositions ( el ) {
+    console.groupCollapsed('createPositions %o', el);
+    console.timeStamp(     'begin createPositions');
+    console.time(          'createPositions');
+    console.log(           'begin createPositions %o', el);
+
+    var tbl       = el  .appendChild( document.createElement('table') );
+    tbl.className = 'setuptable';
+
+    var callback = function(e) {
+        console.log( 'POSITION CALLBACK' );
+        var tgt = null
+        try {
+            tgt = e.srcElement;
+        } catch(e) {
+            tgt = e.target; //Firefox
+        }
+
+        if (!tgt) {
+            return null;
+        }
+
+        var id  = tgt.id;
+
+        var val = getFieldValue( id );
+
+        console.log('changing property ' + id + ' value ' + val);
+
+        localDb.saveOpt( 'positions', id, val );
+
+        var lbl = document.getElementById( id + '_labelA' );
+        if (lbl) {
+            lbl.innerHTML = val;
+        }
+    };
+
+    var posK = Object.keys( positions );
+    posK.sort();
+
+    for (var idN = 0; idN < posK.length; idN++ ) {
+        var tr     = tbl .appendChild( document.createElement('tr'   ) );
+        var id     = posK[idN];
+        var nfo    = copyKeys( positions[id] );
+        nfo.value  = localDb.getOpt( 'positions', id, nfo.value );
+        addPicker(tr, id, 'positions', nfo, callback);
+    }
+
+
+    console.log(      'end createPositions %o', el);
+    console.timeStamp('end createPositions');
+    console.timeEnd(  'createPositions');
+    console.groupEnd( 'createPositions %o', el);
+};
+
+
+function createOptions ( ) {
+    console.groupCollapsed('createOptions');
+    console.timeStamp(     'begin createOptions');
+    console.time(          'createOptions');
+
+    var divH = bdy.appendChild( document.createElement('div') );
+    divH.className   = 'htmlDiv';
+
+
+    var hlp = document.createElement('label');
+        hlp.innerHTML = '<b>Setup</b><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
+
+    divH.appendChild( hlp     );
+    divH.appendChild( document.createElement('br') );
+
+    createSyncs(divH);
+    divH.appendChild( document.createElement('br') );
+
+
+
+    var tbl          = divH.appendChild( document.createElement('table') );
+    tbl.className    = 'setuptable';
+
+    var th           = tbl .appendChild( document.createElement('tr'   ) );
+    var thD11        = th  .appendChild( document.createElement('th'   ) );
+    var thD12        = th  .appendChild( document.createElement('th'   ) );
+    thD11.innerHTML  = 'Positions';
+    thD12.innerHTML  = 'CSS';
+
+    var tr           = tbl .appendChild( document.createElement('tr'   ) );
+    var trD21        = tr  .appendChild( document.createElement('td'   ) );
+    var trD22        = tr  .appendChild( document.createElement('td'   ) );
+
+    createPositions(trD21);
+
+    createCsss(trD22);
+
+    var clsBtnS       = document.createElement('button');
+    clsBtnS.onclick   = function(e) { if (hasStorage) { alert('Cleaning Sync preferences'); localDb.clearDb('syncs'); location.reload(); } };
+    clsBtnS.innerHTML = 'Clear Syncs';
+
+    divH.appendChild( clsBtnS );
+
+    var clsBtnP       = document.createElement('button');
+    clsBtnP.onclick   = function(e) { if (hasStorage) { alert('Cleaning Positions preferences'); localDb.clearDb('positions'); location.reload(); } };
+    clsBtnP.innerHTML = 'Clear Positions';
+
+    divH.appendChild( clsBtnP );
+
+
+    var clsBtnC       = document.createElement('button');
+    clsBtnC.onclick   = function(e) { if (hasStorage) { alert('Cleaning CSS preferences'); localDb.clearDb('css'); location.reload(); } };
+    clsBtnC.innerHTML = 'Clear CSS';
+
+    divH.appendChild( clsBtnC );
+
+
+    var clsBtnA       = document.createElement('button');
+    clsBtnA.onclick   = function(e) { if (hasStorage) { alert('Cleaning ALL preferences'); localDb.clearDb('syncs'); localDb.clearDb('positions'); localDb.clearDb('css'); location.reload(); } };
+    clsBtnA.innerHTML = 'Clear ALL';
+
+    divH.appendChild( clsBtnA );
+
+
+    console.timeStamp('end createOptions');
+    console.timeEnd(  'createOptions');
+    console.groupEnd( 'createOptions');
+}
+
+
+function createSyncs ( el ) {
+    console.groupCollapsed('createSyncs %o', el);
+    console.timeStamp(     'begin createSyncs');
+    console.time(          'createSyncs');
+    console.log(           'begin createSyncs %o', el);
+
+    var span = el.appendChild( document.createElement('span') );
+    span.style.display = "inline-block";
+
+
+    var tbl       = el  .appendChild( document.createElement('table') );
+    tbl.className = 'setuptable';
+
+    var callback = function(e) {
+        console.log('SYNC CALLBACK');
+        var tgt = null
+        try {
+            tgt = e.srcElement;
+        } catch(e) {
+            tgt = e.target; //Firefox
+        }
+
+        if (!tgt) {
+            return null;
+        }
+
+        var id  = tgt.id;
+
+        var val = getFieldValue( id );
+
+        console.log('changing property ' + id + ' value ' + val);
+
+        localDb.saveOpt( 'syncs', id, val );
+
+        var lbl = document.getElementById( id + '_labelA' );
+        if (lbl) {
+            lbl.innerHTML = val;
+        }
+    };
+
+
+
+    var posK = Object.keys( syncFields );
+    posK.sort();
+    var tr    = tbl .appendChild( document.createElement('tr'   ) );
+
+    for (var idN = 0; idN < posK.length; idN++ ) {
+        var id    = posK[idN];
+        var nfo   = syncFields[id];
+
+        nfo.value = localDb.getOpt( 'syncs', id, nfo.value );
+
+        if ( idN > 0 && idN % 4 == 0 ) {
+            tr = tbl .appendChild( document.createElement('tr'   ) );
+        }
+
+        addPicker(tr, id, 'syncs', nfo, callback, {addlblA: false});
+    }
+
+
+
+    //var callback2 = function(e) {
+    //        var tgt = null
+    //        try {
+    //            tgt = e.srcElement;
+    //        } catch(e) {
+    //            tgt = e.target; //Firefox
+    //        }
+    //
+    //        if (tgt) {
+    //            var id = tgt.id;
+    //            localDb.saveOpt( 'syncs', id, getFieldValue( id ) );
+    //        }
+    //    };
+    //
+    //addPicker( tr, 'size', 'sizes', sizes.size, callback2, {addlblA: false});
+
+    console.log(      'end createSyncs %o', el);
+    console.timeStamp('end createSyncs');
+    console.timeEnd(  'createSyncs');
+    console.groupEnd( 'createSyncs %o', el);
+};
+
+
+function genSelectorsOpts ( obj, refSel, dflt ) {
+    /*
+     * Generate drop-down lists options base on "opts"
+     */
+
+    for ( var o = 0; o < obj.length; o++ ){
+        var opt = obj[ o ];
+
+        var op           = document.createElement('option');
+            op.value     = opt[0];
+            op.innerHTML = opt[1];
+
+        if (dflt)
+        {
+            if (dflt == opt[0]) {
+                op.selected = true;
+            }
+        }
+
+        refSel.appendChild( op );
+    }
+};
+
+
+function genSelectors ( sels ) {
+    /*
+     * Generate "select" elements. Calls genOpts to read options
+     * If only one option available, adds a label field, otherwise, adds a drop-down menu.
+     */
+
+    console.groupCollapsed('genSelectors %o', sels);
+    console.timeStamp(     'begin genSelectors');
+    console.time(          'genSelectors');
+    console.log(           'begin genSelectors %o', sels);
+
+
+    var callback = function(e) {
+            var tgt = null;
+
+            try {
+                tgt = e.srcElement;
+            } catch(e) {
+                tgt = e.target; //Firefox
+            }
+
+            if (tgt) {
+                var id = tgt.id;
+                localDb.saveOpt( 'selectors', id, getFieldValue( id ) );
+            }
+        };
+
+
+    var tbl = sels.appendChild( document.createElement('table').appendChild( document.createElement('tr') ));
+
+    for ( var optName in opts ) {
+        var opt = opts[optName];
+
+        var optVar = opt.options;
+
+        if ( optVar.length == 1 ) {
+            var refSel           = document.createElement("label");
+                refSel.id        = optName;
+                refSel.alt       = opt.alt;
+                refSel.value     = optVar[0];
+                refSel.innerHTML = optVar[0];
+
+            tbl.appendChild(refSel);
+
+
+        } else {
+            var opt2 = {};
+
+            for ( var k in opt ) {
+                opt2[k] = opt[k];
+            }
+
+            var optVar2 = [
+                ['null', opt.alt]
+            ];
+
+            for ( var o = 0; o < optVar.length; o++ ){
+                var val = optVar[ o ];
+                optVar2.push([ val , val]);
+            }
+
+            optVar2.push( [ '*all*', 'All' ] );
+
+            opt2.options = optVar2;
+            opt2.value   = localDb.getOpt( 'selectors', optName, opt2.value );
+
+            addPicker(tbl, optName, 'selectors', opt2, callback, {addlbls: false} );
+        }
+    }
+
+
+
+    var okb = document.createElement('button');   // add button and it's click action
+        okb.id        = 'okb';
+        okb.onclick   = selclick;
+        okb.innerHTML = 'View';
+    tbl.appendChild( document.createElement('td').appendChild( okb ) );
+
+
+
+    var clb = document.createElement('button');   // add button and it's click action
+        clb.id        = 'clb';
+        clb.onclick   = clearPics;
+        clb.innerHTML = 'Clear';
+    tbl.appendChild( document.createElement('td').appendChild( clb ) );
+
+    console.log(      'end genSelectors %o', sels);
+    console.timeStamp('end genSelectors');
+    console.timeEnd(  'genSelectors');
+    console.groupEnd( 'genSelectors %o', sels);
+};
+
+
+
+
+
+/*
+ *
+ *ACTIONS
+ *
+ */
+function selclick ( ) {
+    console.groupCollapsed('selclick');
+    console.timeStamp(     'begin selclick');
+    console.time(          'selclick');
+
+    var vals = getVals();
+
+    if (!vals) {
+        console.log('no vals');
+        return;
+    }
+
+    //console.log( vals );
+    var cfg = getCfg();
+
+    if (!cfg) {
+        return;
+    }
+
+    //cfg.horizontal = getFieldValue( 'horizontal' );
+    cfg.tipId      = 'tipper';
+    cfg.labelId    = null;
+
+    new processVals( vals, cfg );
+
+    console.timeStamp('end selclick');
+    console.timeEnd(  'selclick');
+    console.groupEnd( 'selclick');
+};
+
+
+function getVals ( ) {
+    console.groupCollapsed('getVals');
+    console.timeStamp(     'begin getVals');
+    console.time(          'getVals');
+
+    var vals = {};
+
+    for ( var optName in opts ) {
+        var val      = getFieldValue( optName );
+
+        if ( val === null ) {
+            console.log( 'value ' + optName + ' not defined' );
+            vals = null;
+            break;
+        } else {
+            //console.log( 'appending ' + optName + ' = '+ val );
+            vals[ optName ] = val;
+        }
+    }
+
+    console.log(      'end getVals >> %o', vals);
+    console.timeStamp('end getVals');
+    console.timeEnd(  'getVals');
+    console.groupEnd( 'getVals');
+
+    return vals;
+}
+
+
+function getCfg ( ) {
+    console.groupCollapsed('getCfg');
+    console.timeStamp(     'begin getCfg');
+    console.time(          'getCfg');
+
+    var optdbs = {
+        'positions' : [positions , false],
+        'syncFields': [syncFields, true ]
+    };
+
+    for ( optName in optdbs ) {
+        console.log('checking '+ optName);
+        var optdb = optdbs[ optName ][0];
+        var compu = optdbs[ optName ][1];
+
+        var posK  = Object.keys( optdb );
+            posK.sort();
+
+        var cfg   = {};
+
+        for (var idN = 0; idN < posK.length; idN++ ) {
+            var id    = posK[idN];
+            var nfo   = optdb[id];
+            var dfl   = nfo.value;
+            var tpy   = nfo.type;
+            var curr  = getFieldValue( id );
+
+            console.log('checking '+ optName + ' option ' + id + ' default ' + dfl + ' current ' + curr);
+
+
+            if ( ( compu ) || ( dfl === null ) || ( tpy == 'checkbox' ) || ( dfl != curr ) ) {
+                console.log('  changing');
+                console.log( nfo );
+                cfg[id] = curr;
+
+            } else {
+                console.log('  keeping');
+                if (cfg[id]) {
+                    delete cfg[id];
+                }
+            }
+        }
+    }
+
+    console.log(      'end getCfg >> %o', cfg);
+    console.timeStamp('end getCfg');
+    console.timeEnd(  'getCfg');
+    console.groupEnd( 'getCfg');
+
+    return cfg;
+}
+
+
+
+
+
+
+

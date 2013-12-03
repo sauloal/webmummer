@@ -178,7 +178,7 @@
 
 
         .htmlDiv {
-            position: absolute;
+            position: fixed !important;
             right: 0;
             top: 0;
             float: right;
@@ -187,29 +187,38 @@
             text-align: right;
 			white-space: nowrap;
             overflow: hidden;
-            transition: 1s;
-            -webkit-transition: 1s;
-            width:  4em;
-            height: 1.5em;
+            transition: 0.5s;
+            -webkit-transition: 0.5s;
+            width:  3.0em;
+            height: 1.2em;
         }
 
         .htmlDiv:hover {
+            display: block;
             width:   65em;
             height: 100%;
             overflow: scroll !important;
+            z-index: 101;
         }
 
 
         .labelB {
             text-align: right;
+            z-index: 100;
         }
 
         .setupField {
             text-align: left;
+            z-index: 100;
+        }
+
+        .setupEl{
+            z-index: 100;
         }
 
         .labelA {
             text-align: left;
+            z-index: 100;
         }
 
 
@@ -301,7 +310,7 @@
 
 	  var localDb      = new LocalStorageDb( _prog_domain, _db_domain );
 
-	  webmummer_debug  = false;
+	  webmummer_debug  = true;
 	</script>
 
 
