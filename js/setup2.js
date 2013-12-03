@@ -176,13 +176,8 @@ processVals.prototype.getRegister = function ( ) {
     });
 
 
-    console.log(      'end processVals.getRegister %o >> %o', self.vals, self.evals);
-    console.timeStamp('end processVals.getRegister');
-    console.timeEnd(  'processVals.getRegister');
-    console.groupEnd( 'processVals.getRegister %o', self.vals);
 
-
-    self.regs          = [];
+    self.receivedData     = [];
 
     for ( var e = 0; e < self.evals.length; e++ ) {
         var vals = self.evals[e];
@@ -194,7 +189,7 @@ processVals.prototype.getRegister = function ( ) {
 
         var regD = null;
         try {
-            regD = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
+            reg.res = _filelist[ vals.refName ][ vals.refChrom ][ vals.tgtName ][ vals.tgtChrom ][ vals.status ];
         }
         catch(err) {
             console.error('combination does not exists for:');
@@ -203,116 +198,29 @@ processVals.prototype.getRegister = function ( ) {
         }
 
 
-        for ( var k in regD ) {
-            reg.res[k] = regD[k];
-        }
-
-
         var uid            = Object.keys( vals ).map( function(d) { return vals[d] } ).join('').replace(/[^a-z0-9]/gi, '').replace(/[^a-z0-9]/gi, '');
         reg.nfo.uid        = uid;
         reg.nfo.qid        = self.qid;
+
         if ( self.cfg.horizontal) {
             reg.nfo.pid        = encodeObj( self.vals );
         } else {
             reg.nfo.pid        = encodeObj( vals );
         }
+
         reg.nfo.filepath   = datafolder + reg.res.filename;
         reg.nfo.scriptid   = 'script_'  + reg.nfo.uid;
-        self.regs.push( reg );
+        self.receivedData.push( reg );
     }
 
 
-    if (self.regs.length === 0) {
-        console.log('nore valid register');
-        return null;
-    }
-
-    console.log(      'end processVals.parseRegisters %o >> %o', self.evals, self.regs);
-    console.timeStamp('end processVals.parseRegisters');
-    console.timeEnd(  'processVals.parseRegisters');
-    console.groupEnd( 'processVals.parseRegisters %o', self.evals);
+    self.loadGraph();
 
 
-
-    self.size         = 0;
-    self.received     = 0;
-    self.sentData     = [];
-    self.receivedData = [];
-
-    self.regs.map( function(reg) {
-        var file  = reg.res.filename;
-        if (file) {
-            self.size += 1;
-        }
-    });
-
-
-    if (self.size === 0) {
-        console.log('nothing to plot');
-        console.log(self.regs);
-        return null;
-    }
-
-    var func  = function( sregv ) { loadScript( sregv, self.receive() ); };
-
-    self.regs.map( function(reg) {
-        var file   = reg.res.filename;
-
-        self.sentData.push( file );
-
-        if (file) {
-            console.log( 'sending ' + file );
-            func( reg );
-        }
-    });
-
-    console.log(      'end processVals.send %o', self.regs);
-    console.timeStamp('end processVals.send');
-    console.timeEnd(  'processVals.send');
-    console.groupEnd( 'processVals.send %o', self.regs);
-};
-
-
-processVals.prototype.receive = function ( ) {
-    var self = this;
-
-    return function( reg ) {
-        console.groupCollapsed('processVals.receive %o', reg);
-        console.timeStamp(     'begin processVals.receive');
-        console.time(          'processVals.receive');
-        console.log(           'begin processVals.receive %o', reg);
-
-        self.received += 1;
-
-        var dataPos = self.sentData.indexOf( reg.res.filename );
-
-        console.log( 'received #' + self.received + '/' + self.size + ' ' + reg.res.filename + ' pos ' + dataPos );
-
-        var res = _filelist[ reg.qry.refName ][ reg.qry.refChrom ][ reg.qry.tgtName ][ reg.qry.tgtChrom ][ reg.qry.status ];
-
-        reg.res = JSON.parse(JSON.stringify(res));
-
-        self.receivedData[ dataPos ] = reg;
-
-        delete res.points;
-        delete res.tgts;
-
-        var script = document.getElementById( reg.nfo.scriptid );
-
-        if ( script ) {
-            document.getElementById( scriptHolder ).removeChild( script );
-        }
-
-        if ( self.received == self.size ) {
-            //console.log( self.receivedData );
-            self.loadGraph();
-        }
-
-        console.log(      'end processVals.receive %o >> %o', reg, self.receivedData);
-        console.timeStamp('end processVals.receive');
-        console.timeEnd(  'processVals.receive');
-        console.groupEnd( 'processVals.receive %o', reg);
-    };
+    console.log(      'end processVals.getRegister %o >> %o', self.vals, self.evals);
+    console.timeStamp('end processVals.getRegister');
+    console.timeEnd(  'processVals.getRegister');
+    console.groupEnd( 'processVals.getRegister %o', self.vals);
 };
 
 
