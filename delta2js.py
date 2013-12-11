@@ -159,10 +159,13 @@ class exp(object):
         self.tgts    = {}
 
         self.fhd     = open(outfile, 'w')
+        self.fhd2    = open(outfile+'.gff3', 'w')
 
         self.linec   = 0;
 
         self.dbreg   = "_filelist[ '%s' ][ '%s' ][ '%s' ][ '%s' ][ '%s' ]" % ( refName, refChrom, tgtName, tgtChrom, status )
+
+        self.gffReg = {}
 
         #outfiles[ refName ][ chromNumber ][ spp ][ status ]
         self.fhd.write("""\
@@ -173,8 +176,10 @@ class exp(object):
 
 %(dbreg)s[ 'points' ] = [""" % { 'dbreg': self.dbreg, 'title': self.title, 'xlabel': self.xlabel, 'ylabel': self.ylabel } )
 
+        self.fhd2.write("##gff-version 3\n")
 
-    def append(self, x1, y1, x2, y2, name, sense, q):
+
+    def append(self, x1, y1, x2, y2, name, refName, sense, q):
         """
         Adds query name to database of names (a list of all names).
         Exports only species ID (index of the scaffold name in the database of names);
@@ -186,8 +191,27 @@ class exp(object):
 
         self.linec += 1
 
+        minx = x1 if x1 < x2 else x2
+        maxx = x1 if x1 > x2 else x2
+
         if name not in self.tgts:
             self.tgts[name] = len(self.tgts)
+
+            if len(self.gffReg) > 0:
+                for key in self.gffReg:
+                    for line in self.gffReg[key]:
+                        self.fhd2.write("\t".join( [ str(x) for x in line ] ) + "\n")
+
+            self.gffReg     = { name: [] }
+            #self.gffReg[name].append( [ refName, '.', 'gene', minx, maxx, '.', '+'                     , '.', 'ID=%s;Name=%s'   % (name        ,  name) ] )
+            self.gffReg[name].append( [ refName, '.', 'mRNA', minx, maxx, '.', '+'                     , '.', 'ID=%s;Name=%s' % (refName+'_'+name,  refName+'_'+name) ] )
+            #self.fhd2.write("\t".join( [ str(x) for x in [refName, '.', 'mRNA', x1, x2, '.', '+'                           , '.', 'ID=%s;Name=%s'   % (name,  name) ] ] ) + "\n")
+
+        gffId = "%s_frag_%05d" % ( refName+'_'+name, len( self.gffReg[ name ] ) )
+        self.gffReg[name].append( [refName, '.', 'CDS', minx, maxx, '.', '+' if sense == 'fwd' else '-', len( self.gffReg[ name ] )-1, 'ID=%s;Parent=%s' % (gffId, refName+'_'+name) ] )
+        self.gffReg[name][0][4] = maxx
+        #self.gffReg[name][1][4] = maxx
+        #self.fhd2.write("\t".join( [ str(x) for x in [refName, '.', 'exon', x1, x2, '.', '+' if sense == 'fwd' else '-', '.', 'ID=%s;Parent=%s' % (gffId, name) ] ] ) + "\n")
 
         name  = self.tgts[name]
 
@@ -220,7 +244,7 @@ class exp(object):
         #print "adding", reg
         refStart, refEnd, tgtStart, tgtEnd, targetStart, targetEnd, refLen, tgtLen, refSub, tgtSub, idd, refName, tgtName = reg
 
-        self.append( refStart, targetStart, refEnd, targetEnd, tgtName, sense, idd )
+        self.append( refStart, targetStart, refEnd, targetEnd, tgtName, refName, sense, idd )
 
     def close(self):
         """
@@ -247,6 +271,7 @@ class exp(object):
         self.fhd.write( line )
 
         self.fhd.close()
+        self.fhd2.close()
 
 
 
