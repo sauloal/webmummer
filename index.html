@@ -54,11 +54,6 @@
 <p>Use arrow keys, +/-/0, drag with mouse, [shift] double-click, scroll-wheel or use the compass.</p>
 
 <h2>
-<a name="screenshot" class="anchor" href="#screenshot"><span class="octicon octicon-link"></span></a>Screenshot</h2>
-
-<p><img src="https://raw.github.com/sauloal/webmummer/master/Screenshot.png"><img src="http://sauloal.github.io/webmummer/solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean-Dot-Plot.svg"><img src="http://sauloal.github.io/webmummer/solanum-lycopersicum-heinz-vs-solanum-pennellii---Chromosome-12---Clean---Filtered-Dot-Plot--Only-Inversions.svg"></p>
-
-<h2>
 <a name="saving" class="anchor" href="#saving"><span class="octicon octicon-link"></span></a>Saving</h2>
 
 <p>On the top left corther of each graph there's a button to save the current view to a svg file.</p>
@@ -69,22 +64,64 @@
 <p>On the top right corther there's a help message. Hover over it to all configurations and help available.</p>
 
 <h2>
+<a name="screenshot" class="anchor" href="#screenshot"><span class="octicon octicon-link"></span></a>Screenshot</h2>
+
+<h3>
+<a name="a-diagonal-plot-for-close-species" class="anchor" href="#a-diagonal-plot-for-close-species"><span class="octicon octicon-link"></span></a>A diagonal plot for close species</h3>
+
+<p><img src="http://sauloal.github.io/webmummer/Screenshot_01_diagonal.png"></p>
+
+<h3>
+<a name="a-diagonal-plot-for-distant-species" class="anchor" href="#a-diagonal-plot-for-distant-species"><span class="octicon octicon-link"></span></a>A diagonal plot for distant species</h3>
+
+<p><img src="http://sauloal.github.io/webmummer/Screenshot_02_distant_spps.png"></p>
+
+<h3>
+<a name="configuration-pop-up" class="anchor" href="#configuration-pop-up"><span class="octicon octicon-link"></span></a>Configuration pop-up</h3>
+
+<p><img src="http://sauloal.github.io/webmummer/Screenshot_03_config.png"></p>
+
+<h3>
+<a name="horizontal-multi-display" class="anchor" href="#horizontal-multi-display"><span class="octicon octicon-link"></span></a>Horizontal multi display</h3>
+
+<p><img src="http://sauloal.github.io/webmummer/Screenshot_04_horizontal.png"></p>
+
+<h3>
+<a name="horizontal-multi-display---zoomed-with-description-in-the-right-corner" class="anchor" href="#horizontal-multi-display---zoomed-with-description-in-the-right-corner"><span class="octicon octicon-link"></span></a>Horizontal multi display - Zoomed with description in the right corner</h3>
+
+<p><img src="http://sauloal.github.io/webmummer/Screenshot_05_horizontal_zoom.png"></p>
+
+<h3>
+<a name="svg-output" class="anchor" href="#svg-output"><span class="octicon octicon-link"></span></a>SVG output</h3>
+
+<p><img src="http://sauloal.github.io/webmummer/Plot_diagonal.svg"></p>
+
+<h3>
+<a name="svg-output---zoomed" class="anchor" href="#svg-output---zoomed"><span class="octicon octicon-link"></span></a>SVG output - zoomed</h3>
+
+<p><img src="http://sauloal.github.io/webmummer/Plot_diagonal_zoom.svg"></p>
+
+<h2>
 <a name="thanks" class="anchor" href="#thanks"><span class="octicon octicon-link"></span></a>Thanks</h2>
 
 <ul>
-<li>Mummer      - <a href="http://mummer.sourceforge.net/">http://mummer.sourceforge.net/</a>
+<li>Mummer         - <a href="http://mummer.sourceforge.net/">http://mummer.sourceforge.net/</a>
 </li>
-<li>D3          - <a href="http://d3js.org/">http://d3js.org/</a>
+<li>D3             - <a href="http://d3js.org/">http://d3js.org/</a>
 </li>
-<li>JQuery      - <a href="http://jquery.com/">http://jquery.com/</a>
+<li>JQuery         - <a href="http://jquery.com/">http://jquery.com/</a>
 </li>
-<li>Tipsy       - <a href="http://onehackoranother.com/projects/jquery/tipsy/">http://onehackoranother.com/projects/jquery/tipsy/</a>
+<li>Tipsy          - <a href="http://onehackoranother.com/projects/jquery/tipsy/">http://onehackoranother.com/projects/jquery/tipsy/</a>
 </li>
-<li>Stepheneb   - <a href="http://bl.ocks.org/stepheneb/1182434">http://bl.ocks.org/stepheneb/1182434</a>
+<li>Stepheneb      - <a href="http://bl.ocks.org/stepheneb/1182434">http://bl.ocks.org/stepheneb/1182434</a>
 </li>
-<li>SVG Crowbar - <a href="http://nytimes.github.io/svg-crowbar/">http://nytimes.github.io/svg-crowbar/</a>
+<li>SVG Crowbar    - <a href="http://nytimes.github.io/svg-crowbar/">http://nytimes.github.io/svg-crowbar/</a>
 </li>
-<li>SMO script  - <a href="http://www.shawnolson.net">http://www.shawnolson.net</a>
+<li>SMO script     - <a href="http://www.shawnolson.net">http://www.shawnolson.net</a>
+</li>
+<li>ParseUri       - <a href="http://blog.stevenlevithan.com/archives/parseuri">http://blog.stevenlevithan.com/archives/parseuri</a>
+</li>
+<li>Nijiko Yonskai - <a href="https://gist.github.com/Nijikokun/5192472">https://gist.github.com/Nijikokun/5192472</a>
 </li>
 </ul><h2>
 <a name="technical-details" class="anchor" href="#technical-details"><span class="octicon octicon-link"></span></a>Technical details</h2>
@@ -97,29 +134,28 @@
 <h3>
 <a name="jssimple-graphjs" class="anchor" href="#jssimple-graphjs"><span class="octicon octicon-link"></span></a>js/simple-graph.js</h3>
 
-<p>Workhorse of the graphics library</p>
+<p>Workhorse of the graphics library.</p>
 
 <h3>
 <a name="indexhtml" class="anchor" href="#indexhtml"><span class="octicon octicon-link"></span></a>index.html</h3>
 
-<p>Contains the relevant css for coloring the graph.</p>
+<p>Contains the scaffold of the page.</p>
 
 <h3>
 <a name="delta2jspy" class="anchor" href="#delta2jspy"><span class="octicon octicon-link"></span></a>delta2js.py</h3>
 
-<p>Delta files are parsed and converted to cartesian coordinates by delta2js.py.</p>
+<p>Converts .delta files to cartesian coordinates.</p>
+
+<p>delta2js.py MUST be modified to your own project file naming.</p>
 
 <p>It exports all values to java script files because that's the only type of file that can be loaded in a browser without a web server.</p>
 
+<p>It exports a list (data/list.js) and several databases (data/*.js);</p>
+
+<p>data/list.js contains all the available files and their sources (reference, chromosome, target and status), the x/y axis labels and the graphic title.
+This file will be loaded automatically and will draw the options drop-down list.</p>
+
 <p>data/*.js contains minimum and maximum values, as well as an array with all coordinates.</p>
-
-<p>It also exports a list (data/list.js) of all the available files and their sources (reference, chromosome, target and status). This file will be loaded automatically and will draw the options drop-down list.</p>
-
-<p>In data/list.js, also list the x/y labels and graphic title.</p>
-
-<p>deltajs.py MUST be modified to your own project file naming.</p>
-
-<p>data/list.js can also be created manually.</p>
 
 <h4>
 <a name="run" class="anchor" href="#run"><span class="octicon octicon-link"></span></a>Run</h4>
@@ -137,40 +173,45 @@ rm webmummer.tar.xz; tar --exclude .git -ahcvf webmummer.tar.xz .
 <h5>
 <a name="datalistjs" class="anchor" href="#datalistjs"><span class="octicon octicon-link"></span></a>data/list.js</h5>
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">statuses</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Clean &amp; Filtered Dot Plot. Only Inversions'</span><span class="p">,</span> <span class="s1">'Clean Dot Plot'</span><span class="p">];</span>
-<span class="kd">var</span> <span class="nx">spps</span>     <span class="o">=</span> <span class="p">[</span><span class="s1">'solanum arcanum'</span><span class="p">,</span> <span class="s1">'solanum habrochaites'</span><span class="p">,</span> <span class="s1">'solanum lycopersicum heinz denovo'</span><span class="p">,</span> <span class="s1">'solanum pennellii'</span><span class="p">];</span>
-<span class="kd">var</span> <span class="nx">chroms</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">'00'</span><span class="p">,</span> <span class="s1">'01'</span><span class="p">,</span> <span class="s1">'02'</span><span class="p">,</span> <span class="s1">'03'</span><span class="p">,</span> <span class="s1">'04'</span><span class="p">,</span> <span class="s1">'05'</span><span class="p">,</span> <span class="s1">'06'</span><span class="p">,</span> <span class="s1">'07'</span><span class="p">,</span> <span class="s1">'08'</span><span class="p">,</span> <span class="s1">'09'</span><span class="p">,</span> <span class="s1">'10'</span><span class="p">,</span> <span class="s1">'11'</span><span class="p">,</span> <span class="s1">'12'</span><span class="p">];</span>
-<span class="kd">var</span> <span class="nx">refs</span>     <span class="o">=</span> <span class="p">[</span><span class="s1">'solanum lycopersicum heinz'</span><span class="p">];</span>
-<span class="kd">var</span> <span class="nx">filelist</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">'solanum lycopersicum heinz'</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s1">'00'</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s1">'solanum arcanum'</span><span class="o">:</span> <span class="p">{</span>
-        <span class="s2">"Clean &amp; Filtered Dot Plot. Only Inversions"</span><span class="o">:</span> <span class="p">{</span>
-          <span class="s2">"filename"</span><span class="o">:</span> <span class="s2">"solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.filter.invertions.delta.js"</span>
-        <span class="p">},</span>
-        <span class="s2">"Clean Dot Plot"</span><span class="o">:</span> <span class="p">{</span>
-          <span class="s2">"filename"</span><span class="o">:</span> <span class="s2">"solanum_lycopersicum_heinz_SL2.40ch00.fa_._solanum_arcanum_scaffold_final.assembly.fasta.delta.q.delta.js"</span>
-        <span class="p">},</span>
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">_db_version</span>  <span class="o">=</span> <span class="s2">"2013_11_27_14_25_43"</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">_refsNames</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">'ath'</span><span class="p">,</span> <span class="s1">'bol'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">_refsChroms</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">'01'</span><span class="p">,</span> <span class="s1">'02'</span><span class="p">,</span> <span class="s1">'03'</span><span class="p">,</span> <span class="s1">'04'</span><span class="p">,</span> <span class="s1">'05'</span><span class="p">,</span> <span class="s1">'06'</span><span class="p">,</span> <span class="s1">'07'</span><span class="p">,</span> <span class="s1">'08'</span><span class="p">,</span> <span class="s1">'09'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">_tgtsNames</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">'ath'</span><span class="p">,</span> <span class="s1">'bol'</span><span class="p">,</span> <span class="s1">'bra'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">_tgtsChroms</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">'01'</span><span class="p">,</span> <span class="s1">'02'</span><span class="p">,</span> <span class="s1">'03'</span><span class="p">,</span> <span class="s1">'04'</span><span class="p">,</span> <span class="s1">'05'</span><span class="p">,</span> <span class="s1">'06'</span><span class="p">,</span> <span class="s1">'07'</span><span class="p">,</span> <span class="s1">'08'</span><span class="p">,</span> <span class="s1">'09'</span><span class="p">,</span> <span class="s1">'10'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">_statuses</span>    <span class="o">=</span> <span class="p">[</span><span class="s1">'Clean Dot Plot'</span><span class="p">,</span> <span class="s1">'Raw Dot Plot'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">_filelist</span>    <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">'ath'</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s1">'01'</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s1">'ath'</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s1">'01'</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s1">'Clean Dot Plot'</span><span class="o">:</span> <span class="p">{</span>
+                  <span class="s1">'filename'</span><span class="o">:</span> <span class="s1">'ath1_ath1.delta.filter.js'</span>
+          <span class="p">},</span>
+          <span class="s1">'Raw Dot Plot'</span><span class="o">:</span> <span class="p">{</span>
+                  <span class="s1">'filename'</span><span class="o">:</span> <span class="s1">'ath1_ath1.delta.js'</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
       <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">}</span>
-<span class="p">}</span>
+<span class="p">};</span>
 </pre></div>
 
 <h5>
-<a name="datafilejs" class="anchor" href="#datafilejs"><span class="octicon octicon-link"></span></a>data/file.js</h5>
+<a name="datajs" class="anchor" href="#datajs"><span class="octicon octicon-link"></span></a>data/*.js</h5>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'title'</span>  <span class="p">]</span> <span class="o">=</span> <span class="s1">'solanum lycopersicum heinz vs solanum pennellii - Chromosome 12 - Clean Dot Plot'</span><span class="p">;</span>
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xlabel'</span> <span class="p">]</span> <span class="o">=</span> <span class="s1">'solanum lycopersicum heinz Chromosome 12'</span><span class="p">;</span>
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ylabel'</span> <span class="p">]</span> <span class="o">=</span> <span class="s1">'solanum pennellii'</span><span class="p">;</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'title'</span>  <span class="p">]</span> <span class="o">=</span> <span class="s1">'ath Chromosome 01 vs ath Chromosome 01 - Clean Dot Plot'</span><span class="p">;</span>
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xlabel'</span> <span class="p">]</span> <span class="o">=</span> <span class="s1">'ath Chromosome 01'</span><span class="p">;</span>
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ylabel'</span> <span class="p">]</span> <span class="o">=</span> <span class="s1">'ath Chromosome 01'</span><span class="p">;</span>
 
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'points'</span> <span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3159</span><span class="p">,</span><span class="mi">3057</span><span class="p">,</span><span class="mi">8585</span><span class="p">,</span><span class="mi">8485</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">96.19</span><span class="p">];</span>
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xmin'</span> <span class="p">]</span>  <span class="o">=</span>         <span class="mi">3159</span><span class="p">;</span>
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xmax'</span> <span class="p">]</span>  <span class="o">=</span>     <span class="mi">65485119</span><span class="p">;</span>
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'points'</span> <span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">13201252</span><span class="p">,</span><span class="mi">13201253</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">100.00</span><span class="p">];</span>
 
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ymin'</span> <span class="p">]</span>  <span class="o">=</span>         <span class="mi">3057</span><span class="p">;</span>
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ymax'</span> <span class="p">]</span>  <span class="o">=</span>     <span class="mi">60818323</span><span class="p">;</span>
-<span class="nx">filelist</span><span class="p">[</span> <span class="s1">'solanum lycopersicum heinz'</span> <span class="p">][</span> <span class="s1">'12'</span> <span class="p">][</span> <span class="s1">'solanum pennellii'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'scafs'</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">'scaffold_2657'</span><span class="p">];</span>
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xmin'</span>   <span class="p">]</span>  <span class="o">=</span>            <span class="mi">1</span><span class="p">;</span>
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'xmax'</span>   <span class="p">]</span>  <span class="o">=</span>     <span class="mi">30427671</span><span class="p">;</span>
+
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ymin'</span>   <span class="p">]</span>  <span class="o">=</span>            <span class="mi">2</span><span class="p">;</span>
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'ymax'</span>   <span class="p">]</span>  <span class="o">=</span>     <span class="mi">30427672</span><span class="p">;</span>
+<span class="nx">_filelist</span><span class="p">[</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'ath'</span> <span class="p">][</span> <span class="s1">'01'</span> <span class="p">][</span> <span class="s1">'Clean Dot Plot'</span> <span class="p">][</span> <span class="s1">'tgts'</span>   <span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">'1'</span><span class="p">];</span>
 </pre></div>
 
 <h2>
@@ -180,10 +221,13 @@ rm webmummer.tar.xz; tar --exclude .git -ahcvf webmummer.tar.xz .
 <a name="priority" class="anchor" href="#priority"><span class="octicon octicon-link"></span></a>Priority</h3>
 
 <ul>
+<li>[ ] add zoom and position to address bar</li>
+<li>[ ] permit multiple selection</li>
+<li>[ ]</li>
 <li>[ ] better keyboard zoom</li>
-<li>[ ] allow parallel display</li>
 <li>[ ] sync resize axis</li>
 <li>[ ] calculate maxX and maxY</li>
+<li>[x] allow parallel display</li>
 <li>[x] apply sizes configuration</li>
 <li>[x] allow for multiple plots</li>
 <li>[x] highlight same scaffold</li>
@@ -193,10 +237,12 @@ rm webmummer.tar.xz; tar --exclude .git -ahcvf webmummer.tar.xz .
 
 <ul>
 <li>[x] replace all jquery selector for d3 selector in simple-graph.js</li>
-<li>[x] disable auto load
-~~ use jquery-ui to drop-down lists ~~
-~~ allow enablig circles ~~</li>
-</ul><h2>
+<li>[x] disable auto load</li>
+</ul><p><del>use jquery-ui to drop-down lists</del></p>
+
+<p><del>allow enablig circles</del></p>
+
+<h2>
 <a name="images" class="anchor" href="#images"><span class="octicon octicon-link"></span></a>IMAGES</h2>
 
 <div class="highlight highlight-bash"><pre>git checkout --orphan gh-pages
