@@ -165,7 +165,8 @@ class exp(object):
 
         self.dbreg   = "_filelist[ '%s' ][ '%s' ][ '%s' ][ '%s' ][ '%s' ]" % ( refName, refChrom, tgtName, tgtChrom, status )
 
-        self.gffReg = {}
+        self.gffReg   = {}
+        self.gffNames = []
 
         #outfiles[ refName ][ chromNumber ][ spp ][ status ]
         self.fhd.write("""\
@@ -197,21 +198,17 @@ class exp(object):
         if name not in self.tgts:
             self.tgts[name] = len(self.tgts)
 
-            if len(self.gffReg) > 0:
-                for key in self.gffReg:
-                    for line in self.gffReg[key]:
-                        self.fhd2.write("\t".join( [ str(x) for x in line ] ) + "\n")
+            self.gffReg[name] = []
+            self.gffReg[name].append( [ refName, '.', 'mRNA', minx, maxx, '.', '+'                     , '.', 'ID=%s;Name=%s' % (refName+'_'+name,  name) ] )
 
-            self.gffReg     = { name: [] }
-            #self.gffReg[name].append( [ refName, '.', 'gene', minx, maxx, '.', '+'                     , '.', 'ID=%s;Name=%s'   % (name        ,  name) ] )
-            self.gffReg[name].append( [ refName, '.', 'mRNA', minx, maxx, '.', '+'                     , '.', 'ID=%s;Name=%s' % (refName+'_'+name,  refName+'_'+name) ] )
-            #self.fhd2.write("\t".join( [ str(x) for x in [refName, '.', 'mRNA', x1, x2, '.', '+'                           , '.', 'ID=%s;Name=%s'   % (name,  name) ] ] ) + "\n")
+            if name not in self.gffNames:
+                self.gffNames.append( name )
 
-        gffId = "%s_frag_%05d" % ( refName+'_'+name, len( self.gffReg[ name ] ) )
-        self.gffReg[name].append( [refName, '.', 'CDS', minx, maxx, '.', '+' if sense == 'fwd' else '-', len( self.gffReg[ name ] )-1, 'ID=%s;Parent=%s' % (gffId, refName+'_'+name) ] )
+
+        gffId   = "%s_frag_%05d" % ( refName+'_'+name, len( self.gffReg[ name ] ) )
+        gffName = "%s_frag_%05d" % (             name, len( self.gffReg[ name ] ) )
+        self.gffReg[name].append( [refName, '.', 'CDS', minx, maxx, '.', '+' if sense == 'fwd' else '-', len( self.gffReg[ name ] )-1, 'ID=%s;Name=%s;Parent=%s' % (gffId, gffName, refName+'_'+name) ] )
         self.gffReg[name][0][4] = maxx
-        #self.gffReg[name][1][4] = maxx
-        #self.fhd2.write("\t".join( [ str(x) for x in [refName, '.', 'exon', x1, x2, '.', '+' if sense == 'fwd' else '-', '.', 'ID=%s;Parent=%s' % (gffId, name) ] ] ) + "\n")
 
         name  = self.tgts[name]
 
@@ -269,6 +266,12 @@ class exp(object):
         line += '];'
 
         self.fhd.write( line )
+
+        if len(self.gffReg) > 0:
+            for key in self.gffNames:
+                for line in self.gffReg[key]:
+                    self.fhd2.write("\t".join( [ str(x) for x in line ] ) + "\n")
+
 
         self.fhd.close()
         self.fhd2.close()
