@@ -4,29 +4,34 @@
  */
 var opts   = {
     'refName' : {
-        'tag'    : 'select',
-        'options': _refsNames,
-        'alt'    : 'Select Reference'
+        'tag'     : 'select',
+        'options' : _refsNames,
+        'alt'     : 'Select Reference',
+        'multiple': true
     },
     'refChrom': {
-        'tag'    : 'select',
-        'options': _refsChroms,
-        'alt'    : 'Select Reference Chromosome'
+        'tag'     : 'select',
+        'options' : _refsChroms,
+        'alt'     : 'Select Reference Chromosome',
+        'multiple': true
     },
     'tgtName' : {
-        'tag'    : 'select',
-        'options': _tgtsNames ,
-        'alt'    : 'Select Target'
+        'tag'     : 'select',
+        'options' : _tgtsNames ,
+        'alt'     : 'Select Target',
+        'multiple': true
     },
     'tgtChrom': {
-        'tag'    : 'select',
-        'options': _tgtsChroms,
-        'alt'    : 'Select Target Chromosome'
+        'tag'     : 'select',
+        'options' : _tgtsChroms,
+        'alt'     : 'Select Target Chromosome',
+        'multiple': true
     },
     'status'  : {
-        'tag'    : 'select',
-        'options': _statuses  ,
-        'alt'    : 'Select Status'
+        'tag'     : 'select',
+        'options' : _statuses  ,
+        'alt'     : 'Select Status',
+        'multiple': true
     }
 };
 
@@ -36,6 +41,7 @@ var chartSizes = [
         ['chartpart' , 'Half Page'   ],
         ['chartquart', 'Quarter Page']
 ]
+
 
 
 var positions = {
@@ -222,6 +228,7 @@ var positions = {
 };
 
 
+
 var syncFields = {
     'chartClass': {
                         'tag'    : 'select',
@@ -260,9 +267,6 @@ var syncFields = {
                 'alt'    : 'Show crosshair'
     }
 };
-
-
-
 
 
 
@@ -412,6 +416,15 @@ var csss = {
 
 
 
+
+
+
+
+
+
+
+
+
 function draw() {
     var sels = document.createElement('span');
     sels.id  = 'selectors';
@@ -440,7 +453,106 @@ function draw() {
     chartDiv.id        = chartName;
 
     document.body.appendChild( chartDiv );
+    
+    updateSelects();
 }
+
+
+function updateSelects() {
+    var sels = document.getElementsByTagName('select');
+
+    var upd   = function() { updateSel(this.sid, this.o           , this.checked); };
+    var seall = function() { selSelAll(this.parentNode.parentNode , this.checked); };
+
+    for ( var s = 0; s < sels.length; s++ ) {
+        var sel = sels[s];
+        //console.log( sel );
+        if ( sel.multiple ) {
+            var par  = sel.parentNode;
+            var opts = sel.getElementsByTagName('option');
+            var sid  = sel.id;
+            var bcr  = sel.getBoundingClientRect();
+            
+            var div           = document.createElement('div');
+            div.className     = 'selectDiv';
+            div.style.width   = bcr.width + 'px';
+            div.style.display = 'block';
+            //div.style.top     = bcr.top;
+            //div.style.left    = bcr.left;
+            
+            
+            for ( var o = 0; o < opts.length; o++ ) {
+                var opt         = opts[ o ];
+                
+                var inp         = document.createElement( 'input' );
+                    inp.type    = 'checkbox';
+                    inp.sid     = sid;
+                    inp.o       = o;
+                    inp.value   = opt.value;
+                    
+                    if (opt.value === '*all*') {
+                        inp.onclick = seall;
+                    } else 
+                    if (opt.value === 'null') {
+                    } else {
+                        inp.onclick = upd;
+                    }
+                
+                if ( opt.selected ) {
+                    inp.checked = true;
+                }
+                
+                var spa1        = document.createElement( 'span'  );
+                    spa1.style.height = '1.5em';
+                
+                var spa2     = document.createElement( 'span'  );
+                    spa2.innerHTML    = opt.innerHTML;
+                    spa2.style.height = '1.5em';
+                
+                var br       = document.createElement( 'br'    );
+                
+                if (opt.value === 'null') {
+                    inp.style.visibility = 'hidden';
+                }
+                
+                spa1.appendChild( inp  );
+                spa1.appendChild( spa2 );
+                spa2.appendChild( br   );
+                div.appendChild(  spa1 );
+            }
+            
+            par.appendChild( div );
+
+            sel.style.visibility = 'hidden';
+            sel.style.display    = 'none';
+        }
+    }
+}
+
+
+function updateSel(sid, o, checked) {
+    var sel      = document.getElementById( sid );
+    var opts     = sel.getElementsByTagName('option');
+    var opt      = opts[o];
+    opt.selected = checked;
+}
+
+
+function selSelAll(parentNode, checked) {
+    var inps     = parentNode.getElementsByTagName('input');
+    console.log( inps );
+    for ( var i = 0; i < inps.length; i++ ) {
+        var inp      = inps[i];
+        if ( inp.value !== '*all*') {
+            inp.checked = !checked;
+            inp.click();
+        }
+    }
+}
+
+
+
+
 
 
 /*
@@ -494,13 +606,15 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
 
 
     for ( var opt in nfo ) {
-        if (opt != 'tag') {
-            if (nfo.tag == 'select' && (opt == 'value' || opt == 'options')) {
-                continue;
-            }
-
-            sel[opt] = nfo[opt];
+        if (opt == 'tag') {
+            continue;
         }
+        
+        if (nfo.tag == 'select' && (opt == 'value' || opt == 'options')) {
+            continue;
+        }
+
+        sel[opt] = nfo[opt];
     }
 
 
@@ -536,6 +650,30 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
         trD3.appendChild(lbl2);
     }
 }
+
+
+function genSelectorsOpts ( obj, refSel, dflt, multiple ) {
+    /*
+     * Generate drop-down lists options base on "opts"
+     */
+
+    for ( var o = 0; o < obj.length; o++ ){
+        var opt = obj[ o ];
+        
+        var op           = document.createElement('option');
+            op.value     = opt[0];
+            op.innerHTML = opt[1];
+
+        if (dflt)
+        {
+            if (dflt == opt[0]) {
+                op.selected = true;
+            }
+        }
+
+        refSel.appendChild( op );
+    }
+};
 
 
 function createCsss ( el ) {
@@ -831,30 +969,6 @@ function createSyncs ( el ) {
 };
 
 
-function genSelectorsOpts ( obj, refSel, dflt ) {
-    /*
-     * Generate drop-down lists options base on "opts"
-     */
-
-    for ( var o = 0; o < obj.length; o++ ){
-        var opt = obj[ o ];
-
-        var op           = document.createElement('option');
-            op.value     = opt[0];
-            op.innerHTML = opt[1];
-
-        if (dflt)
-        {
-            if (dflt == opt[0]) {
-                op.selected = true;
-            }
-        }
-
-        refSel.appendChild( op );
-    }
-};
-
-
 function genSelectors ( sels ) {
     /*
      * Generate "select" elements. Calls genOpts to read options
@@ -975,7 +1089,6 @@ function selclick ( ) {
         return;
     }
 
-    //cfg.horizontal = getFieldValue( 'horizontal' );
     cfg.tipId      = 'tipper';
     cfg.labelId    = null;
 
@@ -1003,7 +1116,7 @@ function getVals ( ) {
             break;
         } else {
             //console.log( 'appending ' + optName + ' = '+ val );
-            vals[ optName ] = val;
+            vals[ optName ] = val.split('|');
         }
     }
 

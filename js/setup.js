@@ -128,8 +128,8 @@ processVals.prototype.getRegister = function ( ) {
         var val         = self.vals[ key ];
         self.dvals[key] = [];
 
-        if ( val == '*all*' ) {
-            opts[key].options.map( function(oval) {
+        if ( Object.prototype.toString.call( val ) === '[object Array]' ) {
+            val.map( function(oval) {
                 self.dvals[key].push( oval );
             });
         } else {
@@ -831,11 +831,22 @@ function getFieldValue ( fieldId ) {
             //console.log('getting ' + fieldId + ' select');
             var sel = field.selectedIndex;
             //console.log('getting ' + fieldId + ' select index ' + sel);
+            
             if ( sel == -1 ) {
                 sel = null;
+                
             } else {
-                var fio = field.options[ sel ];
-                val     = fio.value;
+                var result  = [];
+                var options = field.options; //.getElementsByTagName('option');
+                console.log( options );
+                for ( var i=0; i < options.length; i++ ) {
+                    var opt = options[i];
+                
+                    if (opt.selected) {
+                        result.push(opt.value || opt.text);
+                    }
+                }
+                val     = result.join('|');
             }
         } else {
             //console.log('getting ' + fieldId + ' !select');

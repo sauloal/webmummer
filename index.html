@@ -177,6 +177,38 @@
         }
 
 
+		
+        .compass{
+          fill: #FFFFFF;
+          stroke: #000000;
+          stroke-width: 1.5;
+        }
+
+        .compass-button{
+          fill: #225EA8;
+          stroke: #0C2C84;
+          stroke-miterlimit:	6;
+          stroke-linecap: round;
+        }
+
+        .compass-button:hover{
+          stroke-width: 2;
+        }
+
+        .compass-plus-minus{
+          fill: #FFFFFF;
+          pointer-events: none;
+        }
+
+        .compass-opaque {
+            opacity: .2;
+        }
+    </style>
+
+	
+	<style>
+
+
         .htmlDiv {
             position: fixed !important;
             right: 0;
@@ -243,37 +275,18 @@
             vertical-align: top;
         }
 
-    </style>
-
-
-    <style>
-        .compass{
-          fill: #FFFFFF;
-          stroke: #000000;
-          stroke-width: 1.5;
-        }
-
-        .compass-button{
-          fill: #225EA8;
-          stroke: #0C2C84;
-          stroke-miterlimit:	6;
-          stroke-linecap: round;
-        }
-
-        .compass-button:hover{
-          stroke-width: 2;
-        }
-
-        .compass-plus-minus{
-          fill: #FFFFFF;
-          pointer-events: none;
-        }
-
-        .compass-opaque {
-            opacity: .2;
-        }
-    </style>
-
+		.selectDiv {
+		  height: 1.5em;
+		  overflow: hidden;
+		  color: blue;
+		}
+		
+		.selectDiv:hover {
+		  height: auto;
+		  color: black;
+		  background: lightgrey;
+		}
+	</style>
     <!--<link rel="stylesheet" type="text/css" href="css/tipsy.css" />-->
   </head>
   <body onload="start()">
@@ -312,7 +325,7 @@
 
 	  var localDb      = new LocalStorageDb( _prog_domain, _db_domain );
 
-	  webmummer_debug  = false;
+	  webmummer_debug  = true;
 	</script>
 
 
