@@ -556,19 +556,20 @@ SimpleGraph.prototype.getMinMax = function () {
                 this.xmax = maxX;
             }
 
-            if ( this.ymax < maxY ) {
-                this.ymax = maxY;
+            if ( this.xmin > minX ) {
+                this.xmin = minX;
             }
             
-            
             if ( ! this.options.horizontal ) {
-                if ( this.xmin > minX ) {
-                    this.xmin = minX;
+
+                if ( this.ymax < maxY ) {
+                    this.ymax = maxY;
                 }
                 
                 if ( this.ymin > minY ) {
                     this.ymin = minY;
                 }
+
             }
         }
     }
