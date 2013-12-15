@@ -32,7 +32,7 @@ var hasstorage = hasStorage();
  * START function
  *
  */
-function start () {
+function start ( ) {
     /*
     * Creates page elements
     */
@@ -92,7 +92,7 @@ function start () {
  *PROCESSING FUNCTIONS
  *
  */
-processVals = function ( vals, cfg, initState ){
+processVals = function ( vals, cfg, initState ) {
     console.groupCollapsed('processVals vals %o cfg %o init state %o', vals, cfg, initState);
     console.timeStamp(     'begin processVals');
     console.time(          'processVals');
@@ -649,7 +649,7 @@ LocalStorageDb.prototype.getOpt = function ( data_domain, key, dflt ) {
 };
 
 
-LocalStorageDb.prototype.getDataDb = function ( data_domain ){
+LocalStorageDb.prototype.getDataDb = function ( data_domain ) {
     var self = this;
 
     console.groupCollapsed('LocalStorageDb.getDataDb data_domain "%s"', data_domain);
@@ -749,6 +749,11 @@ LocalStorageDb.prototype.getDb = function ( ) {
 
     return res;
 };
+
+
+
+
+
 
 
 function updateQuery ( e ) {

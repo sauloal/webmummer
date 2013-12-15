@@ -467,7 +467,7 @@ function createOptions ( ) {
 
 
     var hlp = document.createElement('label');
-        hlp.innerHTML = '<b>Setup</b><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
+        hlp.innerHTML = '<div class="htmlDivTitle"><b>Setup</b></div><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
 
     divH.appendChild( hlp     );
     divH.appendChild( document.createElement('br') );
@@ -1004,14 +1004,21 @@ function replaceSelects ( ) {
             var sid  = sel.id;
             var bcr  = sel.getBoundingClientRect();
             
-            var div           = document.createElement('div');
-            div.className     = 'selectDiv';
-            div.style.width   = bcr.width + 'px';
-            div.style.display = 'block';
-            //div.style.top     = bcr.top;
-            //div.style.left    = bcr.left;
-            
-            
+            var div            = document.createElement('div');
+            div.className      = 'selectDiv';
+            div.style.width    = bcr.width  + 'px';
+            div.style.top      = bcr.top    + 'px';
+            div.style.left     = bcr.left   + 'px';
+            //div.style.right    = bcr.right  + 'px';
+            //div.style.bottom   = bcr.bottom + 'px';
+
+            par.width          = bcr.width  + 'px';
+            par.appendChild( div );
+
+            sel.style.height     = '1.5em';
+            sel.style.visibility = 'hidden';
+            sel.style.display    = 'none';
+
             for ( var o = 0; o < opts.length; o++ ) {
                 var opt         = opts[ o ];
                 
@@ -1051,11 +1058,6 @@ function replaceSelects ( ) {
                 spa2.appendChild( br   );
                 div.appendChild(  spa1 );
             }
-            
-            par.appendChild( div );
-
-            //sel.style.visibility = 'hidden';
-            sel.style.display    = 'none';
         }
     }
 }

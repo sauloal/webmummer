@@ -2,7 +2,7 @@
 //.transition()
 //      .duration(700)
 
-function toFixed (value, precision) {
+function toFixed ( value, precision ) {
     //http://stackoverflow.com/questions/2221167/javascript-formatting-a-rounded-number-to-n-decimals/2909252#2909252
     var precision = precision || 0,
     neg      = value < 0,
@@ -21,7 +21,7 @@ function isArray ( val ) {
 };
 
 
-function compObjValue (objA, objB) {
+function compObjValue ( objA, objB ) {
     return JSON.stringify(objA) == JSON.stringify(objB);
 }
 
@@ -63,16 +63,17 @@ function compObjValue (objA, objB) {
 
 
 // register keyboard events
-registerKeyboardHandler = function (callback) {
+registerKeyboardHandler = function ( callback ) {
     d3.select(window).on("keydown", callback);
 };
 
 
-d3.selection.prototype.size = function () {
+d3.selection.prototype.size = function ( ) {
     var n = 0;
     this.each( function () {
-        n++;
-    } );
+            n++;
+        }
+    );
     return n;
 };
 
@@ -85,7 +86,7 @@ d3.selection.prototype.size = function () {
 /////////////////////////////////////
 // SyncSimpleGraph
 /////////////////////////////////////
-SyncSimpleGraph = function (opts) {
+SyncSimpleGraph = function ( opts ) {
     var self     = this;
     this.sync    = opts.sync    === null ? true : opts.sync;
     this.resizeX = opts.resizeX === null ? true : opts.resizeX;
@@ -124,7 +125,7 @@ SyncSimpleGraph.prototype.getVar = function ( vari ) {
 
 
 
-SyncSimpleGraph.prototype.clear = function () {
+SyncSimpleGraph.prototype.clear = function ( ) {
     var self = this;
     for ( var uid in this.db ) {
         console.log( 'cleaning ' + uid );
@@ -144,7 +145,7 @@ SyncSimpleGraph.prototype.clear = function () {
 
 
 
-SyncSimpleGraph.prototype.add = function(chartHolder, options) {
+SyncSimpleGraph.prototype.add = function ( chartHolder, options ) {
     //console.log( options );
     var uid  = options.uid === null ? 'uid_' + new Date() : options.uid;
     var self = this;
@@ -229,7 +230,7 @@ SyncSimpleGraph.prototype.add = function(chartHolder, options) {
 
 
 
-SyncSimpleGraph.prototype.getQueries = function() {
+SyncSimpleGraph.prototype.getQueries = function ( ) {
     var res = {};
     console.log( 'getting current queries');
 
@@ -270,7 +271,7 @@ SyncSimpleGraph.prototype.getQueries = function() {
 
 
 
-SyncSimpleGraph.prototype.deleteUid = function (uid) {
+SyncSimpleGraph.prototype.deleteUid = function ( uid ) {
     var self = this;
 
     if ( self.db[uid] ) {
@@ -298,7 +299,7 @@ SyncSimpleGraph.prototype.deleteUid = function (uid) {
 
 
 
-SyncSimpleGraph.prototype.d3zoomed = function (e) {
+SyncSimpleGraph.prototype.d3zoomed = function ( e ) {
     var self = this;
     var obj  = e.detail.self;
     var el   = e.detail.el;
@@ -351,7 +352,7 @@ SyncSimpleGraph.prototype.d3zoomed = function (e) {
 
 
 
-SyncSimpleGraph.prototype.d3closed = function (e) {
+SyncSimpleGraph.prototype.d3closed = function ( e ) {
     var obj = e.detail.self;
     var uid = obj.uid;
 
@@ -402,7 +403,7 @@ SyncSimpleGraph.prototype.dispatchChangedEvent = function ( source ) {
 /////////////////////////////////////
 // SimpleGraph
 /////////////////////////////////////
-SimpleGraph = function (chartHolder, options) {
+SimpleGraph = function ( chartHolder, options ) {
     console.log('SimpleGraph %o', options);
 
     this.uid                         = options.uid === null ? 'uid_' + new Date() : options.uid;
@@ -457,15 +458,6 @@ SimpleGraph = function (chartHolder, options) {
             console.log( 'no required argument ' + req + ' defined' );
         }
     }
-
-
-    //requireds = [ 'xmax', 'xmin', 'ymax', 'ymin' ];
-    //for ( var r = 0; r < requireds.length; r++ ) {
-    //    var req = requireds[r];
-    //    if (!this.options[req]) {
-    //        console.log( 'no required option ' + req + ' defined' );
-    //    }
-    //}
 
 
     this.elemid                      = 'div_' + this.uid;
@@ -531,7 +523,7 @@ SimpleGraph = function (chartHolder, options) {
 //
 // SimpleGraph methods
 //
-SimpleGraph.prototype.getMinMax = function () {
+SimpleGraph.prototype.getMinMax = function ( ) {
     for ( var p = 0; p < this.numRegs.length; p++ ) {
         //console.log( 'getMinMax p %d numRegs %o', p, numRegs );
         var numRegs = this.numRegs[p];
@@ -579,7 +571,7 @@ SimpleGraph.prototype.getMinMax = function () {
 
 
 
-SimpleGraph.prototype.draw = function () {
+SimpleGraph.prototype.draw = function ( ) {
     var self = this;
 
     this.cx  = this.chart.clientWidth;
@@ -873,7 +865,7 @@ SimpleGraph.prototype.draw = function () {
 
 
 
-SimpleGraph.prototype.getCurrStatus = function( ) {
+SimpleGraph.prototype.getCurrStatus = function ( ) {
     var val = {
         'currScale'       : this.currScale,
 
@@ -896,7 +888,7 @@ SimpleGraph.prototype.getCurrStatus = function( ) {
 
 
 
-SimpleGraph.prototype.updateWorker = function( linenum ) {
+SimpleGraph.prototype.updateWorker = function ( linenum ) {
     var self   = this;
     var lines  = this.vis.selectAll(".points[k='"+linenum+"']");
 
@@ -974,7 +966,7 @@ SimpleGraph.prototype.updateWorker = function( linenum ) {
 
 
 
-SimpleGraph.prototype.update = function () {
+SimpleGraph.prototype.update = function ( ) {
     var self   = this;
     //var coords = [];
 
@@ -1028,7 +1020,7 @@ SimpleGraph.prototype.update = function () {
 
 
 
-SimpleGraph.prototype.downlight = function( el ) {
+SimpleGraph.prototype.downlight = function ( el ) {
     var self = this;
     d3.select(el).classed( "scaf-highlight", false );
     self.greenbox.selectAll('.scaf-square').remove();
@@ -1040,7 +1032,7 @@ SimpleGraph.prototype.downlight = function( el ) {
 
 
 
-SimpleGraph.prototype.highlight = function( el ) {
+SimpleGraph.prototype.highlight = function ( el ) {
     var self    = this;
     var del     = d3.select(el);
     var nameNum = del.attr('scaf');
@@ -1185,7 +1177,7 @@ SimpleGraph.prototype.highlight = function( el ) {
 
 
 
-SimpleGraph.prototype.getSppName = function(k, j){
+SimpleGraph.prototype.getSppName = function ( k, j ){
     if (this.tgts) {
         return this.tgts[ k ][ j ];
     }
@@ -1197,7 +1189,7 @@ SimpleGraph.prototype.getSppName = function(k, j){
 
 
 
-SimpleGraph.prototype.parsepoint = function(k, j) {
+SimpleGraph.prototype.parsepoint = function ( k, j ) {
     //console.log( 'parsepoint k %d j %d points %o', k, j, this.points);
     
     var startPos = j * this.regSize;
@@ -1226,7 +1218,7 @@ SimpleGraph.prototype.parsepoint = function(k, j) {
 
 
 
-SimpleGraph.prototype.genTip = function (k,j) {
+SimpleGraph.prototype.genTip = function ( k, j ) {
     var vars  = this.parsepoint( k,j );
     var res   = '<b>Scaf:</b> '         + vars.name     +
                 '<br><b>Sense:</b> '    + vars.senseStr +
@@ -1239,7 +1231,7 @@ SimpleGraph.prototype.genTip = function (k,j) {
 
 
 
-SimpleGraph.prototype.plot_drag = function () {
+SimpleGraph.prototype.plot_drag = function ( ) {
     var self = this;
     return function () {
         registerKeyboardHandler(self.keydown());
@@ -1268,7 +1260,7 @@ SimpleGraph.prototype.plot_drag = function () {
 
 
 
-SimpleGraph.prototype.updatePos = function (){
+SimpleGraph.prototype.updatePos = function ( ) {
     var groups = [
         [this.xlabelText, this.options.xlabel, this.x.domain()                         , true  ],
         [this.ylabelText, this.options.ylabel, [this.y.domain()[1], this.y.domain()[0]], false ]
@@ -1309,7 +1301,7 @@ SimpleGraph.prototype.updatePos = function (){
 
 
 
-SimpleGraph.prototype.datapoint_drag = function () {
+SimpleGraph.prototype.datapoint_drag = function ( ) {
     var self = this;
     return function(d) {
         registerKeyboardHandler(self.keydown());
@@ -1322,7 +1314,7 @@ SimpleGraph.prototype.datapoint_drag = function () {
 
 
 
-SimpleGraph.prototype.mousemove = function () {
+SimpleGraph.prototype.mousemove = function ( ) {
     var self = this;
     return function () {
         var p = d3.mouse(self.vis[0][0]);
@@ -1376,7 +1368,7 @@ SimpleGraph.prototype.mousemove = function () {
 
 
 
-SimpleGraph.prototype.mouseup = function () {
+SimpleGraph.prototype.mouseup = function ( ) {
     var self = this;
     return function () {
         document.onselectstart = function () { return true; };
@@ -1406,7 +1398,7 @@ SimpleGraph.prototype.mouseup = function () {
 
 
 
-SimpleGraph.prototype.keydown = function () {
+SimpleGraph.prototype.keydown = function ( ) {
   var self = this;
   return function () {
     var keyPressed = d3.event.keyCode;
@@ -1464,7 +1456,7 @@ SimpleGraph.prototype.keydown = function () {
 
 
 
-SimpleGraph.prototype.mover = function(valPressed) {
+SimpleGraph.prototype.mover = function ( valPressed ) {
     var self   = this;
 
     var blockY = Math.floor(self.size.height / 5);
@@ -1491,7 +1483,7 @@ SimpleGraph.prototype.mover = function(valPressed) {
 
 
 
-SimpleGraph.prototype.reset = function () {
+SimpleGraph.prototype.reset = function ( ) {
     var self = this;
     console.log("reseting");
 
@@ -1519,7 +1511,7 @@ SimpleGraph.prototype.reset = function () {
 
 
 
-SimpleGraph.prototype.panIt = function(dx, dy){
+SimpleGraph.prototype.panIt = function ( dx, dy ) {
     var self = this;
     //console.log('pan. self ' + self + ' dx ' + dx + ' dy ' + dy);
     var cTrans = self.zoom.translate();
@@ -1554,7 +1546,7 @@ SimpleGraph.prototype.panIt = function(dx, dy){
 
 
 
-SimpleGraph.prototype.zoomIt = function(z){
+SimpleGraph.prototype.zoomIt = function ( z ) {
     //console.log( 'zoom. z ' + z )
     var self     = this;
 
@@ -1564,7 +1556,7 @@ SimpleGraph.prototype.zoomIt = function(z){
 
 
 
-SimpleGraph.prototype.applyZoom = function(z, x, y){
+SimpleGraph.prototype.applyZoom = function ( z, x, y ) {
     var self = this;
 
     console.log( 'applying zoom z: ' + z + ' x: ' + x + ' y: ' + y);
@@ -1580,7 +1572,7 @@ SimpleGraph.prototype.applyZoom = function(z, x, y){
 
 
 
-SimpleGraph.prototype.redraw = function () {
+SimpleGraph.prototype.redraw = function ( ) {
   var self = this;
 
   return function () {
@@ -1739,7 +1731,7 @@ SimpleGraph.prototype.redraw = function () {
 
 
 
-SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
+SimpleGraph.prototype.updateCurrentZoom = function ( scale, translate ) {
     var self              = this;
 
     var translationX      = translate[0];
@@ -1802,7 +1794,7 @@ SimpleGraph.prototype.updateCurrentZoom = function(scale, translate) {
 
 
 
-SimpleGraph.prototype.xaxis_drag = function () {
+SimpleGraph.prototype.xaxis_drag = function ( ) {
   var self = this;
   return function(d) {
     document.onselectstart = function () { return false; };
@@ -1814,7 +1806,7 @@ SimpleGraph.prototype.xaxis_drag = function () {
 
 
 
-SimpleGraph.prototype.yaxis_drag = function(d) {
+SimpleGraph.prototype.yaxis_drag = function ( d ) {
   var self = this;
   return function(d) {
     document.onselectstart = function () { return false; };
@@ -1826,7 +1818,7 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
 
 
 
-SimpleGraph.prototype.download = function(obj) {
+SimpleGraph.prototype.download = function ( obj ) {
     var self = this;
     var doctype = '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
     var svg     = self.svg;
@@ -1914,7 +1906,7 @@ SimpleGraph.prototype.download = function(obj) {
 
 
 
-SimpleGraph.prototype.getStyles = function () {
+SimpleGraph.prototype.getStyles = function ( ) {
     //var self        = this;
     var doc         = window.document;
     var styles      = "";
@@ -1951,7 +1943,7 @@ SimpleGraph.prototype.getStyles = function () {
 
 
 
-SimpleGraph.prototype.close = function(obj) {
+SimpleGraph.prototype.close = function ( obj ) {
     var el = document.getElementById( this.elemid );
     var self = this;
 
@@ -1986,7 +1978,7 @@ SimpleGraph.prototype.close = function(obj) {
 
 
 
-SimpleGraph.prototype.addBtns = function() {
+SimpleGraph.prototype.addBtns = function ( ) {
     this.addCompass();
 
     this.addCloseIcon();
@@ -1998,7 +1990,7 @@ SimpleGraph.prototype.addBtns = function() {
 
 
 
-SimpleGraph.prototype.toggleLock = function(obj) {
+SimpleGraph.prototype.toggleLock = function ( obj ) {
     var self        = this;
     this.shouldSync = !this.shouldSync;
 
@@ -2017,7 +2009,7 @@ SimpleGraph.prototype.toggleLock = function(obj) {
 
 
 
-SimpleGraph.prototype.addCompass = function () {
+SimpleGraph.prototype.addCompass = function ( ) {
     var gW     = 42;
     var startX = 50;
     var startY = 50;
@@ -2184,7 +2176,7 @@ SimpleGraph.prototype.addCompass = function () {
 
 
 
-SimpleGraph.prototype.calcIconPos = function(gW, maxSize, coor, ord) {
+SimpleGraph.prototype.calcIconPos = function ( gW, maxSize, coor, ord ) {
     var sW   = this.size.width > this.size.height ? this.size.height : this.size.width;
     var sW10 = sW * 0.025;
     if ( sW10 < maxSize ) {
@@ -2202,7 +2194,7 @@ SimpleGraph.prototype.calcIconPos = function(gW, maxSize, coor, ord) {
 
 
 
-SimpleGraph.prototype.addCloseIcon = function () {
+SimpleGraph.prototype.addCloseIcon = function ( ) {
     var self   = this;
     var coords = this.calcIconPos( 300, this.options.closeIconMaxSize, 1 );
 
@@ -2292,7 +2284,7 @@ SimpleGraph.prototype.addCloseIcon = function () {
 
 
 
-SimpleGraph.prototype.addDownloadIcon = function () {
+SimpleGraph.prototype.addDownloadIcon = function ( ) {
     var self   = this;
     var coords = this.calcIconPos( 300, this.options.closeIconMaxSize, 2 );
 
@@ -2353,7 +2345,7 @@ SimpleGraph.prototype.addDownloadIcon = function () {
 
 
 
-SimpleGraph.prototype.addPadLockIcon = function () {
+SimpleGraph.prototype.addPadLockIcon = function ( ) {
     var self   = this;
     var coords = this.calcIconPos( 260, this.options.padlockIconMaxSize, 3 );
 
