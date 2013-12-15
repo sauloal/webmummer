@@ -13,6 +13,7 @@ function hasStorage ( ) {
     try {
         var res = 'localStorage' in window && window.localStorage !== null;
         //var res = windowhasOwnProperty('localStorage') && window.localStorage !== null;
+        console.log('has storage');
 
         return res;
     } catch(e) {
@@ -98,11 +99,11 @@ processVals = function ( vals, cfg, initState ){
     console.log(           'begin processVals %o cfg %o', vals, cfg);
 
     var self           = this;
+    self.qid           = encodeObj( { 'vals': vals, 'cfg': cfg } );
     self.vals          = vals;
     self.cfg           = cfg;
     self.initState     = initState;
-    self.qid           = encodeObj( { 'vals': self.vals, 'cfg': self.cfg } );
-
+    
     self.getRegister();
 
     console.log(      'end processVals qid %s', self.qid);
@@ -127,7 +128,7 @@ processVals.prototype.getRegister = function ( ) {
     for ( var key in opts ) {
         var val         = self.vals[ key ];
         self.dvals[key] = [];
-
+        
         if ( Object.prototype.toString.call( val ) === '[object Array]' ) {
             val.map( function(oval) {
                 self.dvals[key].push( oval );
@@ -846,7 +847,11 @@ function getFieldValue ( fieldId ) {
                         result.push(opt.value || opt.text);
                     }
                 }
-                val     = result.join('|');
+                
+                val     = result;
+                if ( result.length == 1 ) {
+                    val     = result[0];
+                }
             }
         } else {
             //console.log('getting ' + fieldId + ' !select');
