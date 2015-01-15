@@ -1,3 +1,5 @@
+![DOI](https://zenodo.org/badge/4998/sauloal/webmummer.svg "DOI")
+
 WebMummer
 =========
 Web Browser Mummer Plot Viewer
