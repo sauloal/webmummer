@@ -12,6 +12,7 @@ notindestiny     = []
 dosymetrical     = True
 doreciprocal     = True
 create_make_file = True
+create_html      = False
 html2pdf         = None
 pdf2img          = None
 maxX             = -1
@@ -162,18 +163,18 @@ def mapgenomes( org1, org2 ):
             alt       = "%s chr %s vs %s chr %s" % ( org1name, org1str, org2name, org2str )
             reportouter.append('\t\t\t\t<td><img src="%s" title="%s"/></td>' % ( outpngl, alt ))
 
-            cmd1      = "../nucmer -o -p %s %s %s" % ( outname, org2fasta, org1fasta )
+            cmd1      = "nucmer -o -p %s %s %s" % ( outname, org2fasta, org1fasta )
 
             makefile.append(outdelta + ': ' + org1fasta + ' ' + org2fasta)
             makefile.append('\t%s\n' % cmd1)
 
-            cmd2 = '../mummerplot -f -p %s --large --png %s' % ( outdelta, outdelta )
+            cmd2 = 'mummerplot -f -p %s --large --png %s' % ( outdelta, outdelta )
             makefile.append(outpng + ' ' + outfilter + ': ' + outdelta)
             #makefile.append('\tif [ $( shell cat %s | wc -l ) -gt 2 ]; then %s; else touch %s; touch %s; fi\n' % (outdelta, cmd2, outpng, outfilter))
             makefile.append('\t%s\n' % (cmd2))
             outfiles.append(outpng)
 
-            cmd3 = '../show-aligns -r %s.filter "%s" "%s" > %s' % (outdelta, org2seqname, org1seqname, outaln)
+            cmd3 = 'show-aligns -r %s.filter "%s" "%s" > %s' % (outdelta, org2seqname, org1seqname, outaln)
             makefile.append(outaln + ': ' + outfilter)
             makefile.append('\t%s\n' % cmd3)
             outfiles.append(outaln)
@@ -494,36 +495,45 @@ def main():
 
 
 
-    print "creating html"
-    genHtml(divnames)
-    print "creating html ok"
+    if create_html:
+        print "creating html"
+        genHtml(divnames)
+        print "creating html ok"
 
 
 
     if create_make_file:
         print "creating makefile"
-        html = 'report.html.tar.xz'
-        makefile.append(html + ' : '+" ".join( allfiles ))
-        makefile.append('\ttar --exclude=report.html.png -acvf %s *.html */*.html */*.png\n' % html)
+        if create_html:
+            html = 'report.html.tar.xz'
+            makefile.append(html + ' : '+" ".join( allfiles ))
+            makefile.append('\ttar --exclude=report.html.png -acvf %s *.html */*.html */*.png\n' % html)
 
-        png = 'report.png.tar.xz'
-        makefile.append(png + ' : '+" ".join( allfiles ))
-        makefile.append('\ttar -acvf %s */report.html.png\n' % png)
+            png = 'report.png.tar.xz'
+            makefile.append(png + ' : '+" ".join( allfiles ))
+            makefile.append('\ttar -acvf %s */report.html.png\n' % png)
 
-        pdf = 'report.pdf.tar.xz'
-        makefile.append(pdf + ' : '+" ".join( allfiles ))
-        makefile.append('\ttar -acvf %s */report.html.pdf\n' % pdf)
+            pdf = 'report.pdf.tar.xz'
+            makefile.append(pdf + ' : '+" ".join( allfiles ))
+            makefile.append('\ttar -acvf %s */report.html.pdf\n' % pdf)
 
-        allf = 'report.all.tar.xz'
-        makefile.append(allf + ' : '+" ".join( allfiles ))
-        makefile.append('\ttar -acvf %s *.html */*.html */*.png */*.pdf\n' % allf)
+            allf = 'report.all.tar.xz'
+            makefile.append(allf + ' : '+" ".join( allfiles ))
+            makefile.append('\ttar -acvf %s *.html */*.html */*.png */*.pdf\n' % allf)
 
-        allr = 'report.raw.tar.xz'
-        makefile.append(allr + ' : '+" ".join( allfiles ))
-        makefile.append('\ttar -acvf %s */*.coords */*.delta */*.filter */*.aln */*.fplot  */*.rplot  */*.gp \n' % allr)
+            allr = 'report.raw.tar.xz'
+            makefile.append(allr + ' : '+" ".join( allfiles ))
+            makefile.append('\ttar -acvf %s */*.coords */*.delta */*.filter */*.aln */*.fplot  */*.rplot  */*.gp \n' % allr)
 
-        allstr = 'all: ' + " ".join( [html, png, pdf, allf, allr] ) + "\n"
-        makefile.insert(0, allstr)
+            allstr = 'all: ' + " ".join( [html, png, pdf, allf, allr] ) + "\n"
+            makefile.insert(0, allstr)
+        else:
+            allr = 'report.raw.tar.xz'
+            makefile.append(allr + ' : '+" ".join( allfiles ))
+            makefile.append('\ttar -acvf %s */*.coords */*.delta */*.filter */*.aln */*.fplot  */*.rplot  */*.gp \n' % allr)
+
+            allstr = 'all: ' + " ".join( [allr] ) + "\n"
+            makefile.insert(0, allstr)
 
 
 

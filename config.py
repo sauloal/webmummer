@@ -1,26 +1,18 @@
 genomes = {
-    'ath': {
-        'name'  : 'Arabidopsis thaliana',
-        'folder': 'arabidopsis_thaliana',
-        'prefix': 'Arabidopsis_thaliana.TAIR10.18.dna.chromosome.',
-        'begin' : 1,
-        'end'   : 5,
-        'fmt'   : '%d'
+    'sly': {
+        'name'  : 'Solanum lycopersicum',
+        'folder': 'Solanum_lycopersicum',
+        'prefix': 'SL2.40ch',
+        'begin' : 0,
+        'end'   : 12,
+        'fmt'   : '%02d'
     },
-    'bol': {
-        'name'  : 'Brassica oleracea',
-        'folder': 'brassica_oleracea',
-        'prefix': '',
+    'stu': {
+        'name'  : 'Solanum tuberosum',
+        'folder': 'Solanum_tuberosum',
+        'prefix': 'ST4.03ch',
         'begin' : 1,
-        'end'   : 9,
-        'fmt'   : '%d'
-    },
-    'bra': {
-        'name'  : 'Brassica rapa',
-        'folder': 'brassica_rapa',
-        'prefix': 'chrA',
-        'begin' : 1,
-        'end'   : 10,
+        'end'   : 12,
         'fmt'   : '%02d'
     }
 }
@@ -31,6 +23,7 @@ notindestiny     = ['slyref']
 dosymetrical     = False
 doreciprocal     = True
 create_make_file = True
+create_html      = False
 
 #maxX             = 1
 #maxY             = 2

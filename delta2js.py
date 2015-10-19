@@ -192,8 +192,11 @@ class exp(object):
 
         self.linec += 1
 
-        minx = x1 if x1 < x2 else x2
-        maxx = x1 if x1 > x2 else x2
+        minx = x1 if (x1 < x2) else x2
+        maxx = x1 if (x1 > x2) else x2
+
+	print "minx %d  maxx %d x1 %d x2 %d" % (minx, maxx, x1, x2)
+	assert minx < maxx, "minx (%d) > maxx(%d) for %s" % (minx, maxx, name)
 
         if name not in self.tgts:
             self.tgts[name] = len(self.tgts)
@@ -207,7 +210,8 @@ class exp(object):
 
         gffId   = "%s_frag_%05d" % ( refName+'_'+name, len( self.gffReg[ name ] ) )
         gffName = "%s_frag_%05d" % (             name, len( self.gffReg[ name ] ) )
-        self.gffReg[name].append( [refName, '.', 'CDS', minx, maxx, '.', '+' if sense == 'fwd' else '-', len( self.gffReg[ name ] )-1, 'ID=%s;Name=%s;Parent=%s' % (gffId, gffName, refName+'_'+name) ] )
+        #self.gffReg[name].append( [refName, '.', 'CDS', minx, maxx, '.', '+' if sense == 'fwd' else '-', len( self.gffReg[ name ] )-1, 'ID=%s;Name=%s;Parent=%s' % (gffId, gffName, refName+'_'+name) ] )
+        self.gffReg[name].append( [refName, '.', 'CDS', minx, maxx, '.', '+' if sense == 'fwd' else '-', 0, 'ID=%s;Name=%s;Parent=%s' % (gffId, gffName, refName+'_'+name) ] )
         self.gffReg[name][0][4] = maxx
 
         name  = self.tgts[name]
@@ -321,10 +325,10 @@ def parseDelta(delta):
         #print "identity  %.2f"                                             % ( idd                                                     )
         #print
 
-        refMin = min( refStart, refEnd )
-        refMax = max( refStart, refEnd )
-        tgtMin = min( tgtStart, tgtEnd )
-        tgtMax = max( tgtStart, tgtEnd )
+        refMin = min( [refStart, refEnd] )
+        refMax = max( [refStart, refEnd] )
+        tgtMin = min( [tgtStart, tgtEnd] )
+        tgtMax = max( [tgtStart, tgtEnd] )
         d      = [refStart, refEnd, tgtStart, tgtEnd, refLen, tgtLen, refSub, tgtSub, idd, refName, tgtName]
         #print d
 
