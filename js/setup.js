@@ -13,6 +13,7 @@ function hasStorage ( ) {
     try {
         var res = 'localStorage' in window && window.localStorage !== null;
         //var res = windowhasOwnProperty('localStorage') && window.localStorage !== null;
+        console.log('has storage');
 
         return res;
     } catch(e) {
@@ -31,7 +32,7 @@ var hasstorage = hasStorage();
  * START function
  *
  */
-function start () {
+function start ( ) {
     /*
     * Creates page elements
     */
@@ -91,18 +92,18 @@ function start () {
  *PROCESSING FUNCTIONS
  *
  */
-processVals = function ( vals, cfg, initState ){
+processVals = function ( vals, cfg, initState ) {
     console.groupCollapsed('processVals vals %o cfg %o init state %o', vals, cfg, initState);
     console.timeStamp(     'begin processVals');
     console.time(          'processVals');
     console.log(           'begin processVals %o cfg %o', vals, cfg);
 
     var self           = this;
+    self.qid           = encodeObj( { 'vals': vals, 'cfg': cfg } );
     self.vals          = vals;
     self.cfg           = cfg;
     self.initState     = initState;
-    self.qid           = encodeObj( { 'vals': self.vals, 'cfg': self.cfg } );
-
+    
     self.getRegister();
 
     console.log(      'end processVals qid %s', self.qid);
@@ -127,9 +128,9 @@ processVals.prototype.getRegister = function ( ) {
     for ( var key in opts ) {
         var val         = self.vals[ key ];
         self.dvals[key] = [];
-
-        if ( val == '*all*' ) {
-            opts[key].options.map( function(oval) {
+        
+        if ( Object.prototype.toString.call( val ) === '[object Array]' ) {
+            val.map( function(oval) {
                 self.dvals[key].push( oval );
             });
         } else {
@@ -648,7 +649,7 @@ LocalStorageDb.prototype.getOpt = function ( data_domain, key, dflt ) {
 };
 
 
-LocalStorageDb.prototype.getDataDb = function ( data_domain ){
+LocalStorageDb.prototype.getDataDb = function ( data_domain ) {
     var self = this;
 
     console.groupCollapsed('LocalStorageDb.getDataDb data_domain "%s"', data_domain);
@@ -750,6 +751,11 @@ LocalStorageDb.prototype.getDb = function ( ) {
 };
 
 
+
+
+
+
+
 function updateQuery ( e ) {
     var self = this;
 
@@ -831,11 +837,26 @@ function getFieldValue ( fieldId ) {
             //console.log('getting ' + fieldId + ' select');
             var sel = field.selectedIndex;
             //console.log('getting ' + fieldId + ' select index ' + sel);
+            
             if ( sel == -1 ) {
                 sel = null;
+                
             } else {
-                var fio = field.options[ sel ];
-                val     = fio.value;
+                var result  = [];
+                var options = field.options; //.getElementsByTagName('option');
+                console.log( options );
+                for ( var i=0; i < options.length; i++ ) {
+                    var opt = options[i];
+                
+                    if (opt.selected) {
+                        result.push(opt.value || opt.text);
+                    }
+                }
+                
+                val     = result;
+                if ( result.length == 1 ) {
+                    val     = result[0];
+                }
             }
         } else {
             //console.log('getting ' + fieldId + ' !select');

@@ -4,31 +4,37 @@
  */
 var opts   = {
     'refName' : {
-        'tag'    : 'select',
-        'options': _refsNames,
-        'alt'    : 'Select Reference'
+        'tag'     : 'select',
+        'options' : _refsNames,
+        'alt'     : 'Select Reference',
+        'multiple': true
     },
     'refChrom': {
-        'tag'    : 'select',
-        'options': _refsChroms,
-        'alt'    : 'Select Reference Chromosome'
+        'tag'     : 'select',
+        'options' : _refsChroms,
+        'alt'     : 'Select Reference Chromosome',
+        'multiple': true
     },
     'tgtName' : {
-        'tag'    : 'select',
-        'options': _tgtsNames ,
-        'alt'    : 'Select Target'
+        'tag'     : 'select',
+        'options' : _tgtsNames ,
+        'alt'     : 'Select Target',
+        'multiple': true
     },
     'tgtChrom': {
-        'tag'    : 'select',
-        'options': _tgtsChroms,
-        'alt'    : 'Select Target Chromosome'
+        'tag'     : 'select',
+        'options' : _tgtsChroms,
+        'alt'     : 'Select Target Chromosome',
+        'multiple': true
     },
     'status'  : {
-        'tag'    : 'select',
-        'options': _statuses  ,
-        'alt'    : 'Select Status'
+        'tag'     : 'select',
+        'options' : _statuses  ,
+        'alt'     : 'Select Status',
+        'multiple': true
     }
 };
+
 
 
 var chartSizes = [
@@ -36,6 +42,7 @@ var chartSizes = [
         ['chartpart' , 'Half Page'   ],
         ['chartquart', 'Quarter Page']
 ]
+
 
 
 var positions = {
@@ -222,6 +229,7 @@ var positions = {
 };
 
 
+
 var syncFields = {
     'chartClass': {
                         'tag'    : 'select',
@@ -260,9 +268,6 @@ var syncFields = {
                 'alt'    : 'Show crosshair'
     }
 };
-
-
-
 
 
 
@@ -412,7 +417,13 @@ var csss = {
 
 
 
-function draw() {
+
+
+
+
+
+
+function draw ( ) {
     var sels = document.createElement('span');
     sels.id  = 'selectors';
 
@@ -440,7 +451,86 @@ function draw() {
     chartDiv.id        = chartName;
 
     document.body.appendChild( chartDiv );
+    
+    replaceSelects();
 }
+
+
+
+function createOptions ( ) {
+    console.groupCollapsed('createOptions');
+    console.timeStamp(     'begin createOptions');
+    console.time(          'createOptions');
+
+    var divH = bdy.appendChild( document.createElement('div') );
+    divH.className   = 'htmlDiv';
+
+
+    var hlp = document.createElement('label');
+        hlp.innerHTML = '<div class="htmlDivTitle"><b>Setup</b></div><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
+
+    divH.appendChild( hlp     );
+    divH.appendChild( document.createElement('br') );
+
+    createSyncs(divH);
+    divH.appendChild( document.createElement('br') );
+
+
+
+    var tbl          = divH.appendChild( document.createElement('table') );
+    tbl.className    = 'setuptable';
+
+    var th           = tbl .appendChild( document.createElement('tr'   ) );
+    var thD11        = th  .appendChild( document.createElement('th'   ) );
+    var thD12        = th  .appendChild( document.createElement('th'   ) );
+    thD11.innerHTML  = 'Positions';
+    thD12.innerHTML  = 'CSS';
+
+    var tr           = tbl .appendChild( document.createElement('tr'   ) );
+    var trD21        = tr  .appendChild( document.createElement('td'   ) );
+    var trD22        = tr  .appendChild( document.createElement('td'   ) );
+
+    createPositions(trD21);
+
+    createCsss(trD22);
+
+    var clsBtnS       = document.createElement('button');
+    clsBtnS.onclick   = function(e) { if (hasStorage) { alert('Cleaning Sync preferences'); localDb.clearDb('syncs'); location.reload(); } };
+    clsBtnS.innerHTML = 'Clear Syncs';
+
+    divH.appendChild( clsBtnS );
+
+    var clsBtnP       = document.createElement('button');
+    clsBtnP.onclick   = function(e) { if (hasStorage) { alert('Cleaning Positions preferences'); localDb.clearDb('positions'); location.reload(); } };
+    clsBtnP.innerHTML = 'Clear Positions';
+
+    divH.appendChild( clsBtnP );
+
+
+    var clsBtnC       = document.createElement('button');
+    clsBtnC.onclick   = function(e) { if (hasStorage) { alert('Cleaning CSS preferences'); localDb.clearDb('css'); location.reload(); } };
+    clsBtnC.innerHTML = 'Clear CSS';
+
+    divH.appendChild( clsBtnC );
+
+
+    var clsBtnA       = document.createElement('button');
+    clsBtnA.onclick   = function(e) { if (hasStorage) { alert('Cleaning ALL preferences'); localDb.clearDb('syncs'); localDb.clearDb('positions'); localDb.clearDb('css'); location.reload(); } };
+    clsBtnA.innerHTML = 'Clear ALL';
+
+    divH.appendChild( clsBtnA );
+
+
+    console.timeStamp('end createOptions');
+    console.timeEnd(  'createOptions');
+    console.groupEnd( 'createOptions');
+}
+
+
+
+
+
+
 
 
 /*
@@ -494,13 +584,15 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
 
 
     for ( var opt in nfo ) {
-        if (opt != 'tag') {
-            if (nfo.tag == 'select' && (opt == 'value' || opt == 'options')) {
-                continue;
-            }
-
-            sel[opt] = nfo[opt];
+        if (opt == 'tag') {
+            continue;
         }
+        
+        if (nfo.tag == 'select' && (opt == 'value' || opt == 'options')) {
+            continue;
+        }
+
+        sel[opt] = nfo[opt];
     }
 
 
@@ -536,6 +628,44 @@ function addPicker ( el, id, cls, nfo, callback, opts ) {
         trD3.appendChild(lbl2);
     }
 }
+
+
+function genSelectorsOpts ( obj, refSel, dflt ) {
+    /*
+     * Generate drop-down lists options base on "opts"
+     */
+
+    console.log( 'genSelectorsOpts obj %o dflt %o', obj, dflt );
+    
+    for ( var o = 0; o < obj.length; o++ ){
+        var opt = obj[ o ];
+        
+        var op           = document.createElement('option');
+            op.value     = opt[0];
+            op.innerHTML = opt[1];
+
+        if (dflt)
+        {
+            if ( Object.prototype.toString.call( dflt ) === '[object Array]' ) {
+                console.log( 'dflt is array');
+                for ( var v = 0; v < dflt.length; v++ ) {
+                    var vd = dflt[ v ];
+                    if (vd == op.value) {
+                        op.selected = true;
+                        break;
+                    }
+                }
+            } else {
+                console.log( 'dflt not array');
+                if (dflt == op.value) {
+                    op.selected = true;
+                }
+            }
+        }
+
+        refSel.appendChild( op );
+    }
+};
 
 
 function createCsss ( el ) {
@@ -677,76 +807,6 @@ function createPositions ( el ) {
 };
 
 
-function createOptions ( ) {
-    console.groupCollapsed('createOptions');
-    console.timeStamp(     'begin createOptions');
-    console.time(          'createOptions');
-
-    var divH = bdy.appendChild( document.createElement('div') );
-    divH.className   = 'htmlDiv';
-
-
-    var hlp = document.createElement('label');
-        hlp.innerHTML = '<b>Setup</b><br/><b>[+/ScrUp]</b> Zoom In <b>[-/ScrDw]</b> Zoom Out <b>[Arrow keys]</b> Move <b>[0]</b> Reset'; // creates help label
-
-    divH.appendChild( hlp     );
-    divH.appendChild( document.createElement('br') );
-
-    createSyncs(divH);
-    divH.appendChild( document.createElement('br') );
-
-
-
-    var tbl          = divH.appendChild( document.createElement('table') );
-    tbl.className    = 'setuptable';
-
-    var th           = tbl .appendChild( document.createElement('tr'   ) );
-    var thD11        = th  .appendChild( document.createElement('th'   ) );
-    var thD12        = th  .appendChild( document.createElement('th'   ) );
-    thD11.innerHTML  = 'Positions';
-    thD12.innerHTML  = 'CSS';
-
-    var tr           = tbl .appendChild( document.createElement('tr'   ) );
-    var trD21        = tr  .appendChild( document.createElement('td'   ) );
-    var trD22        = tr  .appendChild( document.createElement('td'   ) );
-
-    createPositions(trD21);
-
-    createCsss(trD22);
-
-    var clsBtnS       = document.createElement('button');
-    clsBtnS.onclick   = function(e) { if (hasStorage) { alert('Cleaning Sync preferences'); localDb.clearDb('syncs'); location.reload(); } };
-    clsBtnS.innerHTML = 'Clear Syncs';
-
-    divH.appendChild( clsBtnS );
-
-    var clsBtnP       = document.createElement('button');
-    clsBtnP.onclick   = function(e) { if (hasStorage) { alert('Cleaning Positions preferences'); localDb.clearDb('positions'); location.reload(); } };
-    clsBtnP.innerHTML = 'Clear Positions';
-
-    divH.appendChild( clsBtnP );
-
-
-    var clsBtnC       = document.createElement('button');
-    clsBtnC.onclick   = function(e) { if (hasStorage) { alert('Cleaning CSS preferences'); localDb.clearDb('css'); location.reload(); } };
-    clsBtnC.innerHTML = 'Clear CSS';
-
-    divH.appendChild( clsBtnC );
-
-
-    var clsBtnA       = document.createElement('button');
-    clsBtnA.onclick   = function(e) { if (hasStorage) { alert('Cleaning ALL preferences'); localDb.clearDb('syncs'); localDb.clearDb('positions'); localDb.clearDb('css'); location.reload(); } };
-    clsBtnA.innerHTML = 'Clear ALL';
-
-    divH.appendChild( clsBtnA );
-
-
-    console.timeStamp('end createOptions');
-    console.timeEnd(  'createOptions');
-    console.groupEnd( 'createOptions');
-}
-
-
 function createSyncs ( el ) {
     console.groupCollapsed('createSyncs %o', el);
     console.timeStamp(     'begin createSyncs');
@@ -831,30 +891,6 @@ function createSyncs ( el ) {
 };
 
 
-function genSelectorsOpts ( obj, refSel, dflt ) {
-    /*
-     * Generate drop-down lists options base on "opts"
-     */
-
-    for ( var o = 0; o < obj.length; o++ ){
-        var opt = obj[ o ];
-
-        var op           = document.createElement('option');
-            op.value     = opt[0];
-            op.innerHTML = opt[1];
-
-        if (dflt)
-        {
-            if (dflt == opt[0]) {
-                op.selected = true;
-            }
-        }
-
-        refSel.appendChild( op );
-    }
-};
-
-
 function genSelectors ( sels ) {
     /*
      * Generate "select" elements. Calls genOpts to read options
@@ -868,19 +904,24 @@ function genSelectors ( sels ) {
 
 
     var callback = function(e) {
-            var tgt = null;
+        console.log('genSelectors CALLBACK e %o', e);
+        
+        var tgt = null;
 
-            try {
-                tgt = e.srcElement;
-            } catch(e) {
-                tgt = e.target; //Firefox
-            }
+        try {
+            tgt = e.srcElement;
+        } catch(e) {
+            tgt = e.target; //Firefox
+        }
 
-            if (tgt) {
-                var id = tgt.id;
-                localDb.saveOpt( 'selectors', id, getFieldValue( id ) );
-            }
-        };
+        console.log('genSelectors CALLBACK tgt %s', tgt);
+
+        if (tgt) {
+            var id = tgt.id;
+            console.log('genSelectors CALLBACK saving');
+            localDb.saveOpt( 'selectors', id, getFieldValue( id ) );
+        }
+    };
 
 
     var tbl = sels.appendChild( document.createElement('table').appendChild( document.createElement('tr') ));
@@ -948,6 +989,136 @@ function genSelectors ( sels ) {
 };
 
 
+function replaceSelects ( ) {
+    var sels  = document.getElementsByTagName('select');
+
+    var upd   = function() { updateSel(this.sid, this.o           , this.checked); };
+    var seall = function() { selSelAll(this.parentNode.parentNode , this.checked); };
+
+    for ( var s = 0; s < sels.length; s++ ) {
+        var sel = sels[s];
+        //console.log( sel );
+        if ( sel.multiple ) {
+            var par  = sel.parentNode;
+            var opts = sel.getElementsByTagName('option');
+            var sid  = sel.id;
+            var bcr  = sel.getBoundingClientRect();
+            
+            var div            = document.createElement('div');
+            div.className      = 'selectDiv';
+            div.style.width    = bcr.width  + 'px';
+            div.style.top      = bcr.top    + 'px';
+            div.style.left     = bcr.left   + 'px';
+            //div.style.right    = bcr.right  + 'px';
+            //div.style.bottom   = bcr.bottom + 'px';
+
+            par.width          = bcr.width  + 'px';
+            par.appendChild( div );
+
+            sel.style.height     = '1.5em';
+            sel.style.visibility = 'hidden';
+            sel.style.display    = 'none';
+
+            for ( var o = 0; o < opts.length; o++ ) {
+                var opt         = opts[ o ];
+                
+                var inp         = document.createElement( 'input' );
+                    inp.type    = 'checkbox';
+                    inp.sid     = sid;
+                    inp.o       = o;
+                    inp.value   = opt.value;
+                    
+                    if (opt.value === '*all*') {
+                        inp.onclick = seall;
+                    } else 
+                    if (opt.value === 'null') {
+                    } else {
+                        inp.onclick = upd;
+                    }
+                
+                if ( opt.selected ) {
+                    inp.checked = true;
+                }
+                
+                var spa1        = document.createElement( 'span'  );
+                    spa1.style.height = '1.5em';
+                
+                var spa2     = document.createElement( 'span'  );
+                    spa2.innerHTML    = opt.innerHTML;
+                    spa2.style.height = '1.5em';
+                
+                var br       = document.createElement( 'br'    );
+                
+                if (opt.value === 'null') {
+                    inp.style.visibility = 'hidden';
+                }
+                
+                spa1.appendChild( inp  );
+                spa1.appendChild( spa2 );
+                spa2.appendChild( br   );
+                div.appendChild(  spa1 );
+            }
+        }
+    }
+}
+
+
+function updateSel ( sid, o, checked ) {
+    console.groupCollapsed('updateSel sid %s o %d checked %s', sid, o, checked);
+    console.timeStamp(     'begin updateSel');
+    console.time(          'updateSel');
+    console.log(           'begin updateSel sid %s o %d checked %s', sid, o, checked);
+ 
+    var sel      = document.getElementById( sid );
+    var opts     = sel.getElementsByTagName('option');
+    var opt      = opts[o];
+    opt.selected = checked;
+    //sel.onchange(sel);
+
+    if ("createEvent" in document) {
+        console.log(           'begin updateSel sid %s o %d checked %s CREATING EVENT', sid, o, checked);    
+        var evt = document.createEvent("HTMLEvents");
+        evt.initEvent("change", false, true);
+        evt.srcElement = sel;
+        evt.target     = sel;
+        sel.dispatchEvent(evt);
+    } else {
+        console.log(           'begin updateSel sid %s o %d checked %s FIRING EVENT', sid, o, checked);    
+        element.fireEvent("onchange");
+    }
+    
+    console.log(      'end updateSel sid %s o %d checked %s', sid, o, checked);
+    console.timeStamp('end updateSel');
+    console.timeEnd(  'updateSel');
+    console.groupEnd( 'updateSel sid %s o %d checked %s', sid, o, checked);
+};
+
+
+function selSelAll ( parentNode, checked ) {
+    console.groupCollapsed('selSelAll parentNode %s checked %s', parentNode, checked);
+    console.timeStamp(     'begin selSelAll');
+    console.time(          'selSelAll');
+    console.log(           'begin parentNode %s checked %s', parentNode, checked);
+ 
+    var inps     = parentNode.getElementsByTagName('input');
+    console.log( inps );
+    for ( var i = 0; i < inps.length; i++ ) {
+        var inp      = inps[i];
+        if ( inp.value !== '*all*') {
+            inp.checked = !checked;
+            inp.click();
+        }
+    }
+
+    console.log(      'end selSelAll parentNode %s checked %s', parentNode, checked);
+    console.timeStamp('end selSelAll');
+    console.timeEnd(  'selSelAll');
+    console.groupEnd( 'selSelAll parentNode %s checked %s', parentNode, checked);
+}
+
+
+
+
 
 
 
@@ -975,7 +1146,6 @@ function selclick ( ) {
         return;
     }
 
-    //cfg.horizontal = getFieldValue( 'horizontal' );
     cfg.tipId      = 'tipper';
     cfg.labelId    = null;
 
